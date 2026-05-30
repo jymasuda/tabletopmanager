@@ -1,0 +1,441 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    background: #0f0b10;
+    color: #f7f1f3;
+}
+
+button {
+    font: inherit;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: min(380px, 100%);
+    max-width: 360px;
+    background: #151117;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    padding: 5px 10px;
+    gap: 5px;
+}
+
+.tab-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 10px 12px;
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.tab::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 0;
+    height: 2px;
+    background: #d3605c;
+    border-radius: 999px;
+    transition: width 0.2s ease, left 0.2s ease;
+}
+
+.tab:hover {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.tab:hover::after {
+    width: 18px;
+    left: calc(50% - 9px);
+}
+
+.tab.selected {
+    color: #fff;
+    font-weight: 700;
+}
+
+.tab.selected::after {
+    width: 28px;
+    left: calc(50% - 14px);
+}
+
+.sidebar-middle {
+    display: grid;
+    gap: 6px;
+    position: relative;
+}
+
+.character-card {
+    height: 115px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    align-items: center;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.character-card.selected {
+    background: rgba(211, 96, 92, 0.15);
+    border-color: #d3605c;
+}
+
+.add-character-card {
+    gap: 0;
+    display: block;
+}
+
+.add-character-card.hidden {
+    display: none;
+}
+
+.add-character-card .character-info {
+    display: grid;
+    gap: 12px;
+}
+
+.add-name-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.add-character-card .new-character-name {
+    flex: 1;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font: inherit;
+}
+
+.add-character-card .new-character-name::placeholder {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.add-character-card .new-character-system {
+    width: 100%;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font: inherit;
+}
+
+.save-new-character,
+.cancel-new-character {
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font: inherit;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.save-new-character {
+    background: #d3605c;
+    color: #fff;
+}
+
+.save-new-character:hover {
+    background: #c7473f;
+    transform: translateY(-1px);
+}
+
+.cancel-new-character {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.cancel-new-character:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    object-fit: cover;
+    background: #2b1c1f;
+}
+
+.character-info {
+    display: grid;
+}
+
+.name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.character-card h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.card-action {
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    width: 30px;
+    height: 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.card-action:hover {
+    background: rgba(211, 96, 92, 0.3);
+    transform: translateY(-1px);
+}
+
+.subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.fab {
+    position: absolute;
+    bottom: 70px;
+    left: 290px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    background: #d3605c;
+    color: #fff;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 18px 40px rgba(211, 96, 92, 0.22);
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.fab:hover {
+    background: #c7473f;
+    transform: translateY(-2px);
+}
+
+.fab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sidebar-bottom {
+    display: grid;
+    gap: 12px;
+    grid-auto-flow: column;
+    align-content: center;
+    margin-top: auto;
+}
+
+.nav-item {
+    display: grid;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: none;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-item.selected{
+    color: #d3605c;
+}
+
+.nav-item:hover {
+    background: rgba(211, 96, 92, 0.18);
+    color: #fff;
+}
+
+.icon {
+    font-size: 1.1rem;
+    display: grid;
+    place-items: center;
+}
+
+.content-pane {
+    flex: 1;
+    background: linear-gradient(180deg, #0c0910 0%, #120b13 100%);
+    padding: 36px 42px;
+}
+
+.hero-panel {
+    max-width: 720px;
+    padding: 28px 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 28px;
+}
+
+.hero-panel h1 {
+    font-size: 2.6rem;
+    margin-bottom: 12px;
+}
+
+.hero-panel p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.7;
+}
+
+.subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 640px;
+}
+
+@media (max-width: 860px) {
+    .app-shell {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 22px;
+    }
+}
+
+.character-detail {
+    max-width: 800px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 28px;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.detail-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    object-fit: cover;
+    background: #2b1c1f;
+}
+
+.detail-info h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+}
+
+.detail-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+}
+
+.detail-content {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+}
+
+.detail-content p {
+    margin-bottom: 16px;
+}
+
+.sidebar.hidden {
+    transform: translateX(-100%);
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    border-right: none;
+    overflow: hidden;
+}
+
+.sidebar {
+    transition: transform 0.2s ease, width 0.2s ease, padding 0.2s ease, border-color 0.2s ease;
+}
+
+.menu-fab {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #d3605c;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 18px 40px rgba(211, 96, 92, 0.22);
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    z-index: 50;
+}
+
+.menu-fab:hover {
+    background: #c7473f;
+    transform: translateY(-2px);
+}
+
+.menu-fab.hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.content-pane.full-width {
+    padding-left: 42px;
+}
+
+@media (max-width: 860px) {
+    .sidebar.hidden {
+        transform: translateY(-100%);
+    }
+
+    .content-pane.full-width {
+        padding-top: 42px;
+    }
+}

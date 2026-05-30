@@ -1,0 +1,5 @@
+package com.masuda.tabletopmanager.model.Personagem.DND5E;
+
+public enum DndAntecedente {
+    ACOLITO, ARTISTA, ARTESAOGUILDA, CHARLATAO, CRIMINOSO, EREMITA, FORASTEIRO, HEROI, MARINHEIRO, NOBRE, ORFAO, SABIO, SOLDADO, CUSTOMIZADO;
+}

@@ -1,0 +1,205 @@
+CREATE TABLE IF NOT EXISTS usuario (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    email VARCHAR(100),
+    senha VARCHAR(255),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS personagem (
+    id SERIAL PRIMARY KEY,
+    id_usuario INTEGER REFERENCES usuario(id),
+    nome VARCHAR(50),
+    sistema VARCHAR(30),
+    avatar_url VARCHAR(512),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ========================
+-- DND5E
+-- ========================
+
+CREATE TABLE IF NOT EXISTS dnd5e_sheets (
+  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id),
+  id_raca VARCHAR(60),
+  experiencia INT DEFAULT 0,
+  antecedente VARCHAR(60)
+  inspiracao BOOLEAN DEFAULT FALSE,
+  forca INT, destreza INT, constituicao INT,
+  inteligencia INT, sabedoria INT, carisma INT,
+  hp_max INT,
+  hp_atual INT,
+  hp_temp INT,
+  classe_armadura INT,
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_classe (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  classe VARCHAR(60) NOT NULL,
+  level INT NOT NULL CHECK (level BETWEEN 1 AND 20),
+  primaria BOOLEAN DEFAULT FALSE 
+);
+
+CREATE TYPE dnd5e_nome_pericia AS ENUM (
+    'Atletismo', 'Acrobacia', 'Furtividade', 'Prestidigitação', 'Arcanismo',
+    'História', 'Investigação', 'Natureza', 'Religião', 'Adestrar Animais', 
+    'Intuição', 'Medicina', 'Percepção', 'Sobrevivência', 'Atuação', 
+    'Enganação', 'Intimidação', 'Persuasão', 
+);
+
+
+CREATE TABLE IF NOT EXISTS dnd5e_pericia (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  pericia dnd5e_nome_pericia NOT NULL,
+  proficiente BOOLEAN DEFAULT FALSE,
+  expert BOOLEAN DEFAULT FALSE,
+  CHECK (NOT expert OR proficiente) 
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_item (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  nome VARCHAR(100),
+  quantidade INT DEFAULT 1,
+  peso DECIMAL(5,2),
+  descricao TEXT,
+  equipado BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_feitico (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  nome VARCHAR(100),
+  level INT,
+  escola VARCHAR(30),
+  preparado BOOLEAN DEFAULT FALSE,
+  descricao TEXT
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_feitico_slots (
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  slot_level INT,
+  total INT,
+  usado INT DEFAULT 0,
+  PRIMARY KEY (id_personagem, slot_level)
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_ataque (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  nome VARCHAR(100),
+  ataque_bonus INT,
+  dano_dado VARCHAR(20),
+  dano_tipo VARCHAR(30)
+);
+
+CREATE TYPE dnd5e_feature_fonte AS ENUM ('RACE', 'CLASS', 'BACKGROUND', 'FEAT', 'OTHER');
+
+CREATE TABLE IF NOT EXISTS dnd5e_feature (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  fonte dnd5e_feature_fonte NOT NULL,
+  nome VARCHAR(100),
+  descricao TEXT
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_auxilio (
+    id_personagem INT PRIMARY KEY REFERENCES personagem(id),
+    backstory TEXT,
+    personalidade TEXT,
+    ideais TEXT,
+    lacos TEXT,
+    falhas TEXT,
+    aparencia TEXT,
+    aliados TEXT,
+    anotacoes TEXT
+);
+
+-- ========================
+-- TFT
+-- ========================
+
+CREATE TABLE IF NOT EXISTS tft_sheets (
+  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id),
+  sin VARCHAR(20), sin_points INT,
+  max_hp INT, current_hp INT, pale_hp INT,
+  max_sp INT, current_sp INT, pale_sp INT,
+  physique INT, endurance INT, 
+  understanding INT, calmness INT, 
+  intuition INT, presence INT, conviction INT,
+  reflex INT, focus INT,
+  blunt_resistance INT, piercing_resistance INT, slashing_resistance INT,
+  red_resistantece INT, white_resistance INT, black_resistance INT, pale_resistance INT
+);
+
+CREATE TABLE IF NOT EXISTS tft_skill (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES tft_sheets(id_personagem),
+  skill tft_skill_name NOT NULL,
+  points INT DEFAULT 0 CHECK (points BETWEEN 0 AND 5)
+);
+
+CREATE TABLE IF NOT EXISTS tft_skill_specialty (
+    id SERIAL PRIMARY KEY,
+    id_skill INT REFERENCES tft_skill(id),
+    nome VARCHAR(100) NOT NULL
+);
+
+CREATE TYPE tft_feature_source AS ENUM (
+    'CORE_PASSIVE', 'ARMOR_PASSIVE', 'PASSIVE', 'FLAW', 'EGO GIFT', 'REPUTATION FLAW', 'REPUTATION PASSIVE', 'ALLY PASSIVE', 'ALLY FLAW', 'EGO RESONANCE', 'RESONANCE'
+);
+
+CREATE TABLE IF NOT EXISTS tft_feature (
+    id SERIAL PRIMARY KEY,
+    id_personagem INT REFERENCES tft_sheets(id_personagem),
+    source tft_feature_source NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    CHECK (source NOT IN ('CORE_PASSIVE', 'ARMOR_PASSIVE') OR (TRUE))
+);
+
+CREATE UNIQUE INDEX uq_tft_core_passive
+    ON tft_feature (id_personagem)
+    WHERE source = 'CORE_PASSIVE';
+
+CREATE UNIQUE INDEX uq_tft_armor_passive
+    ON tft_feature (id_personagem)
+    WHERE source = 'ARMOR_PASSIVE';
+
+CREATE TYPE tft_dmg_form AS ENUM ('SLASH', 'PIERCE', 'BLUNT');
+CREATE TYPE tft_dmg_type AS ENUM ('RED', 'WHITE', 'BLACK', 'PALE');
+
+CREATE TYPE tft_dicepool_mode AS ENUM (
+    'ATTRIBUTE_AND_SKILL',
+    'SKILL_AND_SKILL'
+);
+
+CREATE TYPE tft_attribute_name AS ENUM (
+    'PHYSIQUE', 'ENDURANCE', 'UNDERSTANDING', 'CALMNESS',
+    'INTUITION', 'PRESENCE', 'CONVICTION', 'REFLEX', 'FOCUS'
+);
+
+CREATE TABLE IF NOT EXISTS tft_attack (
+    id SERIAL PRIMARY KEY,
+    id_personagem INT REFERENCES tft_sheets(id_personagem),
+    nome VARCHAR(100) NOT NULL,
+    damage_type tft_damage_type,
+    damage_form tft_damage_form,
+    CHECK (damage_type IS NOT NULL OR damage_form IS NOT NULL),
+    threat INT,
+    attack_weight INT,
+    attack_description TEXT,
+
+    -- dados
+    dicepool_mode tft_dicepool_mode NOT NULL,
+    attribute tft_attribute_name,
+    skill_primary tft_skill_name NOT NULL, 
+    skill_secondary tft_skill_name,
+    CHECK (
+        (dicepool_mode = 'ATTRIBUTE_AND_SKILL' AND attribute IS NOT NULL AND skill_secondary IS NULL)
+        OR
+        (dicepool_mode = 'SKILL_AND_SKILL' AND skill_secondary IS NOT NULL AND attribute IS NULL)
+    )
+);

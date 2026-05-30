@@ -1,0 +1,158 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    color: #fff;
+}
+
+.page-bg {
+    position: relative;
+    min-height: 100vh;
+    background-color: #1d1317;
+    background-size: cover;
+    background-position: center;
+    background-image: url('/images/bg-image.jpg');
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.auth-card {
+    position: relative;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 36px 32px;
+    background: rgba(124, 26, 41, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+    z-index: 1;
+    top: 50%;
+    transform: translateY(20px);
+}
+
+.auth-card h1 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.auth-card form {
+    display: grid;
+    gap: 16px;
+}
+
+.auth-card label {
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.auth-card input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    outline: none;
+}
+
+.auth-card input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.auth-card button {
+    margin-top: 6px;
+    width: 100%;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 14px;
+    background: #d3605c;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.auth-card button:hover {
+    background: #c7473f;
+    transform: translateY(-1px);
+}
+
+.input-error {
+    border-color: #f28b8b !important;
+}
+
+.field-error {
+    min-height: 1.2em;
+    font-size: 0.88rem;
+    color: #f28b8b;
+    margin-top: 4px;
+}
+
+.input-group {
+    display: grid;
+    gap: 6px;
+}
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    min-width: 260px;
+    max-width: 92%;
+    padding: 14px 18px;
+    border-radius: 14px;
+    text-align: center;
+    background: rgba(20, 20, 20, 0.95);
+    color: #fff;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.25);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast.success {
+    background: rgba(34, 115, 79, 0.95);
+}
+
+.toast.error {
+    background: rgba(179, 46, 59, 0.95);
+}
+
+.hint {
+    margin-top: 18px;
+    font-size: 0.95rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.hint a {
+    color: #ffd3d0;
+    text-decoration: none;
+}
+
+.hint a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+    .auth-card {
+        margin: 40px 16px;
+        padding: 28px 22px;
+        top: 0;
+        transform: none;
+    }
+}

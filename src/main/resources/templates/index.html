@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Tabletop Manager - Login</title>
+        <link rel="stylesheet" th:href="@{css/auth.css}">
+        <link rel="stylesheet" th:href="@{css/index.css}">
+    </head>
+    <body>
+        <div class="page-bg">
+            <div class="overlay"></div>
+            <main class="auth-card">
+                <h1>Entrar</h1>
+                <form id="loginForm" th:action="@{'/login'}" method="post" th:object="${user}">
+                    <label for="loginEmail">E-mail</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="seu@email.com">
+                    <span class="field-error" id="loginEmailError"></span>
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Senha">
+                    <span class="field-error" id="loginPasswordError"></span>
+                    <button type="submit">Entrar</button>
+                </form>
+                <p class="hint">Não tem conta? <a th:href="@{/cadastro}" href="/cadastro">Cadastre-se</a></p>
+            </main>
+        </div>
+        <div id="toast" class="toast"></div>
+        <script th:src="@{/js/auth.js}"></script>
+    </body>
+</html>
