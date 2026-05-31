@@ -1,5 +1,8 @@
 package com.masuda.tabletopmanager.model.Personagem;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 public class Personagem {
     private PersonagemID id;
     private PersonagemNome nome;
@@ -65,5 +68,12 @@ public class Personagem {
         this.dataCriacao = dataCriacao;
     }
 
-
+     public static Personagem converterRegistros(Map<String,Object> registros) {
+        int id = (int) registros.get("id");
+        String nome = (String) registros.get("nome");
+        String sistemaStr = (String) registros.get("sistema");
+        String avatarURL = (String) registros.get("avatarURL");
+        LocalDateTime dataCriacaoStr = (LocalDateTime) registros.get("dataCriacao");
+        return new Personagem(avatarURL, new PersonagemDataCriacao(dataCriacaoStr), new PersonagemID(id), new PersonagemNome(nome), Sistema.valueOf(sistemaStr));
+    }
 }

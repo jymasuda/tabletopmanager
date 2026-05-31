@@ -1,5 +1,18 @@
 package com.masuda.tabletopmanager.model.Personagem;
 
-public class PersonagemService {
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.masuda.tabletopmanager.model.Personagem.Resumo.PersonagemResumo;
+
+@Service
+public class PersonagemService {
+    @Autowired
+    PersonagemDAO pDAO;
+
+    public List<PersonagemResumo> obterResumosPersonagemUsuario(int idUsuario) {
+        return pDAO.obterResumosPersonagemUsuario(idUsuario);
+    }
 }

@@ -6,11 +6,15 @@ CREATE TABLE IF NOT EXISTS usuario (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TYPE lista_sistema AS ENUM (
+   'DND5E', 'TFT'
+);
+
 CREATE TABLE IF NOT EXISTS personagem (
     id SERIAL PRIMARY KEY,
     id_usuario INTEGER REFERENCES usuario(id),
     nome VARCHAR(50),
-    sistema VARCHAR(30),
+    sistema lista_sistema NOT NULL,
     avatar_url VARCHAR(512),
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -20,10 +24,10 @@ CREATE TABLE IF NOT EXISTS personagem (
 -- ========================
 
 CREATE TABLE IF NOT EXISTS dnd5e_sheets (
-  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id),
+  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id) ON DELETE CASCADE,
   id_raca VARCHAR(60),
   experiencia INT DEFAULT 0,
-  antecedente VARCHAR(60)
+  antecedente VARCHAR(60),
   inspiracao BOOLEAN DEFAULT FALSE,
   forca INT, destreza INT, constituicao INT,
   inteligencia INT, sabedoria INT, carisma INT,
@@ -31,11 +35,14 @@ CREATE TABLE IF NOT EXISTS dnd5e_sheets (
   hp_atual INT,
   hp_temp INT,
   classe_armadura INT,
+  iniciativa INT,
+  velocidade INT,
+  bonus_proficiencia INT
 );
 
 CREATE TABLE IF NOT EXISTS dnd5e_classe (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   classe VARCHAR(60) NOT NULL,
   level INT NOT NULL CHECK (level BETWEEN 1 AND 20),
   primaria BOOLEAN DEFAULT FALSE 
@@ -51,7 +58,7 @@ CREATE TYPE dnd5e_nome_pericia AS ENUM (
 
 CREATE TABLE IF NOT EXISTS dnd5e_pericia (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   pericia dnd5e_nome_pericia NOT NULL,
   proficiente BOOLEAN DEFAULT FALSE,
   expert BOOLEAN DEFAULT FALSE,
@@ -60,7 +67,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_pericia (
 
 CREATE TABLE IF NOT EXISTS dnd5e_item (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   nome VARCHAR(100),
   quantidade INT DEFAULT 1,
   peso DECIMAL(5,2),
@@ -70,7 +77,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_item (
 
 CREATE TABLE IF NOT EXISTS dnd5e_feitico (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   nome VARCHAR(100),
   level INT,
   escola VARCHAR(30),
@@ -79,7 +86,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_feitico (
 );
 
 CREATE TABLE IF NOT EXISTS dnd5e_feitico_slots (
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   slot_level INT,
   total INT,
   usado INT DEFAULT 0,
@@ -88,7 +95,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_feitico_slots (
 
 CREATE TABLE IF NOT EXISTS dnd5e_ataque (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   nome VARCHAR(100),
   ataque_bonus INT,
   dano_dado VARCHAR(20),
@@ -99,14 +106,14 @@ CREATE TYPE dnd5e_feature_fonte AS ENUM ('RACE', 'CLASS', 'BACKGROUND', 'FEAT', 
 
 CREATE TABLE IF NOT EXISTS dnd5e_feature (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES dnd5e_sheets(id_personagem),
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
   fonte dnd5e_feature_fonte NOT NULL,
   nome VARCHAR(100),
   descricao TEXT
 );
 
 CREATE TABLE IF NOT EXISTS dnd5e_auxilio (
-    id_personagem INT PRIMARY KEY REFERENCES personagem(id),
+    id_personagem INT PRIMARY KEY REFERENCES personagem(id) ON DELETE CASCADE,
     backstory TEXT,
     personalidade TEXT,
     ideais TEXT,
@@ -122,7 +129,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_auxilio (
 -- ========================
 
 CREATE TABLE IF NOT EXISTS tft_sheets (
-  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id),
+  id_personagem SERIAL PRIMARY KEY REFERENCES personagem(id) ON DELETE CASCADE,
   sin VARCHAR(20), sin_points INT,
   max_hp INT, current_hp INT, pale_hp INT,
   max_sp INT, current_sp INT, pale_sp INT,
@@ -136,14 +143,14 @@ CREATE TABLE IF NOT EXISTS tft_sheets (
 
 CREATE TABLE IF NOT EXISTS tft_skill (
   id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES tft_sheets(id_personagem),
+  id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
   skill tft_skill_name NOT NULL,
   points INT DEFAULT 0 CHECK (points BETWEEN 0 AND 5)
 );
 
 CREATE TABLE IF NOT EXISTS tft_skill_specialty (
     id SERIAL PRIMARY KEY,
-    id_skill INT REFERENCES tft_skill(id),
+    id_skill INT REFERENCES tft_skill(id) ON DELETE CASCADE,
     nome VARCHAR(100) NOT NULL
 );
 
@@ -153,7 +160,7 @@ CREATE TYPE tft_feature_source AS ENUM (
 
 CREATE TABLE IF NOT EXISTS tft_feature (
     id SERIAL PRIMARY KEY,
-    id_personagem INT REFERENCES tft_sheets(id_personagem),
+    id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
     source tft_feature_source NOT NULL,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
@@ -183,7 +190,7 @@ CREATE TYPE tft_attribute_name AS ENUM (
 
 CREATE TABLE IF NOT EXISTS tft_attack (
     id SERIAL PRIMARY KEY,
-    id_personagem INT REFERENCES tft_sheets(id_personagem),
+    id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
     nome VARCHAR(100) NOT NULL,
     damage_type tft_damage_type,
     damage_form tft_damage_form,
