@@ -40,18 +40,17 @@ public class PersonagemDAO {
     private List<DndPersonagemResumo> obterResumosDnd(int idUsuario) {
         String sql = """
             SELECT p.id, p.nome, p.sistema, p.avatar_url,
-                c.classe, SUM(c.level) as level
+                c.classe, c.level
             FROM personagem p
             JOIN dnd5e_sheets d ON d.id_personagem = p.id
-            JOIN dnd5e_classe c ON c.id_personagem = p.id
+            LEFT JOIN dnd5e_classe c ON c.id_personagem = p.id
             WHERE p.id_usuario = ? AND p.sistema = 'DND5E'
-            GROUP BY p.id, p.nome, p.sistema, p.avatar_url, c.classe
         """;
 
         List<Map<String, Object>> listaRegistros = jdbc.queryForList(sql, idUsuario);
-        Map<Long, DndPersonagemResumo> personagens = new LinkedHashMap<>();
+        Map<Integer, DndPersonagemResumo> personagens = new LinkedHashMap<>();
         for (Map<String, Object> registro : listaRegistros) {
-        Long id = (Long) registro.get("id");
+        Integer id = (Integer) registro.get("id");
 
         if (personagens.containsKey(id)) {
             personagens.get(id).adicionarClasse(

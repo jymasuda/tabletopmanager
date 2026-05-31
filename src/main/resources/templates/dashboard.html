@@ -19,7 +19,7 @@
 
                 <section class="sidebar-middle">
                     <article class="character-card" th:each="p : ${resumos}" th:data-category="${p.sistema()}">
-                        <img class="avatar" th:src="${p.avatarUrl() != null ? p.avatarUrl() : 'https://placehold.co/56'}" alt="Avatar">
+                        <img class="avatar" th:src="${p.avatarUrl() != null ? p.avatarUrl() : 'https://placehold.net/avatar.svg'}" alt="Avatar">
                         <div class="character-info">
                             <div class="name-row">
                                 <h2 th:text="${p.nome()}"></h2>
@@ -27,7 +27,15 @@
                                     <span class="material-symbols-outlined">more_vert</span>
                                 </button>
                             </div>
-                            <p class="subtitle" th:text="${p.sistema()}"></p>
+
+                            <div th:if="${p instanceof T(com.masuda.tabletopmanager.model.Personagem.Resumo.DndPersonagemResumo)}">
+                                <p class="subtitle" th:text="${#strings.listJoin(p.classes(), ' | ')}"></p>
+                            </div>
+
+                            <div th:if="${p instanceof T(com.masuda.tabletopmanager.model.Personagem.Resumo.TftPersonagemResumo)}">
+                                <p class="subtitle" th:text="${p.sin()}"></p>
+                            </div>
+
                         </div>
                     </article>
                     <article class="character-card add-character-card hidden">
@@ -68,6 +76,7 @@
             </main>
         </div>
         <button class="menu-fab hidden" type="button" aria-label="Mostrar menu"><span class="material-symbols-outlined">menu</span></button>
-        <script th:src="@{/js/main.js}"></script>
+        <script th:src="@{/js/sheet.js(v=2)}"></script>
+        <script th:src="@{/js/main.js(v=2)}"></script>
     </body>
 </html>

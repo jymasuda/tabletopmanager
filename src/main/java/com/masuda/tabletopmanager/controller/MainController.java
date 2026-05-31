@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemService;
 import com.masuda.tabletopmanager.model.Personagem.Resumo.PersonagemResumo;
+import com.masuda.tabletopmanager.model.Personagem.TFT.TftSheetService;
 import com.masuda.tabletopmanager.model.Usuario.Usuario;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioEmail;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioNome;
@@ -100,8 +101,8 @@ public class MainController {
                 ds.inserirFichaDnd5e(usuarioId, nome);
             }
             case "TFT" -> {
-                // Implementar criação de personagem para TFT
-                return ResponseEntity.badRequest().body(Map.of("error", "Sistema ainda não implementado."));
+                TftSheetService ts = context.getBean(TftSheetService.class);
+                ts.inserirFichaTft(usuarioId, nome);
             }
             default -> {
                 return ResponseEntity.badRequest().body(Map.of("error", "Sistema de RPG inválido."));

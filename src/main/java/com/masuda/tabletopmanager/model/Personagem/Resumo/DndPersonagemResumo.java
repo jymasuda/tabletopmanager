@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 public class DndPersonagemResumo implements PersonagemResumo {
-    private final long id;
+    private final Integer id;
     private final String nome;
     private final String sistema;
     private final String avatarUrl;
     private final List<String> classes;
 
-    public DndPersonagemResumo(long id, String nome, String sistema, String avatarUrl) {
+    public DndPersonagemResumo(Integer id, String nome, String sistema, String avatarUrl) {
         this.id = id;
         this.nome = nome;
         this.sistema = sistema;
@@ -20,7 +20,7 @@ public class DndPersonagemResumo implements PersonagemResumo {
     }
 
     @Override
-    public long id() {
+    public Integer id() {
         return id;
     }
 
@@ -48,11 +48,12 @@ public class DndPersonagemResumo implements PersonagemResumo {
     }
     
     public static DndPersonagemResumo converterRegistros(Map<String, Object> registros) {
-    long id = (Long) registros.get("id");
+    Integer id = (Integer) registros.get("id");
     String nome = (String) registros.get("nome");
     String sistema = (String) registros.get("sistema");
     String avatarUrl = (String) registros.get("avatar_url");
-    String classe = registros.get("class") + " " + registros.get("level");
+    String classe = registros.get("classe") != null
+    ? registros.get("classe") + " " + registros.get("level") : "Sem classe";
 
     DndPersonagemResumo resumo = new DndPersonagemResumo(id, nome, sistema, avatarUrl);
     resumo.adicionarClasse(classe);

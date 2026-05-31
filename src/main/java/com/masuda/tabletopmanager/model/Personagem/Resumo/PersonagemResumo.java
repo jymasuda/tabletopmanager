@@ -1,7 +1,7 @@
 package com.masuda.tabletopmanager.model.Personagem.Resumo;
 
 public interface PersonagemResumo {
-    long id();
+    Integer id();
     String nome();
     String sistema();
     String avatarUrl();
