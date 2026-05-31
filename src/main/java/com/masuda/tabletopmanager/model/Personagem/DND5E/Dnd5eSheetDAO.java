@@ -23,14 +23,14 @@ public class Dnd5eSheetDAO {
         public Dnd5eSheet obterFichaDnd5e(int idPersonagem) {
             String sql = """
             SELECT p.id, p.id_usuario, p.nome, p.sistema, p.avatar_url, p.data_criacao,
-                   d.race, d.class, d.background,
-                   d.forca, d.desteza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
-                   d.hp_max, d.hp_atual, d.hp_temporario,
+                   d.raca, d.antecedente,
+                   d.forca, d.destreza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
+                   d.hp_max, d.hp_atual, d.hp_temp,
                    d.classe_armadura, d.bonus_proficiencia
             FROM personagem p
             JOIN dnd5e_sheets d ON d.id_personagem = p.id
             WHERE p.id = ?
-        """; // Simplificar essa bomba dps?
+        """;
             
             return Dnd5eSheet.converterRegistros(jdbc.queryForMap(sql, idPersonagem));
         }
@@ -51,11 +51,11 @@ public class Dnd5eSheetDAO {
 
             sql = """
             INSERT INTO dnd5e_sheets
-                (id_personagem, race, background, alignment, experience, inspiration,
-                 str, dex, con, int_, wis, cha,
-                 max_hp, current_hp, temp_hp,
-                 armor_class, proficiency_bonus)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id_personagem, id_raca, antecedente,
+                 forca, destreza, constituicao, inteligencia, sabedoria, carisma,
+                 hp_max, hp_atual, hp_temp,
+                 classe_armadura, bonus_proficiencia)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
             Object[] objSheet = new Object[14];

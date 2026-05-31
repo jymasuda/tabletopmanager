@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS tft_sheets (
   intuition INT, presence INT, conviction INT,
   reflex INT, focus INT,
   blunt_resistance INT, piercing_resistance INT, slashing_resistance INT,
-  red_resistantece INT, white_resistance INT, black_resistance INT, pale_resistance INT
+  red_resistance INT, white_resistance INT, black_resistance INT, pale_resistance INT
 );
 
 CREATE TABLE IF NOT EXISTS tft_skill (

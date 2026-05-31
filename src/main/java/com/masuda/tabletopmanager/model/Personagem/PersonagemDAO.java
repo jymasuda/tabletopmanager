@@ -40,7 +40,7 @@ public class PersonagemDAO {
     private List<DndPersonagemResumo> obterResumosDnd(int idUsuario) {
         String sql = """
             SELECT p.id, p.nome, p.sistema, p.avatar_url,
-                c.class, SUM(c.level) as total_level
+                c.class, SUM(c.level) as level
             FROM personagem p
             JOIN dnd5e_sheets d ON d.id_personagem = p.id
             JOIN dnd5e_character_class c ON c.id_personagem = p.id
