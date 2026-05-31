@@ -1,3 +1,72 @@
+DROP TABLE IF EXISTS tft_attack CASCADE;
+DROP TABLE IF EXISTS tft_skill_specialty CASCADE;
+DROP TABLE IF EXISTS tft_skill CASCADE;
+DROP TABLE IF EXISTS tft_feature CASCADE;
+DROP TABLE IF EXISTS tft_sheets CASCADE;
+DROP TABLE IF EXISTS dnd5e_auxilio CASCADE;
+DROP TABLE IF EXISTS dnd5e_feature CASCADE;
+DROP TABLE IF EXISTS dnd5e_ataque CASCADE;
+DROP TABLE IF EXISTS dnd5e_feitico_slots CASCADE;
+DROP TABLE IF EXISTS dnd5e_feitico CASCADE;
+DROP TABLE IF EXISTS dnd5e_item CASCADE;
+DROP TABLE IF EXISTS dnd5e_pericia CASCADE;
+DROP TABLE IF EXISTS dnd5e_classe CASCADE;
+DROP TABLE IF EXISTS dnd5e_sheets CASCADE;
+DROP TABLE IF EXISTS personagem CASCADE;
+
+DROP TYPE IF EXISTS tft_attribute_name CASCADE;
+DROP TYPE IF EXISTS tft_dicepool_mode CASCADE;
+DROP TYPE IF EXISTS tft_damage_type CASCADE;
+DROP TYPE IF EXISTS tft_dmg_type CASCADE;
+DROP TYPE IF EXISTS tft_dmg_form CASCADE;
+DROP TYPE IF EXISTS tft_feature_source CASCADE;
+DROP TYPE IF EXISTS tft_skill_name CASCADE;
+DROP TYPE IF EXISTS dnd5e_feature_fonte CASCADE;
+DROP TYPE IF EXISTS dnd5e_nome_pericia CASCADE;
+DROP TYPE IF EXISTS lista_sistema CASCADE;
+
+CREATE TYPE lista_sistema AS ENUM (
+   'DND5E', 'TFT'
+);
+
+CREATE TYPE dnd5e_nome_pericia AS ENUM (
+    'Atletismo', 'Acrobacia', 'Furtividade', 'Prestidigitação', 'Arcanismo',
+    'História', 'Investigação', 'Natureza', 'Religião', 'Adestrar Animais', 
+    'Intuição', 'Medicina', 'Percepção', 'Sobrevivência', 'Atuação', 
+    'Enganação', 'Intimidação', 'Persuasão'
+);
+
+CREATE TYPE dnd5e_feature_fonte AS ENUM ('RACE', 'CLASS', 'BACKGROUND', 'FEAT', 'OTHER');
+
+CREATE TYPE tft_feature_source AS ENUM (
+    'CORE_PASSIVE', 'ARMOR_PASSIVE', 'PASSIVE', 'FLAW', 'EGO GIFT', 'REPUTATION FLAW', 'REPUTATION PASSIVE', 'ALLY PASSIVE', 'ALLY FLAW', 'EGO RESONANCE', 'RESONANCE'
+);
+
+CREATE TYPE tft_dmg_form AS ENUM ('SLASH', 'PIERCE', 'BLUNT');
+CREATE TYPE tft_dmg_type AS ENUM ('RED', 'WHITE', 'BLACK', 'PALE');
+
+CREATE TYPE tft_dicepool_mode AS ENUM (
+    'ATTRIBUTE_AND_SKILL',
+    'SKILL_AND_SKILL'
+);
+
+CREATE TYPE tft_attribute_name AS ENUM (
+    'PHYSIQUE', 'ENDURANCE', 'UNDERSTANDING', 'CALMNESS',
+    'INTUITION', 'PRESENCE', 'CONVICTION', 'REFLEX', 'FOCUS'
+);
+
+CREATE TYPE tft_skill_name AS ENUM (
+    'ATHLETICS', 'ANIMAL KEN', 'AWARENESS', 
+    'BRAWL', 'BACKSTREETS SOCIETY', 'CITY SECRETS', 
+    'CRAFT', 'INSIGHT', 'HIGH SOCIETY',
+    'DRIVE', 'INTIMIDATION', 'INVESTIGATION',
+    'FIREARMS', 'LEADERSHIP', 'MEDICINE',
+    'LARCENY', 'PERFORMANCE', 'TECHNOLOGY',
+    'MEELE', 'PERSUASION', 'STEALTH',
+    'SUBTERFUGE'
+
+);
+
 CREATE TABLE IF NOT EXISTS usuario (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50),
@@ -6,9 +75,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TYPE lista_sistema AS ENUM (
-   'DND5E', 'TFT'
-);
 
 CREATE TABLE IF NOT EXISTS personagem (
     id SERIAL PRIMARY KEY,
@@ -47,14 +113,6 @@ CREATE TABLE IF NOT EXISTS dnd5e_classe (
   level INT NOT NULL CHECK (level BETWEEN 1 AND 20),
   primaria BOOLEAN DEFAULT FALSE 
 );
-
-CREATE TYPE dnd5e_nome_pericia AS ENUM (
-    'Atletismo', 'Acrobacia', 'Furtividade', 'Prestidigitação', 'Arcanismo',
-    'História', 'Investigação', 'Natureza', 'Religião', 'Adestrar Animais', 
-    'Intuição', 'Medicina', 'Percepção', 'Sobrevivência', 'Atuação', 
-    'Enganação', 'Intimidação', 'Persuasão', 
-);
-
 
 CREATE TABLE IF NOT EXISTS dnd5e_pericia (
   id SERIAL PRIMARY KEY,
@@ -102,7 +160,6 @@ CREATE TABLE IF NOT EXISTS dnd5e_ataque (
   dano_tipo VARCHAR(30)
 );
 
-CREATE TYPE dnd5e_feature_fonte AS ENUM ('RACE', 'CLASS', 'BACKGROUND', 'FEAT', 'OTHER');
 
 CREATE TABLE IF NOT EXISTS dnd5e_feature (
   id SERIAL PRIMARY KEY,
@@ -154,9 +211,7 @@ CREATE TABLE IF NOT EXISTS tft_skill_specialty (
     nome VARCHAR(100) NOT NULL
 );
 
-CREATE TYPE tft_feature_source AS ENUM (
-    'CORE_PASSIVE', 'ARMOR_PASSIVE', 'PASSIVE', 'FLAW', 'EGO GIFT', 'REPUTATION FLAW', 'REPUTATION PASSIVE', 'ALLY PASSIVE', 'ALLY FLAW', 'EGO RESONANCE', 'RESONANCE'
-);
+
 
 CREATE TABLE IF NOT EXISTS tft_feature (
     id SERIAL PRIMARY KEY,
@@ -175,25 +230,14 @@ CREATE UNIQUE INDEX uq_tft_armor_passive
     ON tft_feature (id_personagem)
     WHERE source = 'ARMOR_PASSIVE';
 
-CREATE TYPE tft_dmg_form AS ENUM ('SLASH', 'PIERCE', 'BLUNT');
-CREATE TYPE tft_dmg_type AS ENUM ('RED', 'WHITE', 'BLACK', 'PALE');
 
-CREATE TYPE tft_dicepool_mode AS ENUM (
-    'ATTRIBUTE_AND_SKILL',
-    'SKILL_AND_SKILL'
-);
-
-CREATE TYPE tft_attribute_name AS ENUM (
-    'PHYSIQUE', 'ENDURANCE', 'UNDERSTANDING', 'CALMNESS',
-    'INTUITION', 'PRESENCE', 'CONVICTION', 'REFLEX', 'FOCUS'
-);
 
 CREATE TABLE IF NOT EXISTS tft_attack (
     id SERIAL PRIMARY KEY,
     id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
     nome VARCHAR(100) NOT NULL,
-    damage_type tft_damage_type,
-    damage_form tft_damage_form,
+    damage_type tft_dmg_type,
+    damage_form tft_dmg_form,
     CHECK (damage_type IS NOT NULL OR damage_form IS NOT NULL),
     threat INT,
     attack_weight INT,
