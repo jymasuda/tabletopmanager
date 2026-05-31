@@ -35,7 +35,7 @@ public class Dnd5eSheetDAO {
             return Dnd5eSheet.converterRegistros(jdbc.queryForMap(sql, idPersonagem));
         }
 
-        public void inserirFichaDnd5e(Dnd5eSheet ficha) {
+        public Integer inserirFichaDnd5e(int idUsuario, String nome) {
             String sql = """
             INSERT INTO personagem (id_usuario, nome, sistema, avatar_url)
             VALUES (?, ?, 'DND5E', ?)
@@ -43,38 +43,19 @@ public class Dnd5eSheetDAO {
             """;
 
             Object[] objPersonagem = new Object[3];
-            objPersonagem[0] = ficha.getId().idPersonagem();
-            objPersonagem[1] = ficha.getNome().nomePersonagem();
-            objPersonagem[2] = ficha.getAvatarURL();
+            objPersonagem[0] = idUsuario;
+            objPersonagem[1] = nome;
+            objPersonagem[2] = null;
 
             int id = jdbc.queryForObject(sql, Integer.class, objPersonagem);
 
             sql = """
-            INSERT INTO dnd5e_sheets
-                (id_personagem, id_raca, antecedente,
-                 forca, destreza, constituicao, inteligencia, sabedoria, carisma,
-                 hp_max, hp_atual, hp_temp,
-                 classe_armadura, bonus_proficiencia)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO dnd5e_sheets (id_personagem)
+                VALUES (?)
             """;
+            jdbc.update(sql, id);
 
-            Object[] objSheet = new Object[14];
-            objSheet[0] = id;
-            objSheet[1] = ficha.getRaca().name();
-            objSheet[2] = ficha.getAntecedente().name();
-            objSheet[3] = ficha.getAtributos().forca();
-            objSheet[4] = ficha.getAtributos().destreza();
-            objSheet[5] = ficha.getAtributos().constituicao();
-            objSheet[6] = ficha.getAtributos().inteligencia();
-            objSheet[7] = ficha.getAtributos().sabedoria();
-            objSheet[8] = ficha.getAtributos().carisma();
-            objSheet[9] = ficha.getVida().vidaMax();
-            objSheet[10] = ficha.getVida().vidaAtual();
-            objSheet[11] = ficha.getVida().vidaTemporaria();
-            objSheet[12] = ficha.getCombate().classeArmadura();
-            objSheet[13] = ficha.getCombate().bonusProficiencia();
-
-            jdbc.update(sql, objSheet);
+            return id;
         }
 
         public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {

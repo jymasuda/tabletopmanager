@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Função para logout
-    function logout() {
-        // Redirecionar para página de login
+    async function logout() {
+        await fetch('/logout', { method: 'POST' });
         window.location.href = '/';
     }
 
@@ -203,23 +203,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (saveNewCharacterButton) {
-        saveNewCharacterButton.addEventListener('click', () => {
-            const name = newCharacterNameInput?.value.trim();
-            const category = newCharacterSystemSelect?.value || 'DND5E';
+if (saveNewCharacterButton) {
+    saveNewCharacterButton.addEventListener('click', async () => {
+        const name = newCharacterNameInput?.value.trim();
+        const category = newCharacterSystemSelect?.value || 'DND5E';
 
-            if (!name) {
-                newCharacterNameInput?.focus();
-                return;
+        if (!name) {
+            newCharacterNameInput?.focus();
+            return;
+        }
+
+        try {
+            const response = await fetch('/personagem/novo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ nome: name, sistema: category })
+            });
+
+            if (response.ok) {
+                hideAddCharacterForm();
+                const newCard = createCharacterCard(name, category);
+                updateCategoryTabs();
+                selectCharacter(newCard);
+            } else {
+                // um showToast de erro aqui se quiser
             }
-
-            hideAddCharacterForm();
-            const newCard = createCharacterCard(name, category);
-            updateCategoryTabs();
-            selectCharacter(newCard);
-        });
-    }
-
+        } catch (err) {
+            console.error('Erro ao criar personagem:', err);
+        }
+    });
+}
     if (cancelNewCharacterButton) {
         cancelNewCharacterButton.addEventListener('click', () => {
             hideAddCharacterForm();
@@ -241,4 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicializar categorias visíveis
     updateCategoryTabs();
+
+    
 });

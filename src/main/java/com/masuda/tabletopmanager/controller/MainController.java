@@ -1,6 +1,7 @@
 package com.masuda.tabletopmanager.controller;
 
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
+import com.masuda.tabletopmanager.model.Personagem.PersonagemService;
+import com.masuda.tabletopmanager.model.Personagem.Resumo.PersonagemResumo;
 import com.masuda.tabletopmanager.model.Usuario.Usuario;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioEmail;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioNome;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioSenha;
 import com.masuda.tabletopmanager.model.Usuario.UsuarioService;
+
+import jakarta.servlet.http.HttpSession;
 
 
 @Controller
@@ -33,11 +39,13 @@ public class MainController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> login(@RequestParam String email, @RequestParam String senha) {
+    public ResponseEntity<Map<String, String>> login(@RequestParam String email, @RequestParam String senha, HttpSession session) {
         UsuarioService us = context.getBean(UsuarioService.class);
         Usuario user = us.autenticarUsuario(email, senha);
 
         if (user != null) {
+            session.setAttribute("usuarioId", user.getId().userId());
+            session.setAttribute("usuarioNome", user.getNome().nomeUsuario());
             return ResponseEntity.ok(Map.of("message", "Login realizado com sucesso."));
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "Credenciais inválidas."));
@@ -66,7 +74,46 @@ public class MainController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(){
+    public String dashboard(HttpSession session, Model model){
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return "redirect:/";
+        }
+        PersonagemService ps = context.getBean(PersonagemService.class);
+        model.addAttribute("usuarioNome", session.getAttribute("usuarioNome"));
+        List<PersonagemResumo> lista = ps.obterResumosPersonagemUsuario(usuarioId);
+        model.addAttribute("resumos", lista);
         return "dashboard";
+    }
+
+    @PostMapping("/personagem/novo")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> criarPersonagem(@RequestParam String nome, @RequestParam String sistema, HttpSession session) {
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Usuário não autenticado."));
+        }
+
+        switch(sistema){
+            case "DND5E" -> {
+                Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+                ds.inserirFichaDnd5e(usuarioId, nome);
+            }
+            case "TFT" -> {
+                // Implementar criação de personagem para TFT
+                return ResponseEntity.badRequest().body(Map.of("error", "Sistema ainda não implementado."));
+            }
+            default -> {
+                return ResponseEntity.badRequest().body(Map.of("error", "Sistema de RPG inválido."));
+            }
+        }
+        
+        return ResponseEntity.ok(Map.of("message", "Personagem criado com sucesso."));
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 }

@@ -18,6 +18,18 @@
                 </section>
 
                 <section class="sidebar-middle">
+                    <article class="character-card" th:each="p : ${resumos}" th:data-category="${p.sistema()}">
+                        <img class="avatar" th:src="${p.avatarUrl() != null ? p.avatarUrl() : 'https://placehold.co/56'}" alt="Avatar">
+                        <div class="character-info">
+                            <div class="name-row">
+                                <h2 th:text="${p.nome()}"></h2>
+                                <button class="card-action" type="button" aria-label="Opções">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                            <p class="subtitle" th:text="${p.sistema()}"></p>
+                        </div>
+                    </article>
                     <article class="character-card add-character-card hidden">
                         <div class="character-info">
                             <div class="add-name-row">
@@ -34,7 +46,7 @@
                                 <option value="TFT">TFT</option>
                             </select>
                         </div>
-
+                    </article>
                 </section>
             <button class="fab" type="button" aria-label="Adicionar personagem"><span class="material-symbols-outlined">add</span></button>
 

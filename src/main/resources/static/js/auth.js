@@ -144,10 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
                      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                      body: new URLSearchParams({ email: emailValue, senha: passwordValue })
                 });
-
-                const data = await response.json();
-
+                
                 if (response.ok) {                          
+                    const data = await response.json();
                     showToast(data.message, 'success');
                     setTimeout(() => window.location.href = '/dashboard', 1000);
                 } else {                                   

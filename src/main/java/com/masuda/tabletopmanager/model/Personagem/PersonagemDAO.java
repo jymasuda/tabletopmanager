@@ -40,12 +40,12 @@ public class PersonagemDAO {
     private List<DndPersonagemResumo> obterResumosDnd(int idUsuario) {
         String sql = """
             SELECT p.id, p.nome, p.sistema, p.avatar_url,
-                c.class, SUM(c.level) as level
+                c.classe, SUM(c.level) as level
             FROM personagem p
             JOIN dnd5e_sheets d ON d.id_personagem = p.id
-            JOIN dnd5e_character_class c ON c.id_personagem = p.id
+            JOIN dnd5e_classe c ON c.id_personagem = p.id
             WHERE p.id_usuario = ? AND p.sistema = 'DND5E'
-            GROUP BY p.id, p.nome, p.sistema, p.avatar_url
+            GROUP BY p.id, p.nome, p.sistema, p.avatar_url, c.classe
         """;
 
         List<Map<String, Object>> listaRegistros = jdbc.queryForList(sql, idUsuario);
@@ -55,7 +55,7 @@ public class PersonagemDAO {
 
         if (personagens.containsKey(id)) {
             personagens.get(id).adicionarClasse(
-                registro.get("class") + " " + registro.get("level")
+                registro.get("classe") + " " + registro.get("level")
             );
         } else {
             personagens.put(id, DndPersonagemResumo.converterRegistros(registro));

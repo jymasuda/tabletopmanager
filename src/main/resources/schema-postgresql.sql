@@ -70,7 +70,7 @@ CREATE TYPE tft_skill_name AS ENUM (
 CREATE TABLE IF NOT EXISTS usuario (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50),
-    email VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
     senha VARCHAR(255),
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -13,8 +13,8 @@ public class Dnd5eSheetService {
         return dDAO.obterFichaDnd5e(idPersonagem);
     }
 
-    public void inserirFichaDnd5e(Dnd5eSheet ficha) {
-        dDAO.inserirFichaDnd5e(ficha);
+    public Integer inserirFichaDnd5e(int idUsuario, String nome) {
+        return dDAO.inserirFichaDnd5e(idUsuario, nome);
     }
 
     public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {
