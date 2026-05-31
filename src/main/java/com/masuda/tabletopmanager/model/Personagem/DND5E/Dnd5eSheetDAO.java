@@ -24,13 +24,13 @@ public class Dnd5eSheetDAO {
             String sql = """
             SELECT p.id, p.id_usuario, p.nome, p.sistema, p.avatar_url, p.data_criacao,
                    d.race, d.class, d.background,
-                   d.str, d.dex, d.con, d.int_, d.wis, d.cha,
-                   d.max_hp, d.current_hp, d.temp_hp,
-                   d.armor_class, d.proficiency_bonus
+                   d.forca, d.desteza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
+                   d.hp_max, d.hp_atual, d.hp_temporario,
+                   d.classe_armadura, d.bonus_proficiencia
             FROM personagem p
             JOIN dnd5e_sheets d ON d.id_personagem = p.id
             WHERE p.id = ?
-        """; // Simplificar essa bomba dps
+        """; // Simplificar essa bomba dps?
             
             return Dnd5eSheet.converterRegistros(jdbc.queryForMap(sql, idPersonagem));
         }

@@ -85,8 +85,8 @@ public class Dnd5eSheet extends Personagem {
         PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
             ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
         );
-        DndRaca raca = DndRaca.valueOf((String) registros.get("race"));
-        DndAntecedente antecedente = DndAntecedente.valueOf((String) registros.get("background"));
+        DndRaca raca = DndRaca.valueOf((String) registros.get("id_raca"));
+        DndAntecedente antecedente = DndAntecedente.valueOf((String) registros.get("antecedente"));
         DndAtributos atributos = DndAtributos.converterRegistros(registros);
         DndVida vida = DndVida.converterRegistros(registros);
         DndCombate combate = DndCombate.converterRegistros(registros);
