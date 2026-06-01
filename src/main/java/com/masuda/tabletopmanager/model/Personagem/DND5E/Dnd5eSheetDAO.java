@@ -22,15 +22,15 @@ public class Dnd5eSheetDAO {
 
         public Dnd5eSheet obterFichaDnd5e(int idPersonagem) {
             String sql = """
-            SELECT p.id, p.id_usuario, p.nome, p.sistema, p.avatar_url, p.data_criacao,
-                   d.raca, d.antecedente,
-                   d.forca, d.destreza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
-                   d.hp_max, d.hp_atual, d.hp_temp,
-                   d.classe_armadura, d.bonus_proficiencia
-            FROM personagem p
-            JOIN dnd5e_sheets d ON d.id_personagem = p.id
-            WHERE p.id = ?
-        """;
+                SELECT p.id, p.id_usuario, p.nome, p.sistema, p.avatar_url, p.data_criacao,
+                    d.id_raca, d.antecedente,
+                    d.forca, d.destreza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
+                    d.hp_max, d.hp_atual, d.hp_temp,
+                    d.classe_armadura, d.iniciativa, d.velocidade, d.bonus_proficiencia
+                FROM personagem p
+                JOIN dnd5e_sheets d ON d.id_personagem = p.id
+                WHERE p.id = ?
+            """;
             
             return Dnd5eSheet.converterRegistros(jdbc.queryForMap(sql, idPersonagem));
         }

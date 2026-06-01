@@ -1,0 +1,641 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* ═══════════════════════════════════════════════════
+        FRAGMENTO: Ficha DND5E
+        Uso: fragments/dnd-sheet :: sheet
+    ═══════════════════════════════════════════════════ */-->
+
+<div th:fragment="sheet" class="sheet" data-editing="false"
+     th:data-personagem-id="${ficha.id().idPersonagem()}">
+
+    <!-- ── Edit Toggle ──────────────────────────────── -->
+    <button class="sheet-edit-toggle" id="sheetEditToggle" type="button" aria-label="Modo de edição">
+        <span class="material-symbols-outlined edit-icon">edit</span>
+    </button>
+
+    <!-- ══════════════════════════════════════════════
+        HEADER: Nome / Classe / Nível / XP / Ações
+        ══════════════════════════════════════════════ -->
+    <header class="sheet-header">
+
+        <div class="sheet-identity">
+            <div>
+                <span class="sheet-name display-val" th:text="${ficha.nome().nomePersonagem()}">Nome</span>
+                <input class="edit-inp sheet-name-inp" type="text"
+                       th:value="${ficha.nome().nomePersonagem()}" placeholder="Nome">
+            </div>
+            <div class="sheet-subline">
+                <!-- Placeholder: classe vem de dnd5e_classe (tabela separada) -->
+                <span class="display-val">Sem classe</span>
+                <select class="edit-inp subline-class-select">
+                    <option value="">Sem classe</option>
+                    <option value="Bárbaro">Bárbaro</option>
+                    <option value="Bardo">Bardo</option>
+                    <option value="Bruxo">Bruxo</option>
+                    <option value="Clérigo">Clérigo</option>
+                    <option value="Druida">Druida</option>
+                    <option value="Feiticeiro">Feiticeiro</option>
+                    <option value="Guerreiro">Guerreiro</option>
+                    <option value="Ladino">Ladino</option>
+                    <option value="Mago">Mago</option>
+                    <option value="Monge">Monge</option>
+                    <option value="Paladino">Paladino</option>
+                    <option value="Patrulheiro">Patrulheiro</option>
+                </select>
+                <span class="display-val">—</span>
+                <input class="edit-inp subline-level" type="number" value="1" min="1" max="20">
+            </div>
+        </div>
+
+        <div class="sheet-header-right">
+            <div class="rest-actions">
+                <button class="rest-btn" type="button" title="Descanso Curto">
+                    <span class="material-symbols-outlined">bedtime</span>
+                    <span class="rest-lbl">Curto</span>
+                </button>
+                <button class="rest-btn" type="button" title="Descanso Longo">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                    <span class="rest-lbl">Longo</span>
+                </button>
+                <button class="rest-btn rest-levelup" type="button" title="Subir de Nível">
+                    <span class="material-symbols-outlined">grade</span>
+                    <span class="rest-lbl">Nível</span>
+                </button>
+            </div>
+
+            <div class="level-orb">
+                <span class="display-val">1</span>
+                <input class="edit-inp level-inp" type="number" value="1" min="1" max="20">
+            </div>
+
+            <div class="xp-block">
+                <div class="xp-track">
+                    <div class="xp-fill" style="--pct: 0%"></div>
+                </div>
+                <div class="xp-label">
+                    <span class="display-val">0</span>
+                    <input class="edit-inp xp-inp" type="number" value="0">
+                    <span>/ 300</span>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- ══════════════════════════════════════════════
+        ATRIBUTOS: Badges em forma de escudo
+        ══════════════════════════════════════════════ -->
+    <div class="ability-row">
+
+        <div class="ability-badge" data-attr="forca">
+            <span class="ab-name">FOR</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().forca() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().forca() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().forca() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().forca() : 10}"
+                   min="1" max="30" data-attr="forca">
+        </div>
+
+        <div class="ability-badge" data-attr="destreza">
+            <span class="ab-name">DES</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().destreza() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().destreza() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().destreza() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().destreza() : 10}"
+                   min="1" max="30" data-attr="destreza">
+        </div>
+
+        <div class="ability-badge" data-attr="constituicao">
+            <span class="ab-name">CON</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().constituicao() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().constituicao() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().constituicao() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().constituicao() : 10}"
+                   min="1" max="30" data-attr="constituicao">
+        </div>
+
+        <div class="ability-badge" data-attr="inteligencia">
+            <span class="ab-name">INT</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().inteligencia() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().inteligencia() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().inteligencia() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().inteligencia() : 10}"
+                   min="1" max="30" data-attr="inteligencia">
+        </div>
+
+        <div class="ability-badge" data-attr="sabedoria">
+            <span class="ab-name">SAB</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().sabedoria() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().sabedoria() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().sabedoria() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().sabedoria() : 10}"
+                   min="1" max="30" data-attr="sabedoria">
+        </div>
+
+        <div class="ability-badge" data-attr="carisma">
+            <span class="ab-name">CAR</span>
+            <span class="ab-mod display-val"
+                  th:text="${ficha.atributos() != null ? (ficha.atributos().carisma() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().carisma() - 10) / 2, 1) : '—'}">—</span>
+            <span class="ab-score display-val"
+                  th:text="${ficha.atributos() != null ? ficha.atributos().carisma() : '—'}">—</span>
+            <input class="edit-inp ab-score-inp" type="number"
+                   th:value="${ficha.atributos() != null ? ficha.atributos().carisma() : 10}"
+                   min="1" max="30" data-attr="carisma">
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+        SHEET BODY: grid de 4 colunas
+        [Esquerda] [Perícias] [Traços] [Tabs]
+        ══════════════════════════════════════════════ -->
+    <div class="sheet-body">
+
+        <!-- ── COLUNA ESQUERDA ───────────────────────── -->
+        <aside class="col-left">
+
+            <!-- Retrato -->
+            <div class="portrait-wrap">
+                <div class="portrait-frame">
+                    <img class="portrait-img"
+                         th:src="${ficha.avatarURL() != null ? ficha.avatarURL() : 'https://placehold.net/avatar.svg'}"
+                         alt="Retrato do personagem">
+                </div>
+            </div>
+
+            <!-- Exaustão -->
+            <div class="exhaustion-track">
+                <span class="ex-label">Exaustão</span>
+                <div class="ex-pips">
+                    <span class="ex-pip"></span>
+                    <span class="ex-pip"></span>
+                    <span class="ex-pip"></span>
+                    <span class="ex-pip"></span>
+                    <span class="ex-pip"></span>
+                    <span class="ex-pip"></span>
+                </div>
+            </div>
+
+            <!-- Iniciativa | CA | Proficiência -->
+            <div class="combat-stats-row">
+                <div class="stat-chip">
+                    <!--/* Iniciativa = mod de destreza (calculado, somente leitura) */-->
+                    <span class="stat-chip-val"
+                          th:text="${ficha.atributos() != null ? (ficha.atributos().destreza() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().destreza() - 10) / 2, 1) : '—'}">—</span>
+                    <span class="stat-chip-lbl">Iniciativa</span>
+                </div>
+
+                <div class="ac-badge">
+                    <span class="ac-val display-val"
+                          th:text="${ficha.combate() != null ? ficha.combate().classeArmadura() : '—'}">—</span>
+                    <input class="edit-inp ac-inp" type="number"
+                           th:value="${ficha.combate() != null ? ficha.combate().classeArmadura() : 10}">
+                    <span class="ac-lbl">CA</span>
+                </div>
+
+                <div class="stat-chip">
+                    <!--/* Bônus de proficiência = calculado pelo nível (somente leitura) */-->
+                    <span class="stat-chip-val" id="profBonus">+2</span>
+                    <span class="stat-chip-lbl">Proficiência</span>
+                </div>
+            </div>
+
+            <!-- Velocidade -->
+            <div class="speed-row">
+                <span class="speed-val display-val"
+                      th:text="${ficha.combate() != null ? ficha.combate().velocidade() : '—'}">—</span>
+                <input class="edit-inp speed-inp" type="number"
+                       th:value="${ficha.combate() != null ? ficha.combate().velocidade() : 30}">
+                <span class="speed-lbl">ft. Caminhada</span>
+            </div>
+
+            <!-- Pontos de Vida -->
+            <div class="resource-block">
+                <span class="resource-label">Pontos de Vida</span>
+                <div class="hp-bar-wrap">
+                    <div class="hp-bar-fill"
+                         th:style="${ficha.vida() != null and ficha.vida().vidaMax() > 0 ? '--pct: ' + (ficha.vida().vidaAtual() * 100 / ficha.vida().vidaMax()) + '%' : '--pct: 0%'}"></div>
+                    <span class="hp-text">
+                        <span class="display-val"
+                              th:text="${ficha.vida() != null ? ficha.vida().vidaAtual() : '—'}">—</span>
+                        <input class="edit-inp hp-curr-inp" type="number"
+                               th:value="${ficha.vida() != null ? ficha.vida().vidaAtual() : 0}">
+                        /
+                        <span class="display-val"
+                              th:text="${ficha.vida() != null ? ficha.vida().vidaMax() : '—'}">—</span>
+                        <input class="edit-inp hp-max-inp" type="number"
+                               th:value="${ficha.vida() != null ? ficha.vida().vidaMax() : 0}">
+                    </span>
+                </div>
+                <div class="tmp-row">
+                    <span class="tmp-lbl">TMP</span>
+                    <div class="tmp-track">
+                        <div class="tmp-fill"
+                             th:style="${ficha.vida() != null and ficha.vida().vidaMax() > 0 ? '--pct: ' + (ficha.vida().vidaTemporaria() * 100 / ficha.vida().vidaMax()) + '%' : '--pct: 0%'}"></div>
+                    </div>
+                    <span class="tmp-val display-val"
+                          th:text="${ficha.vida() != null and ficha.vida().vidaTemporaria() > 0 ? ficha.vida().vidaTemporaria() : '—'}">—</span>
+                    <input class="edit-inp tmp-inp" type="number"
+                           th:value="${ficha.vida() != null ? ficha.vida().vidaTemporaria() : 0}">
+                </div>
+            </div>
+
+            <!-- Dado de Vida (placeholder: depende das classes) -->
+            <div class="resource-block">
+                <div class="hd-bar-wrap">
+                    <div class="hd-bar-fill" style="--pct: 100%"></div>
+                    <span class="hd-text">
+                        <span class="display-val">—</span>
+                        / — (—)
+                    </span>
+                </div>
+                <span class="resource-label">Dado de Vida</span>
+            </div>
+
+            <!-- Testes Contra a Morte -->
+            <button class="death-saves-row" type="button" title="Testes contra a Morte">
+                <span class="material-symbols-outlined">skull</span>
+                <span class="death-saves-lbl">Testes Contra a Morte</span>
+            </button>
+
+        </aside>
+
+        <!-- ── COLUNA DO MEIO: Perícias ────────────────── -->
+        <section class="col-mid">
+
+            <div class="panel-box">
+                <h3 class="panel-title">⚔ Perícias</h3>
+                <div class="skill-list">
+                    <!--/* Placeholder: perícias vêm de dnd5e_pericia (tabela separada)
+                          data-attr indica qual atributo base usa essa perícia
+                          data-prof: none | proficient | expertise               */-->
+
+                    <div class="skill-row" data-skill="Acrobacia" data-attr="destreza" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">DES</span>
+                        <span class="skill-name">Acrobacia</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Adestrar Animais" data-attr="sabedoria" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">SAB</span>
+                        <span class="skill-name">Adestrar Animais</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Arcanismo" data-attr="inteligencia" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">INT</span>
+                        <span class="skill-name">Arcanismo</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Atletismo" data-attr="forca" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">FOR</span>
+                        <span class="skill-name">Atletismo</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Atuação" data-attr="carisma" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">CAR</span>
+                        <span class="skill-name">Atuação</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Enganação" data-attr="carisma" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">CAR</span>
+                        <span class="skill-name">Enganação</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Furtividade" data-attr="destreza" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">DES</span>
+                        <span class="skill-name">Furtividade</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="História" data-attr="inteligencia" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">INT</span>
+                        <span class="skill-name">História</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Intimidação" data-attr="carisma" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">CAR</span>
+                        <span class="skill-name">Intimidação</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Intuição" data-attr="sabedoria" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">SAB</span>
+                        <span class="skill-name">Intuição</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Investigação" data-attr="inteligencia" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">INT</span>
+                        <span class="skill-name">Investigação</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Medicina" data-attr="sabedoria" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">SAB</span>
+                        <span class="skill-name">Medicina</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Natureza" data-attr="inteligencia" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">INT</span>
+                        <span class="skill-name">Natureza</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Percepção" data-attr="sabedoria" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">SAB</span>
+                        <span class="skill-name">Percepção</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Persuasão" data-attr="carisma" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">CAR</span>
+                        <span class="skill-name">Persuasão</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Prestidigitação" data-attr="destreza" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">DES</span>
+                        <span class="skill-name">Prestidigitação</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Religião" data-attr="inteligencia" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">INT</span>
+                        <span class="skill-name">Religião</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                    <div class="skill-row" data-skill="Sobrevivência" data-attr="sabedoria" data-prof="none">
+                        <span class="prof-dot"></span>
+                        <span class="skill-attr">SAB</span>
+                        <span class="skill-name">Sobrevivência</span>
+                        <span class="skill-mod">—</span>
+                        <span class="skill-passive">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ferramentas de Proficiência (placeholder: adicionável manualmente) -->
+            <div class="panel-box">
+                <h3 class="panel-title">🔧 Ferramentas</h3>
+                <div class="skill-list" id="toolList">
+                    <!--/* Ferramentas são adicionadas/removidas no modo de edição */-->
+                    <div class="tool-empty-msg" style="padding: 10px 12px; font-size: 0.78rem; color: rgba(240,232,224,0.35);">
+                        Nenhuma ferramenta
+                    </div>
+                </div>
+                <div class="edit-only tool-add-row" style="display:none; padding: 8px 12px; gap: 6px; align-items: center;">
+                    <input type="text" class="tool-add-inp" placeholder="Nome da ferramenta"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 6px 10px; font: inherit; font-size: 0.82rem; outline:none;">
+                    <button type="button" class="tool-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 6px 10px; cursor: pointer; font-size: 0.8rem;">
+                        + Adicionar
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ── COLUNA DIREITA: Traços ──────────────────── -->
+        <section class="col-right">
+
+            <!-- Testes de Resistência (calculados, somente leitura visual — pip clicável no modo edição) -->
+            <div class="panel-box">
+                <h3 class="panel-title">🛡 Testes de Resistência</h3>
+                <div class="saves-grid">
+                    <div class="save-row" data-attr="forca" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">FOR</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                    <div class="save-row" data-attr="destreza" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">DES</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                    <div class="save-row" data-attr="constituicao" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">CON</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                    <div class="save-row" data-attr="inteligencia" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">INT</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                    <div class="save-row" data-attr="sabedoria" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">SAB</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                    <div class="save-row" data-attr="carisma" data-prof="false">
+                        <span class="prof-dot"></span>
+                        <span class="save-attr">CAR</span>
+                        <span class="save-mod">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raça / Antecedente -->
+            <div class="trait-chips">
+
+                <div class="trait-chip">
+                    <div class="trait-icon-wrap">🍃</div>
+                    <div class="trait-chip-info">
+                        <!-- display -->
+                        <span class="trait-chip-name display-val"
+                              th:text="${ficha.raca() != null ? ficha.raca().name() : '—'}">—</span>
+                        <!-- edição -->
+                        <select class="edit-inp trait-select" data-field="raca"
+                                th:value="${ficha.raca()}">
+                            <option th:each="r : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndRaca).values()}"
+                                    th:value="${r.name()}"
+                                    th:text="${r.name()}"
+                                    th:selected="${ficha.raca() == r}">
+                            </option>
+                        </select>
+                        <span class="trait-chip-sub">Raça</span>
+                    </div>
+                </div>
+
+                <div class="trait-chip">
+                    <div class="trait-icon-wrap">⚜️</div>
+                    <div class="trait-chip-info">
+                        <!-- display -->
+                        <span class="trait-chip-name display-val"
+                              th:text="${ficha.antecedente() != null ? ficha.antecedente().name() : '—'}">—</span>
+                        <!-- edição -->
+                        <select class="edit-inp trait-select" data-field="antecedente"
+                                th:value="${ficha.antecedente()}">
+                            <option th:each="a : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndAntecedente).values()}"
+                                    th:value="${a.name()}"
+                                    th:text="${a.name()}"
+                                    th:selected="${ficha.antecedente() == a}">
+                            </option>
+                        </select>
+                        <span class="trait-chip-sub">Antecedente</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sentidos (placeholder: adicionável no modo de edição) -->
+            <div class="traits-section">
+                <h4 class="traits-title">👁 Sentidos</h4>
+                <div class="pill-group" id="sensesList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhum</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="sensesList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Visão no Escuro 60 ft."
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+            <!-- Resistências -->
+            <div class="traits-section">
+                <h4 class="traits-title">🔥 Resistências</h4>
+                <div class="pill-group" id="resistancesList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhuma</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="resistancesList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Fogo"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+            <!-- Imunidades -->
+            <div class="traits-section">
+                <h4 class="traits-title">🛡 Imunidades</h4>
+                <div class="pill-group" id="immunitiesList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhuma</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="immunitiesList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Doença"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+            <!-- Armaduras -->
+            <div class="traits-section">
+                <h4 class="traits-title">🪖 Armadura</h4>
+                <div class="pill-group" id="armorList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhuma</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="armorList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Leve"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+            <!-- Armas -->
+            <div class="traits-section">
+                <h4 class="traits-title">⚔ Armas</h4>
+                <div class="pill-group" id="weaponsList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhuma</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="weaponsList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Simples"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+            <!-- Idiomas -->
+            <div class="traits-section">
+                <h4 class="traits-title">🗣 Idiomas</h4>
+                <div class="pill-group" id="languagesList">
+                    <span class="pill-empty" style="font-size:0.7rem; color: rgba(240,232,224,0.35);">Nenhum</span>
+                </div>
+                <div class="edit-only trait-add-row" data-list="languagesList" style="display:none; margin-top:5px; gap:4px; align-items:center;">
+                    <input type="text" class="trait-add-inp" placeholder="Ex: Comum"
+                           style="flex:1; background: rgba(255,255,255,0.07); border: 1px solid var(--sh-gold-border);
+                                  border-radius: 8px; color: var(--sh-text); padding: 5px 8px; font: inherit; font-size: 0.75rem; outline:none;">
+                    <button type="button" class="trait-add-btn"
+                            style="background: var(--sh-gold-faint); border: 1px solid var(--sh-gold-border);
+                                   border-radius: 8px; color: var(--sh-gold); padding: 5px 8px; cursor: pointer; font-size: 0.75rem;">+</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ── TABS LATERAIS ───────────────────────────── -->
+        <nav class="sheet-tabs" aria-label="Seções da ficha">
+            <button class="sheet-tab active" type="button" title="Visão Geral">
+                <span class="material-symbols-outlined">person</span>
+            </button>
+            <button class="sheet-tab" type="button" title="Inventário">
+                <span class="material-symbols-outlined">backpack</span>
+            </button>
+            <button class="sheet-tab" type="button" title="Características">
+                <span class="material-symbols-outlined">auto_stories</span>
+            </button>
+            <button class="sheet-tab" type="button" title="Magias">
+                <span class="material-symbols-outlined">electric_bolt</span>
+            </button>
+            <button class="sheet-tab" type="button" title="Lore">
+                <span class="material-symbols-outlined">menu_book</span>
+            </button>
+        </nav>
+
+    </div><!-- /sheet-body -->
+
+</div><!-- /sheet -->
+
+</body>
+</html>

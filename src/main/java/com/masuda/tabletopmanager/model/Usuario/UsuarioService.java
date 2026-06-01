@@ -29,3 +29,4 @@ public class UsuarioService {
         return uDAO.autenticarUsuario(email, senha);
     }
 }
+

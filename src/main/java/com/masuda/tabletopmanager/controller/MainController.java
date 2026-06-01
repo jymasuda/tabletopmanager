@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -95,21 +96,37 @@ public class MainController {
             return ResponseEntity.badRequest().body(Map.of("error", "Usuário não autenticado."));
         }
 
+        int novoId = 0;
         switch(sistema){
             case "DND5E" -> {
                 Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
-                ds.inserirFichaDnd5e(usuarioId, nome);
+                novoId = ds.inserirFichaDnd5e(usuarioId, nome);
             }
             case "TFT" -> {
                 TftSheetService ts = context.getBean(TftSheetService.class);
-                ts.inserirFichaTft(usuarioId, nome);
+                novoId = ts.inserirFichaTft(usuarioId, nome);
             }
             default -> {
                 return ResponseEntity.badRequest().body(Map.of("error", "Sistema de RPG inválido."));
             }
         }
         
-        return ResponseEntity.ok(Map.of("message", "Personagem criado com sucesso."));
+        return ResponseEntity.ok(Map.of("message", "Personagem criado com sucesso.", "id", String.valueOf(novoId)));
+    }
+
+    @GetMapping("/personagem/{id}")
+    public String visualizarPersonagem(@PathVariable int id, HttpSession session, Model model) {
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return "redirect:/";
+        }
+        Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+        if(ds.obterFichaDnd5e(id).getId().idPersonagem() != usuarioId){
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("ficha", ds.obterFichaDnd5e(id));
+        return "fragments/dnd-sheet :: sheet";
     }
 
     @PostMapping("/logout")

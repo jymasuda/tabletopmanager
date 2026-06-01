@@ -85,12 +85,23 @@ public class Dnd5eSheet extends Personagem {
         PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
             ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
         );
-        DndRaca raca = DndRaca.valueOf((String) registros.get("id_raca"));
-        DndAntecedente antecedente = DndAntecedente.valueOf((String) registros.get("antecedente"));
-        DndAtributos atributos = DndAtributos.converterRegistros(registros);
-        DndVida vida = DndVida.converterRegistros(registros);
-        DndCombate combate = DndCombate.converterRegistros(registros);
+
+        String racaStr = (String) registros.get("id_raca");
+        DndRaca raca = racaStr != null ? DndRaca.valueOf(racaStr) : null;
+
+        String antecedenteStr = (String) registros.get("antecedente");
+        DndAntecedente antecedente = antecedenteStr != null ? DndAntecedente.valueOf(antecedenteStr) : null;
+
+        // atributos podem ser todos nulos numa ficha recém criada
+        boolean temAtributos = registros.get("forca") != null;
+        DndAtributos atributos = temAtributos ? DndAtributos.converterRegistros(registros) : null;
+
+        boolean temVida = registros.get("hp_max") != null;
+        DndVida vida = temVida ? DndVida.converterRegistros(registros) : null;
+
+        boolean temCombate = registros.get("classe_armadura") != null;
+        DndCombate combate = temCombate ? DndCombate.converterRegistros(registros) : null;
 
         return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, avatarURL, dataCriacao, id, nome, Sistema.DND5E);
-}
+    }
 }
