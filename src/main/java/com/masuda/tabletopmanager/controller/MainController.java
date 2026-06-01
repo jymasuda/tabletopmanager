@@ -12,10 +12,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.DndAtributos;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.DndCombate;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemService;
 import com.masuda.tabletopmanager.model.Personagem.Resumo.PersonagemResumo;
 import com.masuda.tabletopmanager.model.Personagem.TFT.TftSheetService;
@@ -129,6 +132,42 @@ public class MainController {
         return "fragments/dnd-sheet :: sheet";
     }
 
+    @PostMapping("/personagem/{id}/atributos")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> atualizarAtributosPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
+
+        DndAtributos atributos = new DndAtributos(
+        body.get("forca"),
+        body.get("destreza"),
+        body.get("constituicao"),
+        body.get("inteligencia"),
+        body.get("sabedoria"),
+        body.get("carisma"));
+
+        Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+        ds.atualizarAtributos(id, atributos);
+
+        return ResponseEntity.ok(Map.of("message", "Atributos atualizados."));
+    }
+
+    @PostMapping("/personagem/{id}/combate")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> atualizarCombatePersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
+
+        DndCombate combate = new DndCombate(body.get("classeArmadura"), body.get("iniciativa"), body.get("velocidade"), body.get("bonusProficiencia"));
+        Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+        ds.atualizarCombate(id, combate);
+
+        return ResponseEntity.ok(Map.of("message", "Atributos de combate atualizados."));
+    }
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

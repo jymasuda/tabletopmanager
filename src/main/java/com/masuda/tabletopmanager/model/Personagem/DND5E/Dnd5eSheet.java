@@ -95,7 +95,6 @@ public class Dnd5eSheet extends Personagem {
         String antecedenteStr = (String) registros.get("antecedente");
         DndAntecedente antecedente = antecedenteStr != null ? DndAntecedente.valueOf(antecedenteStr) : null;
 
-        // atributos podem ser todos nulos numa ficha recém criada
         boolean temAtributos = registros.get("forca") != null;
         DndAtributos atributos = temAtributos ? DndAtributos.converterRegistros(registros) : null;
 

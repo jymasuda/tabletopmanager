@@ -25,6 +25,10 @@ public class Dnd5eSheetService {
         dDAO.atualizarAtributos(idPersonagem, novosAtributos);
     }
 
+    public void atualizarCombate(int idPersonagem, DndCombate combate){
+        dDAO.atualizarCombate(idPersonagem, combate);
+    }
+
     public void deletarFichaDnd5e(int idPersonagem) {
         dDAO.deletarFichaDnd5e(idPersonagem);
     }

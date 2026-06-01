@@ -82,7 +82,7 @@ public class Dnd5eSheetDAO {
     public void atualizarAtributos(int idPersonagem, DndAtributos atributos) {
         String sql = """
             UPDATE dnd5e_sheets SET
-                str = ?, dex = ?, con = ?, int_ = ?, wis = ?, cha = ?
+                forca = ?, destreza = ?, constituicao = ?, inteligencia = ?, sabedoria = ?, carisma = ?
             WHERE id_personagem = ?
         """;
         jdbc.update(sql,
@@ -92,13 +92,13 @@ public class Dnd5eSheetDAO {
         );
     }
 
-    public void atualizarCombate(int idPersonagem, int novaCA, int novaIniciativa, int novaVelocidade, int novoBonusProficiencia) {
+    public void atualizarCombate(int idPersonagem, DndCombate combate) {
         String sql = """
             UPDATE dnd5e_sheets SET
-                classe_armadura = ?, iniciativa = ?, velocidade = ?, bonus_proficiencia = ?
+                classe_armadura = ?, velocidade = ? 
             WHERE id_personagem = ?
         """;
-        jdbc.update(sql, novaCA, novaIniciativa, novaVelocidade, novoBonusProficiencia, idPersonagem);
+        jdbc.update(sql, combate.classeArmadura(), combate.velocidade(), idPersonagem);
     }
 
     public void deletarFichaDnd5e(int idPersonagem) {
