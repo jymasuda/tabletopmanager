@@ -121,7 +121,7 @@ public class MainController {
             return "redirect:/";
         }
         Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
-        if(ds.obterFichaDnd5e(id).getId().idPersonagem() != usuarioId){
+        if(ds.obterFichaDnd5e(id).getuId().idUsuario() != usuarioId){
             return "redirect:/dashboard";
         }
 

@@ -7,7 +7,7 @@
     ═══════════════════════════════════════════════════ */-->
 
 <div th:fragment="sheet" class="sheet" data-editing="false"
-     th:data-personagem-id="${ficha.id().idPersonagem()}">
+     th:data-personagem-id="${ficha.id.idPersonagem}">
 
     <!-- ── Edit Toggle ──────────────────────────────── -->
     <button class="sheet-edit-toggle" id="sheetEditToggle" type="button" aria-label="Modo de edição">
@@ -21,9 +21,9 @@
 
         <div class="sheet-identity">
             <div>
-                <span class="sheet-name display-val" th:text="${ficha.nome().nomePersonagem()}">Nome</span>
+                <span class="sheet-name display-val" th:text="${ficha.nome.nomePersonagem}">Nome</span>
                 <input class="edit-inp sheet-name-inp" type="text"
-                       th:value="${ficha.nome().nomePersonagem()}" placeholder="Nome">
+                       th:value="${ficha.nome.nomePersonagem}" placeholder="Nome">  
             </div>
             <div class="sheet-subline">
                 <!-- Placeholder: classe vem de dnd5e_classe (tabela separada) -->
@@ -91,66 +91,66 @@
         <div class="ability-badge" data-attr="forca">
             <span class="ab-name">FOR</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().forca() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().forca() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.forca >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.forca - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().forca() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.forca : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().forca() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.forca : 10}"
                    min="1" max="30" data-attr="forca">
         </div>
 
         <div class="ability-badge" data-attr="destreza">
             <span class="ab-name">DES</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().destreza() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().destreza() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.destreza >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.destreza - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().destreza() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.destreza : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().destreza() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.destreza : 10}"
                    min="1" max="30" data-attr="destreza">
         </div>
 
         <div class="ability-badge" data-attr="constituicao">
             <span class="ab-name">CON</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().constituicao() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().constituicao() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.constituicao >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.constituicao - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().constituicao() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.constituicao : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().constituicao() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.constituicao : 10}"
                    min="1" max="30" data-attr="constituicao">
         </div>
 
         <div class="ability-badge" data-attr="inteligencia">
             <span class="ab-name">INT</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().inteligencia() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().inteligencia() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.inteligencia >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.inteligencia - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().inteligencia() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.inteligencia : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().inteligencia() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.inteligencia : 10}"
                    min="1" max="30" data-attr="inteligencia">
         </div>
 
         <div class="ability-badge" data-attr="sabedoria">
             <span class="ab-name">SAB</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().sabedoria() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().sabedoria() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.sabedoria >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.sabedoria - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().sabedoria() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.sabedoria : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().sabedoria() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.sabedoria : 10}"
                    min="1" max="30" data-attr="sabedoria">
         </div>
 
         <div class="ability-badge" data-attr="carisma">
             <span class="ab-name">CAR</span>
             <span class="ab-mod display-val"
-                  th:text="${ficha.atributos() != null ? (ficha.atributos().carisma() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().carisma() - 10) / 2, 1) : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? (ficha.atributos.carisma >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.carisma - 10) / 2, 1) : '—'}">—</span>
             <span class="ab-score display-val"
-                  th:text="${ficha.atributos() != null ? ficha.atributos().carisma() : '—'}">—</span>
+                  th:text="${ficha.atributos != null ? ficha.atributos.carisma : '—'}">—</span>
             <input class="edit-inp ab-score-inp" type="number"
-                   th:value="${ficha.atributos() != null ? ficha.atributos().carisma() : 10}"
+                   th:value="${ficha.atributos != null ? ficha.atributos.carisma : 10}"
                    min="1" max="30" data-attr="carisma">
         </div>
 
@@ -169,7 +169,7 @@
             <div class="portrait-wrap">
                 <div class="portrait-frame">
                     <img class="portrait-img"
-                         th:src="${ficha.avatarURL() != null ? ficha.avatarURL() : 'https://placehold.net/avatar.svg'}"
+                         th:src="${ficha.avatarURL != null ? ficha.avatarURL : 'https://placehold.net/avatar.svg'}"
                          alt="Retrato do personagem">
                 </div>
             </div>
@@ -192,15 +192,15 @@
                 <div class="stat-chip">
                     <!--/* Iniciativa = mod de destreza (calculado, somente leitura) */-->
                     <span class="stat-chip-val"
-                          th:text="${ficha.atributos() != null ? (ficha.atributos().destreza() >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos().destreza() - 10) / 2, 1) : '—'}">—</span>
+                          th:text="${ficha.atributos != null ? (ficha.atributos.destreza >= 10 ? '+' : '') + #numbers.formatInteger((ficha.atributos.destreza - 10) / 2, 1) : '—'}">—</span>
                     <span class="stat-chip-lbl">Iniciativa</span>
                 </div>
 
                 <div class="ac-badge">
                     <span class="ac-val display-val"
-                          th:text="${ficha.combate() != null ? ficha.combate().classeArmadura() : '—'}">—</span>
+                          th:text="${ficha.combate != null ? ficha.combate.classeArmadura : '—'}">—</span>
                     <input class="edit-inp ac-inp" type="number"
-                           th:value="${ficha.combate() != null ? ficha.combate().classeArmadura() : 10}">
+                           th:value="${ficha.combate != null ? ficha.combate.classeArmadura : 10}">
                     <span class="ac-lbl">CA</span>
                 </div>
 
@@ -214,9 +214,9 @@
             <!-- Velocidade -->
             <div class="speed-row">
                 <span class="speed-val display-val"
-                      th:text="${ficha.combate() != null ? ficha.combate().velocidade() : '—'}">—</span>
+                      th:text="${ficha.combate != null ? ficha.combate.velocidade : '—'}">—</span>
                 <input class="edit-inp speed-inp" type="number"
-                       th:value="${ficha.combate() != null ? ficha.combate().velocidade() : 30}">
+                       th:value="${ficha.combate != null ? ficha.combate.velocidade : 30}">
                 <span class="speed-lbl">ft. Caminhada</span>
             </div>
 
@@ -225,29 +225,29 @@
                 <span class="resource-label">Pontos de Vida</span>
                 <div class="hp-bar-wrap">
                     <div class="hp-bar-fill"
-                         th:style="${ficha.vida() != null and ficha.vida().vidaMax() > 0 ? '--pct: ' + (ficha.vida().vidaAtual() * 100 / ficha.vida().vidaMax()) + '%' : '--pct: 0%'}"></div>
+                         th:style="${ficha.vida != null and ficha.vida.vidaMax > 0 ? '--pct: ' + (ficha.vida.vidaAtual * 100 / ficha.vida.vidaMax) + '%' : '--pct: 0%'}"></div>
                     <span class="hp-text">
                         <span class="display-val"
-                              th:text="${ficha.vida() != null ? ficha.vida().vidaAtual() : '—'}">—</span>
+                              th:text="${ficha.vida != null ? ficha.vida.vidaAtual : '—'}">—</span>
                         <input class="edit-inp hp-curr-inp" type="number"
-                               th:value="${ficha.vida() != null ? ficha.vida().vidaAtual() : 0}">
+                               th:value="${ficha.vida != null ? ficha.vida.vidaAtual : 0}">
                         /
                         <span class="display-val"
-                              th:text="${ficha.vida() != null ? ficha.vida().vidaMax() : '—'}">—</span>
+                              th:text="${ficha.vida != null ? ficha.vida.vidaMax : '—'}">—</span>
                         <input class="edit-inp hp-max-inp" type="number"
-                               th:value="${ficha.vida() != null ? ficha.vida().vidaMax() : 0}">
+                               th:value="${ficha.vida != null ? ficha.vida.vidaMax : 0}">
                     </span>
                 </div>
                 <div class="tmp-row">
                     <span class="tmp-lbl">TMP</span>
                     <div class="tmp-track">
                         <div class="tmp-fill"
-                             th:style="${ficha.vida() != null and ficha.vida().vidaMax() > 0 ? '--pct: ' + (ficha.vida().vidaTemporaria() * 100 / ficha.vida().vidaMax()) + '%' : '--pct: 0%'}"></div>
+                             th:style="${ficha.vida != null and ficha.vida.vidaMax > 0 ? '--pct: ' + (ficha.vida.vidaTemporaria * 100 / ficha.vida.vidaMax) + '%' : '--pct: 0%'}"></div>
                     </div>
                     <span class="tmp-val display-val"
-                          th:text="${ficha.vida() != null and ficha.vida().vidaTemporaria() > 0 ? ficha.vida().vidaTemporaria() : '—'}">—</span>
+                          th:text="${ficha.vida != null and ficha.vida.vidaTemporaria > 0 ? ficha.vida.vidaTemporaria : '—'}">—</span>
                     <input class="edit-inp tmp-inp" type="number"
-                           th:value="${ficha.vida() != null ? ficha.vida().vidaTemporaria() : 0}">
+                           th:value="${ficha.vida != null ? ficha.vida.vidaTemporaria : 0}">
                 </div>
             </div>
 
@@ -481,14 +481,14 @@
                     <div class="trait-chip-info">
                         <!-- display -->
                         <span class="trait-chip-name display-val"
-                              th:text="${ficha.raca() != null ? ficha.raca().name() : '—'}">—</span>
+                              th:text="${ficha.raca != null ? ficha.raca.name : '—'}">—</span>
                         <!-- edição -->
                         <select class="edit-inp trait-select" data-field="raca"
-                                th:value="${ficha.raca()}">
+                                th:value="${ficha.raca}">
                             <option th:each="r : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndRaca).values()}"
                                     th:value="${r.name()}"
                                     th:text="${r.name()}"
-                                    th:selected="${ficha.raca() == r}">
+                                    th:selected="${ficha.raca == r}">
                             </option>
                         </select>
                         <span class="trait-chip-sub">Raça</span>
@@ -500,14 +500,14 @@
                     <div class="trait-chip-info">
                         <!-- display -->
                         <span class="trait-chip-name display-val"
-                              th:text="${ficha.antecedente() != null ? ficha.antecedente().name() : '—'}">—</span>
+                              th:text="${ficha.antecedente != null ? ficha.antecedente.name : '—'}">—</span>
                         <!-- edição -->
                         <select class="edit-inp trait-select" data-field="antecedente"
-                                th:value="${ficha.antecedente()}">
+                                th:value="${ficha.antecedente}">
                             <option th:each="a : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndAntecedente).values()}"
                                     th:value="${a.name()}"
                                     th:text="${a.name()}"
-                                    th:selected="${ficha.antecedente() == a}">
+                                    th:selected="${ficha.antecedente == a}">
                             </option>
                         </select>
                         <span class="trait-chip-sub">Antecedente</span>

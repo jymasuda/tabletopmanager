@@ -58,11 +58,25 @@ public class Dnd5eSheetDAO {
             return id;
         }
 
-        public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {
+    public void atualizarAntecedente(int idPersonagem, String antecedente) {
         String sql = """
-            UPDATE dnd5e_sheets SET current_hp = ?, temp_hp = ? WHERE id_personagem = ?
+            UPDATE dnd5e_sheets SET antecedente = ? WHERE id_personagem = ?
         """;
-        jdbc.update(sql, novoHP, novoTempHP, idPersonagem);
+        jdbc.update(sql, antecedente, idPersonagem);
+    }
+
+    public void atualizarInspiracao(int idPersonagem, boolean inspiracao) {
+        String sql = """
+            UPDATE dnd5e_sheets SET inspiracao = ? WHERE id_personagem = ?
+        """;
+        jdbc.update(sql, inspiracao, idPersonagem);
+    }
+
+    public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {
+    String sql = """
+        UPDATE dnd5e_sheets SET current_hp = ?, temp_hp = ? WHERE id_personagem = ?
+    """;
+    jdbc.update(sql, novoHP, novoTempHP, idPersonagem);
     }
     
     public void atualizarAtributos(int idPersonagem, DndAtributos atributos) {
@@ -76,6 +90,15 @@ public class Dnd5eSheetDAO {
             atributos.inteligencia(), atributos.sabedoria(), atributos.carisma(),
             idPersonagem
         );
+    }
+
+    public void atualizarCombate(int idPersonagem, int novaCA, int novaIniciativa, int novaVelocidade, int novoBonusProficiencia) {
+        String sql = """
+            UPDATE dnd5e_sheets SET
+                classe_armadura = ?, iniciativa = ?, velocidade = ?, bonus_proficiencia = ?
+            WHERE id_personagem = ?
+        """;
+        jdbc.update(sql, novaCA, novaIniciativa, novaVelocidade, novoBonusProficiencia, idPersonagem);
     }
 
     public void deletarFichaDnd5e(int idPersonagem) {

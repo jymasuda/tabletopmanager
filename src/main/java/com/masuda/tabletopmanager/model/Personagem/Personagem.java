@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class Personagem {
     private PersonagemID id;
+    private PersonagemUID uId;
     private PersonagemNome nome;
     private Sistema sistema;
     private String avatarURL;
@@ -13,17 +14,19 @@ public class Personagem {
     public Personagem() {
     }
 
-    public Personagem(String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemNome nome, Sistema sistema) {
+    public Personagem(String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
         this.avatarURL = avatarURL;
         this.dataCriacao = dataCriacao;
+        this.uId = uId;
         this.nome = nome;
         this.sistema = sistema;
     }
 
-    public Personagem(String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemNome nome, Sistema sistema) {
+    public Personagem(String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
         this.avatarURL = avatarURL;
         this.dataCriacao = dataCriacao;
         this.id = id;
+        this.uId = uId;
         this.nome = nome;
         this.sistema = sistema;
     }
@@ -68,12 +71,22 @@ public class Personagem {
         this.dataCriacao = dataCriacao;
     }
 
+    public PersonagemUID getuId() {
+        return uId;
+    }
+
+    public void setuId(PersonagemUID uId) {
+        this.uId = uId;
+    }
+    
      public static Personagem converterRegistros(Map<String,Object> registros) {
         int id = (int) registros.get("id");
+        int uId = (int) registros.get("id_usuario");
         String nome = (String) registros.get("nome");
         String sistemaStr = (String) registros.get("sistema");
         String avatarURL = (String) registros.get("avatarURL");
         LocalDateTime dataCriacaoStr = (LocalDateTime) registros.get("dataCriacao");
-        return new Personagem(avatarURL, new PersonagemDataCriacao(dataCriacaoStr), new PersonagemID(id), new PersonagemNome(nome), Sistema.valueOf(sistemaStr));
+        return new Personagem(avatarURL, new PersonagemDataCriacao(dataCriacaoStr), new PersonagemID(id), new PersonagemUID(uId), new PersonagemNome(nome), Sistema.valueOf(sistemaStr));
     }
+
 }

@@ -7,6 +7,7 @@ import com.masuda.tabletopmanager.model.Personagem.Personagem;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemDataCriacao;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemID;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemNome;
+import com.masuda.tabletopmanager.model.Personagem.PersonagemUID;
 import com.masuda.tabletopmanager.model.Personagem.Sistema;
 
 public class Dnd5eSheet extends Personagem {
@@ -19,8 +20,8 @@ public class Dnd5eSheet extends Personagem {
     public Dnd5eSheet() {
     }
 
-    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemNome nome, Sistema sistema) {
-        super(avatarURL, dataCriacao, nome, sistema);
+    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+        super(avatarURL, dataCriacao, id, uId, nome, sistema);
         this.antecedente = antecedente;
         this.atributos = atributos;
         this.combate = combate;
@@ -28,14 +29,15 @@ public class Dnd5eSheet extends Personagem {
         this.vida = vida;
     }
 
-    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemNome nome, Sistema sistema) {
-        super(avatarURL, dataCriacao, id, nome, sistema);
+    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+        super(avatarURL, dataCriacao, uId, nome, sistema);
         this.antecedente = antecedente;
         this.atributos = atributos;
         this.combate = combate;
         this.raca = raca;
         this.vida = vida;
     }
+
 
 
     public DndRaca getRaca() {
@@ -80,6 +82,7 @@ public class Dnd5eSheet extends Personagem {
     
     public static Dnd5eSheet converterRegistros(Map<String, Object> registros) {
         PersonagemID id = new PersonagemID((int) registros.get("id"));
+        PersonagemUID uId = new PersonagemUID((int) registros.get("id_usuario"));
         PersonagemNome nome = new PersonagemNome((String) registros.get("nome"));
         String avatarURL = (String) registros.get("avatar_url");
         PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
@@ -102,6 +105,6 @@ public class Dnd5eSheet extends Personagem {
         boolean temCombate = registros.get("classe_armadura") != null;
         DndCombate combate = temCombate ? DndCombate.converterRegistros(registros) : null;
 
-        return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, avatarURL, dataCriacao, id, nome, Sistema.DND5E);
+        return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, avatarURL, dataCriacao, id, uId, nome, Sistema.DND5E);
     }
 }

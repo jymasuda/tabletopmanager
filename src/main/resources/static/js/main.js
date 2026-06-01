@@ -40,7 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const res = await fetch(`/personagem/${id}`);
-            if (!res.ok) throw new Error('Erro ao carregar ficha');
+            
+             if (!res.ok) {
+            console.error('Erro ao carregar ficha:', res.status);
+            return; // <-- não renderiza nada se der erro/redirect
+        }
             
             const html = await res.text();
             contentPane.innerHTML = `<div class="character-detail"><div class="detail-content">${html}</div></div>`;

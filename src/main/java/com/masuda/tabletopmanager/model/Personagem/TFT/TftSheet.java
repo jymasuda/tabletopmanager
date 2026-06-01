@@ -7,6 +7,7 @@ import com.masuda.tabletopmanager.model.Personagem.Personagem;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemDataCriacao;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemID;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemNome;
+import com.masuda.tabletopmanager.model.Personagem.PersonagemUID;
 import com.masuda.tabletopmanager.model.Personagem.Sistema;
 
 public class TftSheet extends Personagem {
@@ -16,33 +17,31 @@ public class TftSheet extends Personagem {
     private TftAttributes attributes;
     private TftCombat combatAttributes;
 
-    public TftSheet(TftAttributes attributes, TftCombat combatAttributes, TftHP hp, TftSin sin, TftSP sp, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemNome nome, Sistema sistema) {
-        super(avatarURL, dataCriacao, id, nome, sistema);
-        this.attributes = attributes;
-        this.combatAttributes = combatAttributes;
-        this.hp = hp;
-        this.sin = sin;
-        this.sp = sp;
-    }
-
-    public TftSheet(TftAttributes attributes, TftCombat combatAttributes, TftHP hp, TftSin sin, TftSP sp, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemNome nome, Sistema sistema) {
-        super(avatarURL, dataCriacao, nome, sistema);
-        this.attributes = attributes;
-        this.combatAttributes = combatAttributes;
-        this.hp = hp;
-        this.sin = sin;
-        this.sp = sp;
-    }
-
-    public TftSheet(String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemNome nome, Sistema sistema) {
-        super(avatarURL, dataCriacao, id, nome, sistema);
-    }
+    
     
 
     public TftSheet() {
     }
 
     public TftSheet(TftAttributes attributes, TftCombat combatAttributes, TftHP hp, TftSin sin, TftSP sp) {
+        this.attributes = attributes;
+        this.combatAttributes = combatAttributes;
+        this.hp = hp;
+        this.sin = sin;
+        this.sp = sp;
+    }
+
+    public TftSheet(TftAttributes attributes, TftCombat combatAttributes, TftHP hp, TftSin sin, TftSP sp, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+        super(avatarURL, dataCriacao, id, uId, nome, sistema);
+        this.attributes = attributes;
+        this.combatAttributes = combatAttributes;
+        this.hp = hp;
+        this.sin = sin;
+        this.sp = sp;
+    }
+
+    public TftSheet(TftAttributes attributes, TftCombat combatAttributes, TftHP hp, TftSin sin, TftSP sp, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+        super(avatarURL, dataCriacao, uId, nome, sistema);
         this.attributes = attributes;
         this.combatAttributes = combatAttributes;
         this.hp = hp;
@@ -92,6 +91,7 @@ public class TftSheet extends Personagem {
 
     public static TftSheet converterRegistros(Map<String, Object> registros) {
         PersonagemID id = new PersonagemID((Integer) registros.get("id"));
+        PersonagemUID uId = new PersonagemUID((Integer) registros.get("id_usuario"));
         PersonagemNome nome = new PersonagemNome((String) registros.get("nome"));
         String avatarURL = (String) registros.get("avatar_url");
                 PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
@@ -102,6 +102,6 @@ public class TftSheet extends Personagem {
         TftSP sp = TftSP.converterRegistros(registros);
         TftAttributes attributes = TftAttributes.converterRegistros(registros);
         TftCombat combatAttributes = TftCombat.converterRegistros(registros);
-        return new TftSheet(attributes, combatAttributes, hp, sin, sp, avatarURL, dataCriacao, id, nome, Sistema.TFT);
+        return new TftSheet(attributes, combatAttributes, hp, sin, sp, avatarURL, dataCriacao, id, uId, nome, Sistema.TFT);
     }
 }
