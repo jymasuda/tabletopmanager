@@ -102,8 +102,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_sheets (
   hp_temp INT,
   classe_armadura INT,
   iniciativa INT,
-  velocidade INT,
-  bonus_proficiencia INT
+  velocidade INT
 );
 
 CREATE TABLE IF NOT EXISTS dnd5e_classe (

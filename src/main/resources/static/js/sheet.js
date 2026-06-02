@@ -526,7 +526,6 @@ function initDndSheet() {
             classeArmadura: parseInt(sheet.querySelector('.ac-inp')?.value)    || 10,
             iniciativa: parseInt(sheet.querySelector('#profBonus')?.value) || +0,
             velocidade:     parseInt(sheet.querySelector('.speed-inp')?.value) || 30,
-            bonusProficiencia: parseInt(sheet.querySelector('.stat-chip-val')?.value) || +2,
         });
     }
 

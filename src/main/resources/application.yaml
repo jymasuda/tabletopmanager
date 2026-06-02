@@ -4,9 +4,9 @@ server:
 spring:
   datasource:
     platform: postgres
-    url: jdbc:postgresql://dpg-d8f0u76q1p3s73de3ud0-a.virginia-postgres.render.com:5432/ttrpgmanager?sslmode=require
-    username: ttrpgmanager_user
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_URL:127.0.0.1:5432/ttrpgmanager}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
     driverClassName: org.postgresql.Driver
  
   jpa:

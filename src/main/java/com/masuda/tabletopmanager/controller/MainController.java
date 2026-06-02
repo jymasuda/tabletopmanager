@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.DndAtributos;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.DndCombate;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.DndVida;
 import com.masuda.tabletopmanager.model.Personagem.PersonagemService;
 import com.masuda.tabletopmanager.model.Personagem.Resumo.PersonagemResumo;
 import com.masuda.tabletopmanager.model.Personagem.TFT.TftSheetService;
@@ -162,12 +163,27 @@ public class MainController {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
         }
 
-        DndCombate combate = new DndCombate(body.get("classeArmadura"), body.get("iniciativa"), body.get("velocidade"), body.get("bonusProficiencia"));
+        DndCombate combate = new DndCombate(body.get("classeArmadura"), body.get("iniciativa"), body.get("velocidade"));
         Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
         ds.atualizarCombate(id, combate);
 
         return ResponseEntity.ok(Map.of("message", "Atributos de combate atualizados."));
     }
+
+    @PostMapping("/personagem/{id}/vida")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> atualizarVidaPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
+        DndVida vida = new DndVida(body.get("vidaAtual"), body.get("vidaMax"), body.get("vidaTemp"));
+        Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+        ds.atualizarVida(id, vida);
+
+        return ResponseEntity.ok(Map.of("message", "Vida atualizada."));
+    }
+
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

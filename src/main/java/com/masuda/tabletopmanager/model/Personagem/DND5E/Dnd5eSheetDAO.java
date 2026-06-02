@@ -26,7 +26,7 @@ public class Dnd5eSheetDAO {
                     d.id_raca, d.antecedente,
                     d.forca, d.destreza, d.constituicao, d.inteligencia, d.sabedoria, d.carisma,
                     d.hp_max, d.hp_atual, d.hp_temp,
-                    d.classe_armadura, d.iniciativa, d.velocidade, d.bonus_proficiencia
+                    d.classe_armadura, d.iniciativa, d.velocidade
                 FROM personagem p
                 JOIN dnd5e_sheets d ON d.id_personagem = p.id
                 WHERE p.id = ?
@@ -72,11 +72,11 @@ public class Dnd5eSheetDAO {
         jdbc.update(sql, inspiracao, idPersonagem);
     }
 
-    public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {
+    public void atualizarVida(int idPersonagem, DndVida vida) {
     String sql = """
-        UPDATE dnd5e_sheets SET current_hp = ?, temp_hp = ? WHERE id_personagem = ?
+        UPDATE dnd5e_sheets SET hp_atual = ?, hp_max = ?, hp_temp = ? WHERE id_personagem = ?
     """;
-    jdbc.update(sql, novoHP, novoTempHP, idPersonagem);
+    jdbc.update(sql, vida.vidaAtual(), vida.vidaMax(), vida.vidaTemporaria(), idPersonagem);
     }
     
     public void atualizarAtributos(int idPersonagem, DndAtributos atributos) {
@@ -95,10 +95,10 @@ public class Dnd5eSheetDAO {
     public void atualizarCombate(int idPersonagem, DndCombate combate) {
         String sql = """
             UPDATE dnd5e_sheets SET
-                classe_armadura = ?, velocidade = ? 
+                classe_armadura = ?, iniciativa = ?, velocidade = ?
             WHERE id_personagem = ?
         """;
-        jdbc.update(sql, combate.classeArmadura(), combate.velocidade(), idPersonagem);
+        jdbc.update(sql, combate.classeArmadura(), combate.iniciativa(), combate.velocidade(), idPersonagem);
     }
 
     public void deletarFichaDnd5e(int idPersonagem) {

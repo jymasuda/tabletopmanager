@@ -17,8 +17,8 @@ public class Dnd5eSheetService {
         return dDAO.inserirFichaDnd5e(idUsuario, nome);
     }
 
-    public void atualizarHP(int idPersonagem, int novoHP, int novoTempHP) {
-        dDAO.atualizarHP(idPersonagem, novoHP, novoTempHP);
+    public void atualizarVida(int idPersonagem, DndVida novoHP) {
+        dDAO.atualizarVida(idPersonagem, novoHP);
     }
     
     public void atualizarAtributos(int idPersonagem, DndAtributos novosAtributos) {

@@ -81,6 +81,7 @@ public class Dnd5eSheet extends Personagem {
     }
     
     public static Dnd5eSheet converterRegistros(Map<String, Object> registros) {
+        System.out.println("Registros recebidos para conversão: " + registros); // Log para verificar os dados recebidos
         PersonagemID id = new PersonagemID((int) registros.get("id"));
         PersonagemUID uId = new PersonagemUID((int) registros.get("id_usuario"));
         PersonagemNome nome = new PersonagemNome((String) registros.get("nome"));
