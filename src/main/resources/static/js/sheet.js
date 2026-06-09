@@ -524,7 +524,7 @@ function initDndSheet() {
     async function saveCombate() {
         await post(`/personagem/${personagemId}/combate`, {
             classeArmadura: parseInt(sheet.querySelector('.ac-inp')?.value)    || 10,
-            iniciativa: parseInt(sheet.querySelector('#profBonus')?.value) || +0,
+            iniciativa: parseInt(sheet.querySelector('#profBonus')) || +0,
             velocidade:     parseInt(sheet.querySelector('.speed-inp')?.value) || 30,
         });
     }

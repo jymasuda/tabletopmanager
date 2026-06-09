@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS tft_skill CASCADE;
 DROP TABLE IF EXISTS tft_feature CASCADE;
 DROP TABLE IF EXISTS tft_sheets CASCADE;
 DROP TABLE IF EXISTS dnd5e_auxilio CASCADE;
+DROP TABLE IF EXISTS dnd5e_ferramenta CASCADE;
 DROP TABLE IF EXISTS dnd5e_feature CASCADE;
 DROP TABLE IF EXISTS dnd5e_ataque CASCADE;
 DROP TABLE IF EXISTS dnd5e_feitico_slots CASCADE;
@@ -97,6 +98,8 @@ CREATE TABLE IF NOT EXISTS dnd5e_sheets (
   inspiracao BOOLEAN DEFAULT FALSE,
   forca INT, destreza INT, constituicao INT,
   inteligencia INT, sabedoria INT, carisma INT,
+  forcaSave BOOLEAN, destrezaSave BOOLEAN, constituicaoSave BOOLEAN,
+  inteligenciaSave BOOLEAN, sabedoriaSave BOOLEAN, carismaSave BOOLEAN,
   hp_max INT,
   hp_atual INT,
   hp_temp INT,
@@ -177,7 +180,23 @@ CREATE TABLE IF NOT EXISTS dnd5e_auxilio (
     falhas TEXT,
     aparencia TEXT,
     aliados TEXT,
-    anotacoes TEXT
+    anotacoes TEXT,
+    sentidos TEXT,
+    resistencias TEXT,
+    imunidades TEXT,
+    armaduras TEXT,
+    armas TEXT,
+    idiomas TEXT
+);
+
+CREATE TABLE IF NOT EXISTS dnd5e_ferramenta (
+  id SERIAL PRIMARY KEY,
+  id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL
+  proficiente BOOLEAN DEFAULT FALSE,
+  expert BOOLEAN DEFAULT FALSE,
+  CHECK (NOT expert OR proficiente) 
+
 );
 
 -- ========================

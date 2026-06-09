@@ -1,5 +1,8 @@
 package com.masuda.tabletopmanager.model.Personagem.DND5E;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,23 @@ public class Dnd5eSheetDAO {
             return id;
         }
 
+    public void atualizarIdentidade(int idPersonagem, String raca, String antecedente, int experiencia) {
+        String sql = """
+            UPDATE dnd5e_sheets
+            SET id_raca = ?, antecedente = ?, experiencia = ?
+            WHERE id_personagem = ?
+        """;
+        jdbc.update(sql, raca, antecedente, experiencia, idPersonagem);
+    }
+
+    public void atualizarAuxilio(int idPersonagem, String sentidos, String resistencias,
+                                String imunidades, String armaduras, String armas, String idiomas) {
+        String sql = """
+            INSERT INTO dnd5e_auxilio (id_personagem, sentidos, resistencias, imunidades, armaduras, armas, idiomas)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+        jdbc.update(sql, idPersonagem, sentidos, resistencias, imunidades, armaduras, armas, idiomas);
+    }
     public void atualizarAntecedente(int idPersonagem, String antecedente) {
         String sql = """
             UPDATE dnd5e_sheets SET antecedente = ? WHERE id_personagem = ?
@@ -92,6 +112,59 @@ public class Dnd5eSheetDAO {
         );
     }
 
+    public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
+        jdbc.update("DELETE FROM dnd5e_pericia WHERE id_personagem = ?", idPersonagem);
+
+        if (pericias == null || pericias.isEmpty()) return;
+
+        String sql = """
+            INSERT INTO dnd5e_pericia (id_personagem, pericia, proficiente, expert)
+            VALUES (?, ?::dnd5e_nome_pericia, ?, ?)
+        """;
+
+        for (Map<String, Object> p : pericias) {
+            String nome       = (String)  p.get("nome");
+            boolean proficiente = Boolean.TRUE.equals(p.get("proficiente"));
+            boolean expert      = Boolean.TRUE.equals(p.get("expert"));
+
+            if (!proficiente && !expert) continue;
+
+            jdbc.update(sql, idPersonagem, nome, proficiente, expert);
+        }
+    }
+
+    public void atualizarFerramentas(int idPersonagem, List<Map<String, Object>> ferramentas) {
+        jdbc.update("DELETE FROM dnd5e_ferramenta WHERE id_personagem = ?", idPersonagem);
+
+        if (ferramentas == null || ferramentas.isEmpty()) return;
+
+        String sql = "INSERT INTO dnd5e_ferramenta (id_personagem, nome, proficiente, expert) VALUES (?, ?, ?, ?)";
+
+        for (Map<String, Object> f : ferramentas) {
+            String nome = (String) f.get("nome");
+            boolean proficiente = Boolean.TRUE.equals(f.get("proficiente"));
+            boolean expert = Boolean.TRUE.equals(f.get("expert"));
+
+            if (!proficiente && !expert) continue;
+
+            jdbc.update(sql, idPersonagem, nome, proficiente, expert);
+        }
+    }
+
+    public void atualizarSaves(int idPersonagem, DndSaves saves) {
+        String sql = """
+            UPDATE dnd5e_sheets SET
+                forcaSave = ?, destrezaSave = ?, constituicaoSave = ?,
+                inteligenciaSave = ?, sabedoriaSave = ?, carismaSave = ?
+            WHERE id_personagem = ?
+        """;
+        jdbc.update(sql,
+            saves.isProficienteForca(), saves.isProficienteDestreza(), saves.isProficienteConstituicao(),
+            saves.isProficienteInteligencia(), saves.isProficienteSabedoria(), saves.isProficienteCarisma(),
+            idPersonagem
+        );
+    }
+
     public void atualizarCombate(int idPersonagem, DndCombate combate) {
         String sql = """
             UPDATE dnd5e_sheets SET
@@ -100,6 +173,7 @@ public class Dnd5eSheetDAO {
         """;
         jdbc.update(sql, combate.classeArmadura(), combate.iniciativa(), combate.velocidade(), idPersonagem);
     }
+
 
     public void deletarFichaDnd5e(int idPersonagem) {
         jdbc.update("DELETE FROM personagem WHERE id = ?", idPersonagem);

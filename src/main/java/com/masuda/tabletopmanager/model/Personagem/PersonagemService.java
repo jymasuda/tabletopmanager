@@ -15,4 +15,8 @@ public class PersonagemService {
     public List<PersonagemResumo> obterResumosPersonagemUsuario(int idUsuario) {
         return pDAO.obterResumosPersonagemUsuario(idUsuario);
     }
+
+    public void atualizarIdentidade(int idPersonagem, String nome, String avatarUrl) {
+    pDAO.atualizarIdentidade(idPersonagem, nome, avatarUrl);
+    }
 }

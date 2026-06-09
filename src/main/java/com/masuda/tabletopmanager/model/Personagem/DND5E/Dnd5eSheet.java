@@ -13,29 +13,32 @@ import com.masuda.tabletopmanager.model.Personagem.Sistema;
 public class Dnd5eSheet extends Personagem {
     private DndRaca raca;
     private DndAntecedente antecedente;
-    private DndAtributos atributos; // Faz sentido isso ser assim ou o correto é fazer uma separada pra cada atributo?
-    private DndVida vida; // Idem
-    private DndCombate combate; // Idem
+    private DndAtributos atributos;
+    private DndSaves saves;
+    private DndVida vida;
+    private DndCombate combate;
 
     public Dnd5eSheet() {
     }
 
-    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, DndSaves saves, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemID id, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
         super(avatarURL, dataCriacao, id, uId, nome, sistema);
         this.antecedente = antecedente;
         this.atributos = atributos;
         this.combate = combate;
         this.raca = raca;
         this.vida = vida;
+        this.saves = saves;
     }
 
-    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
+    public Dnd5eSheet(DndAntecedente antecedente, DndAtributos atributos, DndCombate combate, DndRaca raca, DndVida vida, DndSaves saves, String avatarURL, PersonagemDataCriacao dataCriacao, PersonagemUID uId, PersonagemNome nome, Sistema sistema) {
         super(avatarURL, dataCriacao, uId, nome, sistema);
         this.antecedente = antecedente;
         this.atributos = atributos;
         this.combate = combate;
         this.raca = raca;
         this.vida = vida;
+        this.saves = saves;
     }
 
 
@@ -105,6 +108,9 @@ public class Dnd5eSheet extends Personagem {
         boolean temCombate = registros.get("classe_armadura") != null;
         DndCombate combate = temCombate ? DndCombate.converterRegistros(registros) : null;
 
-        return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, avatarURL, dataCriacao, id, uId, nome, Sistema.DND5E);
+        boolean temSaves = registros.get("forcaSave") != null;
+        DndSaves saves = temSaves ? DndSaves.converterRegistros(registros) : null;
+
+        return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, saves, avatarURL, dataCriacao, id, uId, nome, Sistema.DND5E);
     }
 }

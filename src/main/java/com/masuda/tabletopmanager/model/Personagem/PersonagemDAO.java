@@ -82,4 +82,9 @@ public class PersonagemDAO {
         }
         return personagens;
     }
+
+    public void atualizarIdentidade(int idPersonagem, String nome, String avatarUrl) {
+    String sql = "UPDATE personagem SET nome = ?, avatar_url = ? WHERE id = ?";
+    jdbc.update(sql, nome, avatarUrl, idPersonagem);
+    }
 }
