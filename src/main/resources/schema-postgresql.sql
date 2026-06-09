@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_auxilio (
 CREATE TABLE IF NOT EXISTS dnd5e_ferramenta (
   id SERIAL PRIMARY KEY,
   id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
-  nome VARCHAR(100) NOT NULL
+  nome VARCHAR(100) NOT NULL,
   proficiente BOOLEAN DEFAULT FALSE,
   expert BOOLEAN DEFAULT FALSE,
   CHECK (NOT expert OR proficiente) 

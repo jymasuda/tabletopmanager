@@ -197,13 +197,26 @@ public class MainController {
 
     @PostMapping("/personagem/{id}/pericias")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> atualizarPericiasPersonagem(@PathVariable int id, @RequestBody Map<String, Boolean> body, HttpSession session){
+    public ResponseEntity<Map<String, String>> atualizarPericias(
+            @PathVariable int id,
+            @RequestBody Map<String, Object> body,
+            HttpSession session) {
+
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
         }
-        
-        
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> pericias    = (List<Map<String, Object>>) body.get("pericias");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> ferramentas = (List<Map<String, Object>>) body.get("ferramentas");
+
+        Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
+        ds.atualizarPericias(id, pericias);
+        ds.atualizarFerramentas(id, ferramentas);
+
+        return ResponseEntity.ok(Map.of("message", "Perícias atualizadas."));
     }
 
     @PostMapping("/personagem/{id}/combate")

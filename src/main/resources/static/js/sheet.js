@@ -31,8 +31,6 @@ function initDndSheet() {
         'Persuasão':        'carisma',
     };
 
-    const SAVE_ATTRS = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
-
     // ── Bônus de proficiência por nível ───────────
     function calcProfBonus(nivel) {
         if (nivel <= 4)  return 2;
@@ -42,7 +40,6 @@ function initDndSheet() {
         return 6;
     }
 
-    // ── Modificador de atributo ───────────────────
     function calcMod(score) {
         return Math.floor((score - 10) / 2);
     }
@@ -51,7 +48,6 @@ function initDndSheet() {
         return mod >= 0 ? `+${mod}` : `${mod}`;
     }
 
-    // ── Ler scores atuais dos inputs ──────────────
     function getScores() {
         const scores = {};
         sheet.querySelectorAll('.ab-score-inp').forEach(inp => {
@@ -75,13 +71,8 @@ function initDndSheet() {
         identidade: false,
     };
 
-    function markDirty(section) {
-        dirty[section] = true;
-    }
-
-    function resetDirty() {
-        Object.keys(dirty).forEach(k => dirty[k] = false);
-    }
+    function markDirty(section) { dirty[section] = true; }
+    function resetDirty() { Object.keys(dirty).forEach(k => dirty[k] = false); }
 
     // ══════════════════════════════════════════════
     //  RECÁLCULO EM TEMPO REAL
@@ -92,31 +83,23 @@ function initDndSheet() {
         const nivel     = getNivel();
         const profBonus = calcProfBonus(nivel);
 
-        // Atualiza modificadores dos badges
         sheet.querySelectorAll('.ability-badge').forEach(badge => {
             const attr  = badge.dataset.attr;
             const score = scores[attr] ?? 10;
             const mod   = calcMod(score);
             const modEl = badge.querySelector('.ab-mod');
             if (modEl) modEl.textContent = formatMod(mod);
-
-            // Atualiza display do score também
             const scoreEl = badge.querySelector('.ab-score');
             if (scoreEl) scoreEl.textContent = score;
         });
 
-        // Atualiza bônus de proficiência
         const profEl = document.getElementById('profBonus');
         if (profEl) profEl.textContent = formatMod(profBonus);
 
-        // Atualiza iniciativa (mod de destreza)
         const iniciativaEl = sheet.querySelector('.combat-stats-row .stat-chip:first-child .stat-chip-val');
         if (iniciativaEl) iniciativaEl.textContent = formatMod(calcMod(scores['destreza'] ?? 10));
 
-        // Recalcula perícias
         recalcSkills(scores, profBonus);
-
-        // Recalcula saves
         recalcSaves(scores, profBonus);
     }
 
@@ -134,8 +117,8 @@ function initDndSheet() {
 
             const modEl     = row.querySelector('.skill-mod');
             const passiveEl = row.querySelector('.skill-passive');
-            if (modEl)     modEl.textContent     = formatMod(total);
-            if (passiveEl) passiveEl.textContent  = 10 + total;
+            if (modEl)     modEl.textContent    = formatMod(total);
+            if (passiveEl) passiveEl.textContent = 10 + total;
         });
     }
 
@@ -145,58 +128,40 @@ function initDndSheet() {
             const prof  = row.dataset.prof === 'true';
             const score = scores[attr] ?? 10;
             const total = calcMod(score) + (prof ? profBonus : 0);
-
             const modEl = row.querySelector('.save-mod');
             if (modEl) modEl.textContent = formatMod(total);
         });
     }
 
     // ══════════════════════════════════════════════
-    //  LISTENERS DE INPUT (atributos, CA, vida, etc)
+    //  LISTENERS DE INPUT
     // ══════════════════════════════════════════════
 
-    // Score inputs → recalc em tempo real
     sheet.querySelectorAll('.ab-score-inp').forEach(inp => {
-        inp.addEventListener('input', () => {
-            markDirty('atributos');
-            recalcAll();
-        });
+        inp.addEventListener('input', () => { markDirty('atributos'); recalcAll(); });
     });
 
-    // Nível → recalc proficiência e perícias
     const levelInp = sheet.querySelector('.level-inp');
     if (levelInp) {
         levelInp.addEventListener('input', () => {
             markDirty('identidade');
             recalcAll();
-            // Atualiza display do level orb
             const orbVal = sheet.querySelector('.level-orb .display-val');
             if (orbVal) orbVal.textContent = levelInp.value;
         });
     }
 
-    // CA e velocidade
     sheet.querySelector('.ac-inp')?.addEventListener('input',    () => markDirty('combate'));
     sheet.querySelector('.speed-inp')?.addEventListener('input', () => markDirty('combate'));
 
-    // HP
-    sheet.querySelector('.hp-curr-inp')?.addEventListener('input', () => {
-        markDirty('vida');
-        updateHPBar();
-    });
-    sheet.querySelector('.hp-max-inp')?.addEventListener('input', () => {
-        markDirty('vida');
-        updateHPBar();
-    });
-    sheet.querySelector('.tmp-inp')?.addEventListener('input', () => {
-        markDirty('vida');
-        updateTmpBar();
-    });
+    sheet.querySelector('.hp-curr-inp')?.addEventListener('input', () => { markDirty('vida'); updateHPBar(); });
+    sheet.querySelector('.hp-max-inp')?.addEventListener('input',  () => { markDirty('vida'); updateHPBar(); });
+    sheet.querySelector('.tmp-inp')?.addEventListener('input',     () => { markDirty('vida'); updateTmpBar(); });
 
     function updateHPBar() {
-        const curr   = parseInt(sheet.querySelector('.hp-curr-inp')?.value) || 0;
-        const max    = parseInt(sheet.querySelector('.hp-max-inp')?.value)  || 1;
-        const fill   = sheet.querySelector('.hp-bar-fill');
+        const curr = parseInt(sheet.querySelector('.hp-curr-inp')?.value) || 0;
+        const max  = parseInt(sheet.querySelector('.hp-max-inp')?.value)  || 1;
+        const fill = sheet.querySelector('.hp-bar-fill');
         if (fill) fill.style.setProperty('--pct', `${Math.min(100, (curr / max) * 100)}%`);
     }
 
@@ -207,20 +172,21 @@ function initDndSheet() {
         if (fill) fill.style.setProperty('--pct', `${Math.min(100, (tmp / max) * 100)}%`);
     }
 
-    // Nome, raça, antecedente
-    sheet.querySelector('.sheet-name-inp')?.addEventListener('input',  () => markDirty('identidade'));
+    sheet.querySelector('.sheet-name-inp')?.addEventListener('input', () => markDirty('identidade'));
     sheet.querySelectorAll('.trait-select').forEach(sel => {
         sel.addEventListener('change', () => markDirty('identidade'));
     });
 
     // ══════════════════════════════════════════════
-    //  PIPS DE PERÍCIA (ciclo: none → proficient → expertise → none)
+    //  HELPER: ciclo de pip none → proficient → expertise → none
+    //  Compartilhado entre perícias e ferramentas
     // ══════════════════════════════════════════════
 
-    sheet.querySelectorAll('.skill-row').forEach(row => {
+    function attachProfCycle(row, dirtySection) {
         const dot = row.querySelector('.prof-dot');
         if (!dot) return;
 
+        dot.style.cursor = 'pointer';
         dot.addEventListener('click', () => {
             if (!isEditing()) return;
 
@@ -230,49 +196,44 @@ function initDndSheet() {
                        : 'none';
 
             row.dataset.prof = next;
-
-            // Atualiza classe visual do dot
             dot.className = 'prof-dot' + (next !== 'none' ? ` ${next}` : '');
-
-            // Atualiza classe visual da row
             row.classList.remove('proficient', 'expertise');
             if (next !== 'none') row.classList.add(next);
 
-            markDirty('pericias');
+            markDirty(dirtySection);
             recalcAll();
         });
+    }
 
-        dot.style.cursor = 'pointer';
+    // ── Pips de perícias ──────────────────────────
+    sheet.querySelectorAll('.skill-row:not(.tool-entry)').forEach(row => {
+        attachProfCycle(row, 'pericias');
     });
 
-    // ── Pips de saves ──────────────────────────────
+    // ── Pips de saves ─────────────────────────────
+    // Saves usam toggle binário (não têm "expertise"), então mantêm lógica própria
     sheet.querySelectorAll('.save-row').forEach(row => {
         const dot = row.querySelector('.prof-dot');
         if (!dot) return;
-
+        dot.style.cursor = 'pointer';
         dot.addEventListener('click', () => {
             if (!isEditing()) return;
-
             const current = row.dataset.prof === 'true';
             row.dataset.prof = (!current).toString();
-
             dot.className = 'prof-dot' + (!current ? ' proficient' : '');
             row.classList.toggle('proficient', !current);
-
             markDirty('saves');
             recalcAll();
         });
-
-        dot.style.cursor = 'pointer';
     });
 
     // ══════════════════════════════════════════════
-    //  PILLS: adição e remoção (sentidos, resistências, etc.)
+    //  PILLS (sentidos, resistências, etc.)
     // ══════════════════════════════════════════════
 
     function setupPillList(listId) {
-        const list    = document.getElementById(listId);
-        const addRow  = sheet.querySelector(`.trait-add-row[data-list="${listId}"]`);
+        const list   = document.getElementById(listId);
+        const addRow = sheet.querySelector(`.trait-add-row[data-list="${listId}"]`);
         if (!list || !addRow) return;
 
         const addInp = addRow.querySelector('.trait-add-inp');
@@ -281,25 +242,21 @@ function initDndSheet() {
         addBtn?.addEventListener('click', () => {
             const val = addInp?.value.trim();
             if (!val) return;
-
             addPill(list, val);
             if (addInp) addInp.value = '';
             markDirty('identidade');
         });
 
-        addInp?.addEventListener('keydown', e => {
-            if (e.key === 'Enter') addBtn?.click();
-        });
+        addInp?.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn?.click(); });
     }
 
     function addPill(list, text) {
-        // Remove mensagem de "nenhum"
         const empty = list.querySelector('.pill-empty');
         if (empty) empty.remove();
 
         const pill = document.createElement('span');
         pill.className = 'pill pill-removable';
-        pill.innerHTML = `${text} <span class="pill-remove" style="cursor:pointer; margin-left:4px; opacity:0.7;">×</span>`;
+        pill.innerHTML = `${text} <span class="pill-remove" style="cursor:pointer;margin-left:4px;opacity:0.7;">×</span>`;
 
         pill.querySelector('.pill-remove').addEventListener('click', () => {
             pill.remove();
@@ -320,6 +277,9 @@ function initDndSheet() {
 
     // ══════════════════════════════════════════════
     //  FERRAMENTAS
+    //  Comportamento idêntico às perícias:
+    //  pip clicável none → proficient → expertise → none
+    //  Diferença: nome é customizado (não é enum)
     // ══════════════════════════════════════════════
 
     const toolList   = document.getElementById('toolList');
@@ -330,38 +290,45 @@ function initDndSheet() {
     toolAddBtn?.addEventListener('click', () => {
         const val = toolAddInp?.value.trim();
         if (!val) return;
-
         addTool(val);
         if (toolAddInp) toolAddInp.value = '';
         markDirty('pericias');
     });
 
-    toolAddInp?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') toolAddBtn?.click();
-    });
+    toolAddInp?.addEventListener('keydown', e => { if (e.key === 'Enter') toolAddBtn?.click(); });
 
-    function addTool(name) {
+    /**
+     * Cria e insere uma linha de ferramenta na lista.
+     * @param {string} name       - Nome da ferramenta
+     * @param {string} profState  - Estado inicial: 'none' | 'proficient' | 'expertise'
+     */
+    function addTool(name, profState = 'none') {
         const empty = toolList?.querySelector('.tool-empty-msg');
         if (empty) empty.remove();
 
         const row = document.createElement('div');
         row.className = 'skill-row tool-entry';
+        row.dataset.prof = profState;
+        if (profState !== 'none') row.classList.add(profState);
+
         row.innerHTML = `
-            <span class="prof-dot proficient"></span>
+            <span class="prof-dot${profState !== 'none' ? ' ' + profState : ''}"></span>
             <span class="skill-attr">—</span>
             <span class="skill-name">${name}</span>
             <span class="skill-mod"></span>
             <button class="tool-remove" type="button"
-                style="background:none; border:none; color: rgba(240,232,224,0.4);
-                       cursor:pointer; font-size:0.9rem; padding:0;">×</button>
+                style="background:none;border:none;color:rgba(240,232,224,0.4);cursor:pointer;font-size:0.9rem;padding:0;">×</button>
         `;
+
+        // Reutiliza o mesmo ciclo de pip das perícias
+        attachProfCycle(row, 'pericias');
 
         row.querySelector('.tool-remove').addEventListener('click', () => {
             row.remove();
             if (toolList && toolList.querySelectorAll('.tool-entry').length === 0) {
                 const msg = document.createElement('div');
                 msg.className = 'tool-empty-msg';
-                msg.style.cssText = 'padding: 10px 12px; font-size: 0.78rem; color: rgba(240,232,224,0.35);';
+                msg.style.cssText = 'padding:10px 12px;font-size:0.78rem;color:rgba(240,232,224,0.35);';
                 msg.textContent = 'Nenhuma ferramenta';
                 toolList.appendChild(msg);
             }
@@ -371,47 +338,30 @@ function initDndSheet() {
         toolList?.appendChild(row);
     }
 
-    // ── Botões de descanso e level up ─────────────────
-    const btnCurto  = sheet.querySelector('.rest-btn[title="Descanso Curto"]');
-    const btnLongo  = sheet.querySelector('.rest-btn[title="Descanso Longo"]');
-    const btnLevelUp = sheet.querySelector('.rest-btn[title="Subir de Nível"]');
+    // ── Botões de descanso e level up ─────────────
+    sheet.querySelector('.rest-btn[title="Descanso Curto"]')
+         ?.addEventListener('click', () => post(`/personagem/${personagemId}/descansocurto`, {}));
+    sheet.querySelector('.rest-btn[title="Descanso Longo"]')
+         ?.addEventListener('click', () => post(`/personagem/${personagemId}/descansolongo`, {}));
+    sheet.querySelector('.rest-btn[title="Subir de Nível"]')
+         ?.addEventListener('click', () => post(`/personagem/${personagemId}/levelup`, {}));
 
-    btnCurto?.addEventListener('click', async () => {
-        await post(`/personagem/${personagemId}/descansocurto`, {});
-    });
-
-    btnLongo?.addEventListener('click', async () => {
-        await post(`/personagem/${personagemId}/descansolongo`, {});
-    });
-
-    btnLevelUp?.addEventListener('click', async () => {
-        await post(`/personagem/${personagemId}/levelup`, {});
-    });
-
-
-    
     // ══════════════════════════════════════════════
     //  TOGGLE MODO DE EDIÇÃO
     // ══════════════════════════════════════════════
 
-    function isEditing() {
-        return sheet.dataset.editing === 'true';
-    }
+    function isEditing() { return sheet.dataset.editing === 'true'; }
 
     function showEditOnlyElements(show) {
-        // Pill add rows
         sheet.querySelectorAll('.trait-add-row').forEach(el => {
             el.style.display = show ? 'flex' : 'none';
         });
-        // Tool add row
         if (toolAddRow) toolAddRow.style.display = show ? 'flex' : 'none';
     }
 
     toggle.addEventListener('click', async () => {
         const editing = isEditing();
-
         if (editing) {
-            // ── Saindo do modo de edição ──────────────
             await saveChanges();
             updateDisplayValues();
             recalcAll();
@@ -420,38 +370,30 @@ function initDndSheet() {
             toggle.querySelector('.edit-icon').textContent = 'edit';
             resetDirty();
         } else {
-            // ── Entrando no modo de edição ────────────
             sheet.dataset.editing = 'true';
             toggle.querySelector('.edit-icon').textContent = 'edit_off';
             showEditOnlyElements(true);
         }
     });
 
-    // ── Atualiza display-val ao sair da edição ────
     function updateDisplayValues() {
         const scores = getScores();
-        const nivel  = getNivel();
 
-        // Nome
         const nomeInp = sheet.querySelector('.sheet-name-inp');
         const nomeVal = sheet.querySelector('.sheet-name');
         if (nomeInp && nomeVal) nomeVal.textContent = nomeInp.value;
 
-        // Nível
         const levelVal = sheet.querySelector('.level-orb .display-val');
         if (levelVal && levelInp) levelVal.textContent = levelInp.value;
 
-        // CA
         const acInp = sheet.querySelector('.ac-inp');
         const acVal = sheet.querySelector('.ac-val');
         if (acInp && acVal) acVal.textContent = acInp.value;
 
-        // Velocidade
         const speedInp = sheet.querySelector('.speed-inp');
         const speedVal = sheet.querySelector('.speed-val');
         if (speedInp && speedVal) speedVal.textContent = speedInp.value;
 
-        // HP
         const hpCurrInp = sheet.querySelector('.hp-curr-inp');
         const hpMaxInp  = sheet.querySelector('.hp-max-inp');
         const tmpInp    = sheet.querySelector('.tmp-inp');
@@ -460,23 +402,16 @@ function initDndSheet() {
             if (i === 1 && hpMaxInp)  el.textContent = hpMaxInp.value;
         });
         const tmpVal = sheet.querySelector('.tmp-val');
-        if (tmpVal && tmpInp) {
-            tmpVal.textContent = parseInt(tmpInp.value) > 0 ? tmpInp.value : '—';
-        }
+        if (tmpVal && tmpInp) tmpVal.textContent = parseInt(tmpInp.value) > 0 ? tmpInp.value : '—';
 
-        // Raça e Antecedente
         sheet.querySelectorAll('.trait-select').forEach(sel => {
-            const field   = sel.dataset.field;
-            const chip    = sel.closest('.trait-chip-info');
-            const display = chip?.querySelector('.display-val');
+            const display = sel.closest('.trait-chip-info')?.querySelector('.display-val');
             if (display) display.textContent = sel.value || '—';
         });
 
-        // Scores (display-val dos badges)
         sheet.querySelectorAll('.ability-badge').forEach(badge => {
-            const attr    = badge.dataset.attr;
             const scoreEl = badge.querySelector('.ab-score');
-            if (scoreEl) scoreEl.textContent = scores[attr] ?? 10;
+            if (scoreEl) scoreEl.textContent = scores[badge.dataset.attr] ?? 10;
         });
     }
 
@@ -486,26 +421,12 @@ function initDndSheet() {
 
     async function saveChanges() {
         const saves = [];
-
-        if (dirty.atributos) {
-            saves.push(saveAtributos());
-        }
-        if (dirty.combate) {
-            saves.push(saveCombate());
-        }
-        if (dirty.vida) {
-            saves.push(saveVida());
-        }
-        if (dirty.pericias) {
-            saves.push(savePericias());
-        }
-        if (dirty.saves) {
-            saves.push(saveSaves());
-        }
-        if (dirty.identidade) {
-            saves.push(saveIdentidade());
-        }
-
+        if (dirty.atributos)  saves.push(saveAtributos());
+        if (dirty.combate)    saves.push(saveCombate());
+        if (dirty.vida)       saves.push(saveVida());
+        if (dirty.pericias)   saves.push(savePericias());
+        if (dirty.saves)      saves.push(saveSaves());
+        if (dirty.identidade) saves.push(saveIdentidade());
         await Promise.all(saves);
     }
 
@@ -524,7 +445,7 @@ function initDndSheet() {
     async function saveCombate() {
         await post(`/personagem/${personagemId}/combate`, {
             classeArmadura: parseInt(sheet.querySelector('.ac-inp')?.value)    || 10,
-            iniciativa: parseInt(sheet.querySelector('#profBonus')) || +0,
+            iniciativa:     0,
             velocidade:     parseInt(sheet.querySelector('.speed-inp')?.value) || 30,
         });
     }
@@ -538,8 +459,9 @@ function initDndSheet() {
     }
 
     async function savePericias() {
+        // Perícias com nome fixo (enum no banco)
         const pericias = [];
-        sheet.querySelectorAll('.skill-row').forEach(row => {
+        sheet.querySelectorAll('.skill-row:not(.tool-entry)').forEach(row => {
             const skill = row.dataset.skill;
             const prof  = row.dataset.prof || 'none';
             if (skill) {
@@ -551,10 +473,18 @@ function initDndSheet() {
             }
         });
 
+        // Ferramentas com nome livre e mesmo estado de proficiência
         const ferramentas = [];
         sheet.querySelectorAll('.tool-entry').forEach(row => {
             const nome = row.querySelector('.skill-name')?.textContent?.trim();
-            if (nome) ferramentas.push({ nome });
+            const prof = row.dataset.prof || 'none';
+            if (nome) {
+                ferramentas.push({
+                    nome,
+                    proficiente: prof === 'proficient' || prof === 'expertise',
+                    expert:      prof === 'expertise',
+                });
+            }
         });
 
         await post(`/personagem/${personagemId}/pericias`, { pericias, ferramentas });
@@ -563,9 +493,7 @@ function initDndSheet() {
     async function saveSaves() {
         const saves = {};
         sheet.querySelectorAll('.save-row').forEach(row => {
-            const attr = row.dataset.attr;
-            const prof = row.dataset.prof === 'true';
-            if (attr) saves[attr] = prof;
+            if (row.dataset.attr) saves[row.dataset.attr] = row.dataset.prof === 'true';
         });
         await post(`/personagem/${personagemId}/saves`, saves);
     }
@@ -590,7 +518,7 @@ function initDndSheet() {
         });
     }
 
-    // ── Helper POST ──────────────────────────────
+    // ── Helper POST ───────────────────────────────
     async function post(url, body) {
         try {
             const res = await fetch(url, {
@@ -598,9 +526,7 @@ function initDndSheet() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
-            if (!res.ok) {
-                console.error(`Erro ao salvar ${url}:`, res.status);
-            }
+            if (!res.ok) console.error(`Erro ao salvar ${url}:`, res.status);
         } catch (err) {
             console.error(`Falha na requisição ${url}:`, err);
         }

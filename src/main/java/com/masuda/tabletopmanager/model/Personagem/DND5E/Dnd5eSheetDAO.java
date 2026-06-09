@@ -114,39 +114,42 @@ public class Dnd5eSheetDAO {
 
     public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
         jdbc.update("DELETE FROM dnd5e_pericia WHERE id_personagem = ?", idPersonagem);
-
+ 
         if (pericias == null || pericias.isEmpty()) return;
-
+ 
         String sql = """
             INSERT INTO dnd5e_pericia (id_personagem, pericia, proficiente, expert)
             VALUES (?, ?::dnd5e_nome_pericia, ?, ?)
         """;
-
+ 
         for (Map<String, Object> p : pericias) {
-            String nome       = (String)  p.get("nome");
+            String nome       = (String) p.get("nome");
             boolean proficiente = Boolean.TRUE.equals(p.get("proficiente"));
             boolean expert      = Boolean.TRUE.equals(p.get("expert"));
-
+ 
             if (!proficiente && !expert) continue;
-
+ 
             jdbc.update(sql, idPersonagem, nome, proficiente, expert);
         }
     }
 
     public void atualizarFerramentas(int idPersonagem, List<Map<String, Object>> ferramentas) {
         jdbc.update("DELETE FROM dnd5e_ferramenta WHERE id_personagem = ?", idPersonagem);
-
+ 
         if (ferramentas == null || ferramentas.isEmpty()) return;
-
-        String sql = "INSERT INTO dnd5e_ferramenta (id_personagem, nome, proficiente, expert) VALUES (?, ?, ?, ?)";
-
+ 
+        String sql = """
+            INSERT INTO dnd5e_ferramenta (id_personagem, nome, proficiente, expert)
+            VALUES (?, ?, ?, ?)
+        """;
+ 
         for (Map<String, Object> f : ferramentas) {
-            String nome = (String) f.get("nome");
+            String nome         = (String) f.get("nome");
             boolean proficiente = Boolean.TRUE.equals(f.get("proficiente"));
-            boolean expert = Boolean.TRUE.equals(f.get("expert"));
-
-            if (!proficiente && !expert) continue;
-
+            boolean expert      = Boolean.TRUE.equals(f.get("expert"));
+ 
+            if (nome == null || nome.isBlank()) continue;
+ 
             jdbc.update(sql, idPersonagem, nome, proficiente, expert);
         }
     }

@@ -1,5 +1,8 @@
 package com.masuda.tabletopmanager.model.Personagem.DND5E;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,14 @@ public class Dnd5eSheetService {
     
     public void atualizarAtributos(int idPersonagem, DndAtributos novosAtributos) {
         dDAO.atualizarAtributos(idPersonagem, novosAtributos);
+    }
+
+    public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
+        dDAO.atualizarPericias(idPersonagem, pericias);
+    }
+
+    public void atualizarFerramentas(int idPersonagem, List<Map<String, Object>> ferramentas) {
+        dDAO.atualizarFerramentas(idPersonagem, ferramentas);
     }
 
     public void atualizarSaves(int idPersonagem, DndSaves novosSaves) {
