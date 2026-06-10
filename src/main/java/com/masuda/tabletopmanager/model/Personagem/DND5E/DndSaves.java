@@ -33,12 +33,12 @@ public record DndSaves(boolean forca, boolean destreza, boolean constituicao, bo
             return null;
         }
 
-        boolean forca = registros.get("forcaSave") != null ? (boolean) registros.get("forcaSave") : false;
-        boolean destreza = registros.get("destrezaSave") != null ? (boolean) registros.get("destrezaSave") : false;
-        boolean constituicao = registros.get("constituicaoSave") != null ? (boolean) registros.get("constituicaoSave") : false;
-        boolean inteligencia = registros.get("inteligenciaSave") != null ? (boolean) registros.get("inteligenciaSave") : false;
-        boolean sabedoria = registros.get("sabedoriaSave") != null ? (boolean) registros.get("sabedoriaSave") : false;
-        boolean carisma = registros.get("carismaSave") != null ? (boolean) registros.get("carismaSave") : false;
+        boolean forca = Boolean.TRUE.equals(registros.get("forcasave"));
+        boolean destreza = Boolean.TRUE.equals(registros.get("destrezasave"));
+        boolean constituicao = Boolean.TRUE.equals(registros.get("constituicaosave"));
+        boolean inteligencia = Boolean.TRUE.equals(registros.get("inteligenciasave"));
+        boolean sabedoria = Boolean.TRUE.equals(registros.get("sabedoriasave"));
+        boolean carisma = Boolean.TRUE.equals(registros.get("carismasave"));
 
         return new DndSaves(forca, destreza, constituicao, inteligencia, sabedoria, carisma);
     }
