@@ -19,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 
 @Repository
 public class PersonagemDAO {
+
     @Autowired
     DataSource dataSource;
 
@@ -34,9 +35,10 @@ public class PersonagemDAO {
         resumos.addAll(obterResumosDnd(idUsuario));
         resumos.addAll(obterResumosTft(idUsuario));
         return resumos;
-}
+    }
 // + longo do q tft por causa do multiclassing
 // query do bd retorna 1+ linhas por personagem pra resumo
+
     private List<DndPersonagemResumo> obterResumosDnd(int idUsuario) {
         String sql = """
             SELECT p.id, p.nome, p.sistema, p.avatar_url,
@@ -50,14 +52,14 @@ public class PersonagemDAO {
         List<Map<String, Object>> listaRegistros = jdbc.queryForList(sql, idUsuario);
         Map<Integer, DndPersonagemResumo> personagens = new LinkedHashMap<>();
         for (Map<String, Object> registro : listaRegistros) {
-        Integer id = (Integer) registro.get("id");
+            Integer id = (Integer) registro.get("id");
 
-        if (personagens.containsKey(id)) {
-            personagens.get(id).adicionarClasse(
-                registro.get("classe") + " " + registro.get("level")
-            );
-        } else {
-            personagens.put(id, DndPersonagemResumo.converterRegistros(registro));
+            if (personagens.containsKey(id)) {
+                personagens.get(id).adicionarClasse(
+                        registro.get("classe") + " " + registro.get("level")
+                );
+            } else {
+                personagens.put(id, DndPersonagemResumo.converterRegistros(registro));
             }
         }
 
@@ -84,7 +86,7 @@ public class PersonagemDAO {
     }
 
     public void atualizarIdentidade(int idPersonagem, String nome, String avatarUrl) {
-    String sql = "UPDATE personagem SET nome = ?, avatar_url = ? WHERE id = ?";
-    jdbc.update(sql, nome, avatarUrl, idPersonagem);
+        String sql = "UPDATE personagem SET nome = ?, avatar_url = ? WHERE id = ?";
+        jdbc.update(sql, nome, avatarUrl, idPersonagem);
     }
 }

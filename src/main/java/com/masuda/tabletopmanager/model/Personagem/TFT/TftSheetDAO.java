@@ -10,38 +10,38 @@ import jakarta.annotation.PostConstruct;
 
 @Repository
 public class TftSheetDAO {
+
     @Autowired
-        DataSource dataSource;
+    DataSource dataSource;
 
-        JdbcTemplate jdbc;
+    JdbcTemplate jdbc;
 
-        @PostConstruct
-        private void initialize() {
-            jdbc = new JdbcTemplate(dataSource);
-        }
+    @PostConstruct
+    private void initialize() {
+        jdbc = new JdbcTemplate(dataSource);
+    }
 
-
-       public Integer inserirFichaTft(int idUsuario, String nome) {
-            String sql = """
+    public Integer inserirFichaTft(int idUsuario, String nome) {
+        String sql = """
             INSERT INTO personagem (id_usuario, nome, sistema, avatar_url)
             VALUES (?, ?, 'TFT', ?)
             RETURNING id
             """;
 
-            Object[] objPersonagem = new Object[3];
-            objPersonagem[0] = idUsuario;
-            objPersonagem[1] = nome;
-            objPersonagem[2] = null;
+        Object[] objPersonagem = new Object[3];
+        objPersonagem[0] = idUsuario;
+        objPersonagem[1] = nome;
+        objPersonagem[2] = null;
 
-            int id = jdbc.queryForObject(sql, Integer.class, objPersonagem);
+        int id = jdbc.queryForObject(sql, Integer.class, objPersonagem);
 
-            sql = """
+        sql = """
                 INSERT INTO tft_sheets (id_personagem)
                 VALUES (?)
             """;
-            jdbc.update(sql, id);
+        jdbc.update(sql, id);
 
-            return id;
-        }
+        return id;
+    }
 
 }

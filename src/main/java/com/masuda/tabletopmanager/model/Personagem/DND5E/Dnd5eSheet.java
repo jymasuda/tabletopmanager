@@ -11,6 +11,7 @@ import com.masuda.tabletopmanager.model.Personagem.PersonagemUID;
 import com.masuda.tabletopmanager.model.Personagem.Sistema;
 
 public class Dnd5eSheet extends Personagem {
+
     private DndRaca raca;
     private DndAntecedente antecedente;
     private DndAtributos atributos;
@@ -40,8 +41,6 @@ public class Dnd5eSheet extends Personagem {
         this.vida = vida;
         this.saves = saves;
     }
-
-
 
     public DndRaca getRaca() {
         return raca;
@@ -82,7 +81,7 @@ public class Dnd5eSheet extends Personagem {
     public void setCombate(DndCombate combate) {
         this.combate = combate;
     }
-    
+
     public static Dnd5eSheet converterRegistros(Map<String, Object> registros) {
         System.out.println("Registros recebidos para conversão: " + registros); // Log para verificar os dados recebidos
         PersonagemID id = new PersonagemID((int) registros.get("id"));
@@ -90,7 +89,7 @@ public class Dnd5eSheet extends Personagem {
         PersonagemNome nome = new PersonagemNome((String) registros.get("nome"));
         String avatarURL = (String) registros.get("avatar_url");
         PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
-            ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
+                ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
         );
 
         String racaStr = (String) registros.get("id_raca");
@@ -112,5 +111,13 @@ public class Dnd5eSheet extends Personagem {
         DndSaves saves = temSaves ? DndSaves.converterRegistros(registros) : null;
 
         return new Dnd5eSheet(antecedente, atributos, combate, raca, vida, saves, avatarURL, dataCriacao, id, uId, nome, Sistema.DND5E);
+    }
+
+    public DndSaves getSaves() {
+        return saves;
+    }
+
+    public void setSaves(DndSaves saves) {
+        this.saves = saves;
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 public class Personagem {
+
     private PersonagemID id;
     private PersonagemUID uId;
     private PersonagemNome nome;
@@ -78,8 +79,8 @@ public class Personagem {
     public void setuId(PersonagemUID uId) {
         this.uId = uId;
     }
-    
-     public static Personagem converterRegistros(Map<String,Object> registros) {
+
+    public static Personagem converterRegistros(Map<String, Object> registros) {
         int id = (int) registros.get("id");
         int uId = (int) registros.get("id_usuario");
         String nome = (String) registros.get("nome");

@@ -1,4 +1,3 @@
-
 package com.masuda.tabletopmanager.model.Personagem.DND5E;
 
 public enum DndRaca {

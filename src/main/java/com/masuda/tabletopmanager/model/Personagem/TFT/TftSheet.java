@@ -11,14 +11,12 @@ import com.masuda.tabletopmanager.model.Personagem.PersonagemUID;
 import com.masuda.tabletopmanager.model.Personagem.Sistema;
 
 public class TftSheet extends Personagem {
+
     private TftSin sin;
     private TftHP hp;
     private TftSP sp;
     private TftAttributes attributes;
     private TftCombat combatAttributes;
-
-    
-    
 
     public TftSheet() {
     }
@@ -94,8 +92,8 @@ public class TftSheet extends Personagem {
         PersonagemUID uId = new PersonagemUID((Integer) registros.get("id_usuario"));
         PersonagemNome nome = new PersonagemNome((String) registros.get("nome"));
         String avatarURL = (String) registros.get("avatar_url");
-                PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
-            ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
+        PersonagemDataCriacao dataCriacao = new PersonagemDataCriacao(
+                ((Timestamp) registros.get("data_criacao")).toLocalDateTime()
         );
         TftSin sin = TftSin.valueOf((String) registros.get("sin"));
         TftHP hp = TftHP.converterRegistros(registros);

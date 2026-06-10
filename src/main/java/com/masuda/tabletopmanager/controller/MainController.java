@@ -1,6 +1,5 @@
 package com.masuda.tabletopmanager.controller;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.masuda.tabletopmanager.model.Personagem.DND5E.Classe.Dnd5eClasse;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5ePericia;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheet;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.DndAtributos;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.DndCombate;
@@ -32,15 +34,14 @@ import com.masuda.tabletopmanager.model.Usuario.UsuarioService;
 
 import jakarta.servlet.http.HttpSession;
 
-
 @Controller
 public class MainController {
 
     @Autowired
     ApplicationContext context;
-    
+
     @GetMapping("/")
-    public String index(){
+    public String index() {
         return "index";
     }
 
@@ -60,14 +61,14 @@ public class MainController {
     }
 
     @GetMapping("/cadastro")
-    public String cadastro(Model model){
+    public String cadastro(Model model) {
         model.addAttribute("user", new Usuario());
         return "cadastro";
     }
-    
+
     @PostMapping("/cadastro")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> cadastroPost(@RequestParam String username,@RequestParam String email,@RequestParam String senha) {  
+    public ResponseEntity<Map<String, String>> cadastroPost(@RequestParam String username, @RequestParam String email, @RequestParam String senha) {
 
         Usuario user = new Usuario();
         user.setNome(new UsuarioNome(username));
@@ -81,7 +82,7 @@ public class MainController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model){
+    public String dashboard(HttpSession session, Model model) {
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return "redirect:/";
@@ -102,7 +103,7 @@ public class MainController {
         }
 
         int novoId = 0;
-        switch(sistema){
+        switch (sistema) {
             case "DND5E" -> {
                 Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
                 novoId = ds.inserirFichaDnd5e(usuarioId, nome);
@@ -115,7 +116,7 @@ public class MainController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Sistema de RPG inválido."));
             }
         }
-        
+
         return ResponseEntity.ok(Map.of("message", "Personagem criado com sucesso.", "id", String.valueOf(novoId)));
     }
 
@@ -126,11 +127,67 @@ public class MainController {
             return "redirect:/";
         }
         Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
-        if(ds.obterFichaDnd5e(id).getuId().idUsuario() != usuarioId){
+        if (ds.obterFichaDnd5e(id).getuId().idUsuario() != usuarioId) {
             return "redirect:/dashboard";
         }
 
-        model.addAttribute("ficha", ds.obterFichaDnd5e(id));
+        Dnd5eSheet ficha = ds.obterFichaDnd5e(id);
+
+        List<Dnd5ePericia> pericias = ds.obterPericias(id);
+
+        Map<String, String> profMap = pericias.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        p -> p.pericia(),
+                        p -> p.expert() ? "expertise" : "proficient"
+                ));
+
+        List<Dnd5eClasse> classes = ds.obterClasses(id);
+
+        Dnd5eClasse classePrimaria = classes.stream()
+                .filter(Dnd5eClasse::isPrimaria)
+                .findFirst()
+                .orElse(classes.isEmpty() ? null : classes.get(0));
+        int nivelTotal = classes.stream()
+                .mapToInt(c -> c.getLevel().levelClasse())
+                .sum();
+        if (nivelTotal == 0) {
+            nivelTotal = 1;
+        }
+
+        DndAtributos attr = ficha.getAtributos();
+        model.addAttribute("atFor", attr != null ? attr.forca() : 10);
+        model.addAttribute("atDes", attr != null ? attr.destreza() : 10);
+        model.addAttribute("atCon", attr != null ? attr.constituicao() : 10);
+        model.addAttribute("atInt", attr != null ? attr.inteligencia() : 10);
+        model.addAttribute("atSab", attr != null ? attr.sabedoria() : 10);
+        model.addAttribute("atCar", attr != null ? attr.carisma() : 10);
+
+        DndCombate combate = ficha.getCombate();
+        model.addAttribute("combateCA", combate != null ? combate.classeArmadura() : 10);
+        model.addAttribute("combateVelocidade", combate != null ? combate.velocidade() : 30);
+
+        DndVida vida = ficha.getVida();
+        model.addAttribute("vidaAtual", vida != null ? vida.vidaAtual() : 0);
+        model.addAttribute("vidaMax", vida != null ? vida.vidaMax() : 0);
+        model.addAttribute("vidaTemporaria", vida != null ? vida.vidaTemporaria() : 0);
+
+        DndSaves saves = ficha.getSaves();
+        model.addAttribute("saveFor", saves != null && saves.forca());
+        model.addAttribute("saveDes", saves != null && saves.destreza());
+        model.addAttribute("saveCon", saves != null && saves.constituicao());
+        model.addAttribute("saveInt", saves != null && saves.inteligencia());
+        model.addAttribute("saveSab", saves != null && saves.sabedoria());
+        model.addAttribute("saveCar", saves != null && saves.carisma());
+
+        model.addAttribute("ficha", ficha);
+        model.addAttribute("classePrimaria", classePrimaria);
+        model.addAttribute("classes", classes);
+        model.addAttribute("nivelTotal", nivelTotal);
+        model.addAttribute("pericias", ds.obterPericias(id));
+        model.addAttribute("profMap", profMap);
+        model.addAttribute("auxilio", ds.obterAuxilio(id).orElse(null));
+        model.addAttribute("ferramentas", ds.obterFerramentas(id));
+
         return "fragments/dnd-sheet :: sheet";
     }
 
@@ -143,17 +200,17 @@ public class MainController {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
         }
 
-        String nome       = (String) body.get("nome");
-        String raca       = (String) body.get("raca");
+        String nome = (String) body.get("nome");
+        String raca = (String) body.get("raca");
         String antecedente = (String) body.get("antecedente");
-        int experiencia   = body.get("xp") != null ? (int) body.get("xp") : 0;
+        int experiencia = body.get("xp") != null ? (int) body.get("xp") : 0;
 
-        String sentidos    = joinLista(body, "sensesList");
+        String sentidos = joinLista(body, "sensesList");
         String resistencias = joinLista(body, "resistancesList");
-        String imunidades  = joinLista(body, "immunitiesList");
-        String armaduras   = joinLista(body, "armorList");
-        String armas       = joinLista(body, "weaponsList");
-        String idiomas     = joinLista(body, "languagesList");
+        String imunidades = joinLista(body, "immunitiesList");
+        String armaduras = joinLista(body, "armorList");
+        String armas = joinLista(body, "weaponsList");
+        String idiomas = joinLista(body, "languagesList");
 
         PersonagemService ps = context.getBean(PersonagemService.class);
         ps.atualizarIdentidade(id, nome, null);
@@ -175,19 +232,19 @@ public class MainController {
 
     @PostMapping("/personagem/{id}/atributos")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> atualizarAtributosPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+    public ResponseEntity<Map<String, String>> atualizarAtributosPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session) {
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
         }
 
         DndAtributos atributos = new DndAtributos(
-        body.get("forca"),
-        body.get("destreza"),
-        body.get("constituicao"),
-        body.get("inteligencia"),
-        body.get("sabedoria"),
-        body.get("carisma"));
+                body.get("forca"),
+                body.get("destreza"),
+                body.get("constituicao"),
+                body.get("inteligencia"),
+                body.get("sabedoria"),
+                body.get("carisma"));
 
         Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
         ds.atualizarAtributos(id, atributos);
@@ -208,7 +265,7 @@ public class MainController {
         }
 
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> pericias    = (List<Map<String, Object>>) body.get("pericias");
+        List<Map<String, Object>> pericias = (List<Map<String, Object>>) body.get("pericias");
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> ferramentas = (List<Map<String, Object>>) body.get("ferramentas");
 
@@ -221,7 +278,7 @@ public class MainController {
 
     @PostMapping("/personagem/{id}/combate")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> atualizarCombatePersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+    public ResponseEntity<Map<String, String>> atualizarCombatePersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session) {
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
@@ -236,7 +293,7 @@ public class MainController {
 
     @PostMapping("/personagem/{id}/vida")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> atualizarVidaPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session){
+    public ResponseEntity<Map<String, String>> atualizarVidaPersonagem(@PathVariable int id, @RequestBody Map<String, Integer> body, HttpSession session) {
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
@@ -250,18 +307,18 @@ public class MainController {
 
     @PostMapping("/personagem/{id}/saves")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> atualizarSavesPersonagem(@PathVariable int id, @RequestBody Map<String, Boolean> body, HttpSession session){
+    public ResponseEntity<Map<String, String>> atualizarSavesPersonagem(@PathVariable int id, @RequestBody Map<String, Boolean> body, HttpSession session) {
         Integer usuarioId = (Integer) session.getAttribute("usuarioId");
         if (usuarioId == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
         }
         DndSaves saves = new DndSaves(
-            body.get("forca"),
-            body.get("destreza"),
-            body.get("constituicao"),
-            body.get("inteligencia"),
-            body.get("sabedoria"),
-            body.get("carisma")
+                body.get("forca"),
+                body.get("destreza"),
+                body.get("constituicao"),
+                body.get("inteligencia"),
+                body.get("sabedoria"),
+                body.get("carisma")
         );
         Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
         ds.atualizarSaves(id, saves);
