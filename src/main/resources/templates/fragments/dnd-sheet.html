@@ -2,16 +2,6 @@
 
 <body>
 
-    <!--/* ═══════════════════════════════════════════════════
-        FRAGMENTO: Ficha DND5E
-        Model attributes esperados:
-          ficha        → Dnd5eSheet
-          classes      → List<Dnd5eClasse>
-          profMap      → Map<String,String>  nome → "proficient"|"expertise"
-          ferramentas  → List<Map>           nome, proficiente, expert
-          auxilio      → Dnd5eAuxilio | null
-    ═══════════════════════════════════════════════════ */-->
-
     <div th:fragment="sheet" class="sheet" data-editing="false" th:data-personagem-id="${ficha.id.idPersonagem}">
 
         <button class="sheet-edit-toggle" id="sheetEditToggle" type="button" aria-label="Modo de edição">
@@ -29,7 +19,6 @@
                 </div>
 
                 <div class="sheet-subline">
-                    <!--/* Display: lista de classes separadas por · */-->
                     <th:block th:if="${classes != null and !classes.empty}" class="display-val">
                         <th:block th:each="cls, stat : ${classes}">
                             <span class="display-val"
@@ -39,7 +28,6 @@
                     </th:block>
                     <span class="display-val" th:if="${classes == null or classes.empty}">Sem classe</span>
 
-                    <!--/* Edição: select + level da classe primária (ou primeira) */-->
                     <th:block th:with="primaria=${classePrimaria}">
                         <select class="edit-inp subline-class-select">
                             <option value="">— Classe —</option>
@@ -55,7 +43,6 @@
                 </div>
             </div>
 
-            <!--/* Nível total = soma de todos os levels das classes */-->
             <th:block th:with="nivelTotal=${nivelTotal}">
 
                 <div class="sheet-header-right">
@@ -79,8 +66,6 @@
                         <input class="edit-inp level-inp" type="number" th:value="${nivelTotal}" min="1" max="20">
                     </div>
 
-                    <!--/* XP — experiencia não está no join base (adicioná-lo ao obterFichaDnd5e
-                          é opcional; por ora usa 0 como fallback seguro).             */-->
                     <div class="xp-block">
                         <div class="xp-track">
                             <div class="xp-fill" style="--pct: 0%"></div>
@@ -232,7 +217,6 @@
                     </div>
                 </div>
 
-                <!--/* Dado de Vida — derivado das classes via SheetHelper */-->
                 <div class="resource-block">
                     <div class="hd-bar-wrap">
                         <div class="hd-bar-fill" style="--pct: 100%"></div>
@@ -240,7 +224,7 @@
                             <th:block th:if="${classes != null and !classes.empty}">
                                 <th:block th:each="cls, stat : ${classes}">
                                     <span
-                                        th:text="${cls.level.levelClasse + 'd' + T(com.masuda.tabletopmanager.controller.SheetHelper).hitDieForClass(cls.classe.name())}"></span>
+                                        th:text="${cls.level.levelClasse + 'd' + T(com.masuda.tabletopmanager.controller.DndSheetHelper).hitDieForClass(cls.classe.name())}"></span>
                                     <span th:if="${!stat.last}"> + </span>
                                 </th:block>
                             </th:block>
@@ -319,27 +303,22 @@
                 <div class="panel-box">
                     <h3 class="panel-title">🛡 Testes de Resistência</h3>
                     <div class="saves-grid">
-                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.controller.SheetHelper).SAVE_LIST}"
+                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.controller.DndSheetHelper).SAVE_LIST}"
                             th:with="isProf=${sv[0] == 'forca' ? saveFor :
-                                  sv[0] == 'destreza' ? saveDes :
-                                  sv[0] == 'constituicao' ? saveCon :
-                                  sv[0] == 'inteligencia' ? saveInt :
-                                  sv[0] == 'sabedoria' ? saveSab : saveCar}">
-
-                            <th:block
-                                th:each="sv : ${T(com.masuda.tabletopmanager.controller.DndSheetHelper).SAVE_LIST}"
-                                th:with="isProf=${sv[0] == 'forca' ? sFor :
-                                               sv[0] == 'destreza' ? sDes :
-                                               sv[0] == 'constituicao' ? sCon :
-                                               sv[0] == 'inteligencia' ? sInt :
-                                               sv[0] == 'sabedoria' ? sSab : sCar}">
-                                <div class="save-row" th:data-attr="${sv[0]}" th:data-prof="${isProf}"
-                                    th:classappend="${isProf ? 'proficient' : ''}">
-                                    <span class="prof-dot" th:classappend="${isProf ? ' proficient' : ''}"></span>
-                                    <span class="save-attr" th:text="${sv[1]}">—</span>
-                                    <span class="save-mod">—</span>
-                                </div>
-                            </th:block>
+                                        sv[0] == 'destreza' ? saveDes :
+                                        sv[0] == 'constituicao' ? saveCon :
+                                        sv[0] == 'inteligencia' ? saveInt :
+                                        sv[0] == 'sabedoria' ? saveSab : saveCar}">
+                            <div class="save-row"
+                                th:data-attr="${sv[0]}"
+                                th:data-prof="${isProf != null and isProf}"
+                                th:classappend="${isProf != null and isProf ? 'proficient' : ''}">
+                                <span class="prof-dot"
+                                    th:classappend="${isProf != null and isProf ? ' proficient' : ''}"></span>
+                                <span class="save-attr" th:text="${sv[1]}">—</span>
+                                <span class="save-mod">—</span>
+                            </div>
+                        </th:block>
                     </div>
                 </div>
 
@@ -379,8 +358,6 @@
 
                 <!--/* ── Pill sections (sentidos, resistências, imunidades, armaduras, armas, idiomas) ── */-->
 
-                <!--/* Macro via th:replace não existe, então repetimos o padrão mínimo para cada seção.
-                  Cada bloco é idêntico, variando só: ícone, título, listId, lista do auxílio.  */-->
 
                 <th:block th:each="sec : ${ {
                 {'👁','Sentidos','sensesList'},
@@ -390,8 +367,6 @@
                 {'⚔','Armas','weaponsList'},
                 {'🗣','Idiomas','languagesList'}
             } }">
-                    <!--/* Thymeleaf não suporta array literals de String[] aninhados no template dessa forma;
-                  portanto a abordagem funcional é a repetição explícita abaixo.             */-->
                 </th:block>
 
                 <!--/* Sentidos */-->

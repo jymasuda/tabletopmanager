@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Classe.Dnd5eClasse;
+import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eAuxilio;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5ePericia;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheet;
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Dnd5eSheetService;
@@ -185,8 +186,11 @@ public class MainController {
         model.addAttribute("nivelTotal", nivelTotal);
         model.addAttribute("pericias", ds.obterPericias(id));
         model.addAttribute("profMap", profMap);
-        model.addAttribute("auxilio", ds.obterAuxilio(id).orElse(null));
         model.addAttribute("ferramentas", ds.obterFerramentas(id));
+        model.addAttribute("auxilio", ds.obterAuxilio(id).orElseGet(() ->
+    new Dnd5eAuxilio(null, null, null, null, null, null, null, null,
+                     null, null, null, null, null, null)
+));
 
         return "fragments/dnd-sheet :: sheet";
     }
