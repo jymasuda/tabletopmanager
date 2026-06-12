@@ -204,6 +204,10 @@ button {
     gap: 8px;
 }
 
+.character-card {
+    position: relative;
+}
+
 .character-card h2 {
     font-size: 1rem;
     margin: 0;
@@ -223,6 +227,37 @@ button {
 .card-action:hover {
     background: rgba(211, 96, 92, 0.3);
     transform: translateY(-1px);
+}
+
+.card-menu {
+    position: absolute;
+    top: 29px;
+    right: -72px;
+    min-width: 120px;
+    background: #1d1620;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    z-index: 10;
+}
+
+.card-menu.hidden {
+    display: none;
+}
+
+.card-menu-item {
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.92);
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.card-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .subtitle {

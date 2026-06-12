@@ -2,8 +2,9 @@
     <head>
         <title>Tabletop Manager</title>
         <link rel="stylesheet" th:href="@{css/index.css}">
+        <link rel="stylesheet" th:href="@{css/tft-sheet.css(v=2)}">
         <link rel="stylesheet" th:href="@{css/dnd-sheet.css}">
-        <link rel="stylesheet" th:href="@{css/tft-sheet.css}">
+
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=add,auto_stories,backpack,bedtime,check,close,dark_mode,edit,edit_off,electric_bolt,grade,logout,menu,menu_book,more_vert,person,skull" />
     </head>
     <body>
@@ -26,6 +27,9 @@
                                 <button class="card-action" type="button" aria-label="Opções">
                                     <span class="material-symbols-outlined">more_vert</span>
                                 </button>
+                                <div class="card-menu hidden">
+                                    <button class="card-menu-item delete-character" type="button">Excluir</button>
+                                </div>
                             </div>
 
                             <div th:if="${p instanceof T(com.masuda.tabletopmanager.model.Personagem.Resumo.DndPersonagemResumo)}">
@@ -76,7 +80,8 @@
             </main>
         </div>
         <button class="menu-fab hidden" type="button" aria-label="Mostrar menu"><span class="material-symbols-outlined">menu</span></button>
-        <script th:src="@{/js/sheet.js(v=2)}"></script>
+        <script th:src="@{/js/dnd-sheet.js(v=2)}"></script>
+        <script th:src="@{/js/tft-sheet.js(v=1)}"></script>
         <script th:src="@{/js/main.js(v=2)}"></script>
     </body>
 </html>

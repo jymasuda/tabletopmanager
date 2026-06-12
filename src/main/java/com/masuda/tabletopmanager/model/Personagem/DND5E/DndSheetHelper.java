@@ -1,4 +1,4 @@
-package com.masuda.tabletopmanager.controller;
+package com.masuda.tabletopmanager.model.Personagem.DND5E;
 
 import java.util.List;
 

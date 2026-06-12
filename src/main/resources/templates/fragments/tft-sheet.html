@@ -1,0 +1,620 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<!--
+    Fragment: tft-sheet :: sheet
+    Model attributes expected from the controller:
+      ficha          — TftSheet
+      hp             — TftHP
+      sp             — TftSP
+      attributes     — TftAttributes
+      combat         — TftCombat
+      skills         — List<Map<String,Object>>  (skill, points, specialty)
+      features       — List<Map<String,Object>>  (source, nome, descricao)
+      attacks        — List<Map<String,Object>>  (nome, damage_type, damage_form,
+                                                   dicepool_mode, attribute,
+                                                   skill_primary, skill_secondary,
+                                                   threat, attack_weight, attack_description)
+-->
+
+<div th:fragment="sheet"
+     class="lobcorp"
+     data-editing="false"
+     th:data-personagem-id="${ficha.id.idPersonagem}"
+     th:data-sin="${ficha.sin != null ? ficha.sin.name() : 'PRIDE'}">
+
+    <!-- Edit toggle — mirrors the DnD sheet pattern -->
+    <button class="sheet-edit-toggle" id="tftEditToggle" type="button" aria-label="Modo de edição">
+        <span class="material-symbols-outlined edit-icon">edit</span>
+    </button>
+
+    <div class="gridcontainer">
+
+        <!-- ══════════════════════════════════════════════════
+             COLUMN 1 — Agent Basic Information
+             ══════════════════════════════════════════════════ -->
+        <div class="notched agent">
+            <div class="headertext">Agent Basic Information</div>
+
+            <div class="profile">
+                <div class="inner-profile">
+
+                    <!-- Portrait -->
+                    <img class="profile-img"
+                         th:src="${ficha.avatarURL != null ? ficha.avatarURL : 'https://placehold.net/avatar.svg'}"
+                         th:alt="${ficha.nome.nomePersonagem}" />
+
+                    <!-- Name -->
+                    <div class="name-field">
+                        <span class="charname display-val" th:text="${ficha.nome.nomePersonagem}">Nome</span>
+                        <input class="charname edit-inp tft-name-inp" type="text"
+                               th:value="${ficha.nome.nomePersonagem}" placeholder="Nome do agente" />
+                    </div>
+
+                    <hr />
+
+                    <!-- Sin type -->
+                    <div class="blurbsintext">
+                        <span>
+                            <span class="display-val sin-color-label"
+                                  th:text="${ficha.sin != null ? ficha.sin.name() : '—'}"
+                                  th:classappend="${ficha.sin != null ? ficha.sin.name() : ''}">—</span>
+                            <select class="edit-inp tft-sin-select">
+                                <option value="">— Sin —</option>
+                                <option th:each="s : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftSin).values()}"
+                                        th:value="${s.name()}" th:text="${s.name()}"
+                                        th:selected="${ficha.sin == s}"></option>
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- /profile -->
+
+            <!-- ── Health Points ─────────────────────────── -->
+            <div class="point-container"
+                 th:with="hpMax=${hp != null ? hp.maxHP() : 0},
+                           hpCurr=${hp != null ? hp.currentHP() : 0},
+                           hpPale=${hp != null ? hp.paleHP() : 0}">
+                <div>
+                    <label>
+                        <i class="fas fa-minus resource-control"
+                           data-resource="hp" data-resource-action="minus"></i>
+                        Health Points
+                        <i class="fas fa-plus resource-control"
+                           data-resource="hp" data-resource-action="plus"></i>
+                    </label>
+                </div>
+                <div class="health">
+                    <div class="hp-pips">
+                        <span th:each="i : ${#numbers.sequence(1, hpMax > 0 ? hpMax : 1)}"
+                              class="resource-counter-step"
+                              th:classappend="${i <= hpCurr ? '' : ' empty'}"
+                              th:data-index="${i}"></span>
+                    </div>
+                    <div class="hp-pips pale-pips">
+                        <span th:each="i : ${#numbers.sequence(1, hpPale > 0 ? hpPale : 0)}"
+                              class="resource-counter-step pale"
+                              th:data-index="${i}"></span>
+                    </div>
+                </div>
+                <!-- Edit inputs -->
+                <div class="edit-inp tft-res-edit" style="display:none;">
+                    <label>Atual <input class="tft-hp-curr" type="number" th:value="${hpCurr}" min="0" /></label>
+                    <label>Máx   <input class="tft-hp-max"  type="number" th:value="${hpMax}"  min="0" /></label>
+                    <label>Pale  <input class="tft-hp-pale" type="number" th:value="${hpPale}" min="0" /></label>
+                </div>
+            </div>
+
+            <!-- ── Sanity Points ──────────────────────────── -->
+            <div class="point-container"
+                 th:with="spMax=${sp != null ? sp.maxSP() : 0},
+                           spCurr=${sp != null ? sp.currentSP() : 0},
+                           spPale=${sp != null ? sp.paleSP() : 0}">
+                <div>
+                    <label>
+                        <i class="fas fa-minus resource-control"
+                           data-resource="sp" data-resource-action="minus"></i>
+                        Sanity Points
+                        <i class="fas fa-plus resource-control"
+                           data-resource="sp" data-resource-action="plus"></i>
+                    </label>
+                </div>
+                <div class="sanity">
+                    <div class="sp-pips">
+                        <span th:each="i : ${#numbers.sequence(1, spMax > 0 ? spMax : 1)}"
+                              class="resource-counter-step"
+                              th:classappend="${i <= spCurr ? '' : ' empty'}"
+                              th:data-index="${i}"></span>
+                    </div>
+                    <div class="sp-pips pale-pips">
+                        <span th:each="i : ${#numbers.sequence(1, spPale > 0 ? spPale : 0)}"
+                              class="resource-counter-step pale"
+                              th:data-index="${i}"></span>
+                    </div>
+                </div>
+                <div class="edit-inp tft-res-edit" style="display:none;">
+                    <label>Atual <input class="tft-sp-curr" type="number" th:value="${spCurr}" min="0" /></label>
+                    <label>Máx   <input class="tft-sp-max"  type="number" th:value="${spMax}"  min="0" /></label>
+                    <label>Pale  <input class="tft-sp-pale" type="number" th:value="${spPale}" min="0" /></label>
+                </div>
+            </div>
+
+            <!-- ── Sin Points ─────────────────────────────── -->
+            <div class="point-container sin-points-container"
+                 th:with="sinPts=${ficha.sin != null ? 0 : 0}">
+                <div><label>Sin Points</label></div>
+                <div class="sin-tracker">
+                    <div class="sin-pip-track" id="sinPipTrack">
+                        <!-- Pips rendered by tft-sheet.js based on sin type max -->
+                        <span th:each="i : ${#numbers.sequence(1, 10)}"
+                              class="sin-pip"
+                              th:data-index="${i}"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /agent -->
+
+
+        <!-- ══════════════════════════════════════════════════
+             COLUMNS 2-4 — Combat Skills / Attacks
+             ══════════════════════════════════════════════════ -->
+        <div class="notched combat-panel">
+            <div class="headertext">Combat Skills</div>
+
+            <div class="combat-skills-grid" id="tftAttackList">
+
+                <!-- Existing attacks -->
+                <th:block th:if="${attacks != null and !attacks.empty}"
+                          th:each="atk : ${attacks}">
+                    <div class="combat-skill" th:data-attack-id="${atk['id']}">
+
+                        <div class="combat-skill-header">
+                            <span class="skill-index"
+                                  th:text="${atk['dicepool_mode'] == 'ATTRIBUTE_AND_SKILL'
+                                             ? atk['attribute'] + ' + ' + atk['skill_primary']
+                                             : atk['skill_primary'] + ' + ' + atk['skill_secondary']}">—</span>
+                            <span class="skill-title display-val" th:text="${atk['nome']}">—</span>
+                            <input class="edit-inp atk-name-inp" type="text"
+                                   th:value="${atk['nome']}" placeholder="Nome do ataque" />
+                        </div>
+
+                        <!-- Damage badges -->
+                        <div class="atk-damage-row">
+                            <span class="atk-badge"
+                                  th:text="${atk['damage_type'] != null ? atk['damage_type'] : '—'}"
+                                  th:classappend="${'dmg-type-' + (atk['damage_type'] != null ? atk['damage_type'] : 'none')}">—</span>
+                            <span class="atk-badge atk-form"
+                                  th:text="${atk['damage_form'] != null ? atk['damage_form'] : '—'}">—</span>
+                            <span class="atk-threat display-val"
+                                  th:if="${atk['threat'] != null}"
+                                  th:text="${'Threat ' + atk['threat']}">—</span>
+                        </div>
+
+                        <div class="combat-skill-summary" th:if="${atk['attack_description'] != null}"
+                             th:text="${atk['attack_description']}"></div>
+
+                        <!-- Edit-mode controls -->
+                        <div class="combat-skill-controls edit-inp" style="display:none;">
+                            <button class="tft-atk-delete" type="button"
+                                    th:data-attack-id="${atk['id']}"
+                                    style="background:none;border:none;color:rgba(163,160,117,0.5);cursor:pointer;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </th:block>
+
+                <!-- Empty state -->
+                <div class="combat-skills-empty" th:if="${attacks == null or attacks.empty}">
+                    <p>Nenhum ataque cadastrado.</p>
+                </div>
+
+            </div><!-- /combat-skills-grid -->
+
+            <!-- Add attack button (edit mode only) -->
+            <button class="combat-add-btn edit-inp" id="tftAddAttackBtn" type="button"
+                    style="display:none;">
+                <i class="fas fa-plus"></i> Adicionar Ataque
+            </button>
+
+        </div><!-- /combat-panel -->
+
+
+        <!-- ══════════════════════════════════════════════════
+             COLUMN 5 — Right Panel: Resistances + Features
+             ══════════════════════════════════════════════════ -->
+        <div class="notched right-panel">
+
+            <!-- Resistance section -->
+            <div class="resistance-section"
+                 th:with="c=${combat}">
+                <div class="agent-silhouette">
+                    <img class="silhouette-img"
+                         th:src="${ficha.avatarURL != null ? ficha.avatarURL : 'https://placehold.net/avatar.svg'}"
+                         alt="" />
+                </div>
+
+                <div class="resistance-list">
+                    <!-- Slash -->
+                    <div class="resist-row">
+                        <span class="resist-label">Slash</span>
+                        <span class="display-val" th:text="${c != null ? c.slashingResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="slashing"
+                               th:value="${c != null ? c.slashingResistance() : 0}" min="0" />
+                    </div>
+                    <!-- Pierce -->
+                    <div class="resist-row">
+                        <span class="resist-label">Pierce</span>
+                        <span class="display-val" th:text="${c != null ? c.piercingResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="piercing"
+                               th:value="${c != null ? c.piercingResistance() : 0}" min="0" />
+                    </div>
+                    <!-- Blunt -->
+                    <div class="resist-row">
+                        <span class="resist-label">Blunt</span>
+                        <span class="display-val" th:text="${c != null ? c.bluntResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="blunt"
+                               th:value="${c != null ? c.bluntResistance() : 0}" min="0" />
+                    </div>
+                    <!-- Ego (pale damage) -->
+                    <div class="resist-row">
+                        <span class="resist-label">Red</span>
+                        <span class="display-val" th:text="${c != null ? c.redResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="red"
+                               th:value="${c != null ? c.redResistance() : 0}" min="0" />
+                    </div>
+                    <div class="resist-row">
+                        <span class="resist-label">White</span>
+                        <span class="display-val" th:text="${c != null ? c.whiteResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="white"
+                               th:value="${c != null ? c.whiteResistance() : 0}" min="0" />
+                    </div>
+                    <div class="resist-row">
+                        <span class="resist-label">Black</span>
+                        <span class="display-val" th:text="${c != null ? c.blackResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="black"
+                               th:value="${c != null ? c.blackResistance() : 0}" min="0" />
+                    </div>
+                    <div class="resist-row">
+                        <span class="resist-label">Pale</span>
+                        <span class="display-val" th:text="${c != null ? c.paleResistance() : '—'}">—</span>
+                        <input class="edit-inp tft-resist-inp" type="number"
+                               data-resist="pale"
+                               th:value="${c != null ? c.paleResistance() : 0}" min="0" />
+                    </div>
+                </div>
+            </div><!-- /resistance-section -->
+
+            <!-- Feature cards (EGO Gift, Ally Passive, Reputation Flaw, Ally Flaw …) -->
+            <div class="rp-entries" id="tftFeatureList">
+                <th:block th:if="${features != null}"
+                          th:each="feat : ${features}">
+                    <div class="rp-entry notched" th:data-feature-id="${feat['id']}">
+                        <div class="rp-entry-header">
+                            <span class="rp-type" th:text="${feat['source']}">—</span>
+                            <span class="rp-name display-val" th:text="${feat['nome']}">—</span>
+                            <input class="edit-inp rp-name-inp" type="text"
+                                   th:value="${feat['nome']}" placeholder="Nome" />
+                        </div>
+                        <div class="rp-body">
+                            <div class="rp-desc display-val" th:text="${feat['descricao']}"></div>
+                            <textarea class="edit-inp rp-desc-textarea"
+                                      th:text="${feat['descricao']}"
+                                      placeholder="Descrição…"></textarea>
+                        </div>
+                        <div class="edit-inp" style="display:none; text-align:right;">
+                            <button class="tft-feat-delete" type="button"
+                                    th:data-feature-id="${feat['id']}"
+                                    style="background:none;border:none;color:rgba(163,160,117,0.5);cursor:pointer;font-size:11px;">
+                                <i class="fas fa-trash"></i> remover
+                            </button>
+                        </div>
+                    </div>
+                </th:block>
+
+                <!-- Empty state -->
+                <div th:if="${features == null or features.empty}"
+                     style="font-size:11px;opacity:0.4;padding:4px 0;">
+                    Nenhuma feature cadastrada.
+                </div>
+            </div>
+
+            <!-- Add feature form (edit mode only) -->
+            <div class="edit-inp tft-feat-add-form" style="display:none; margin-top:6px;">
+                <select class="tft-feat-source-select"
+                        style="width:100%;background:transparent;border:1px solid var(--notched-border-color);
+                               color:var(--main-text-color);font-size:11px;margin-bottom:4px;">
+                    <option th:each="src : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftFeatureSource).values()}"
+                            th:value="${src.name()}" th:text="${src.name()}"></option>
+                </select>
+                <input type="text" class="tft-feat-name-inp" placeholder="Nome"
+                       style="width:100%;background:transparent;border:1px solid var(--notched-border-color);
+                              color:var(--main-text-color);font-size:11px;padding:2px 4px;
+                              box-sizing:border-box;margin-bottom:4px;" />
+                <textarea class="tft-feat-desc-inp" placeholder="Descrição…"
+                          style="width:100%;background:rgba(255,255,255,0.03);
+                                 border:1px solid var(--notched-border-color);
+                                 color:var(--main-text-color);font-size:11px;
+                                 font-family:inherit;resize:vertical;min-height:40px;
+                                 padding:2px 4px;box-sizing:border-box;margin-bottom:4px;"></textarea>
+                <button type="button" class="tft-feat-add-btn"
+                        style="background:var(--panel-inner-bg);border:1px solid var(--notched-border-color);
+                               color:var(--main-text-color);font-size:11px;padding:2px 8px;cursor:pointer;">
+                    <i class="fas fa-plus"></i> Adicionar
+                </button>
+            </div>
+
+        </div><!-- /right-panel -->
+
+
+        <!-- ══════════════════════════════════════════════════
+             ROW 2, COL 1-2 — Stats and Traits (Attributes)
+             ══════════════════════════════════════════════════ -->
+        <div class="notched stats-panel"
+             th:with="attr=${attributes}">
+            <div class="headertext">Stats and Traits</div>
+
+            <div class="stats-groups">
+
+                <!-- Fortitude group: Physique + Endurance -->
+                <div class="attr-group" data-group="physical">
+                    <div class="attr-group-icon"><i class="fas fa-hand-fist"></i></div>
+                    <div class="attr-group-attrs">
+
+                        <div class="attr-row" data-attr="physique">
+                            <span class="attr-name">Physique</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.physique() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="physique"
+                                       th:value="${attr != null ? attr.physique() : 0}" />
+                            </div>
+                        </div>
+
+                        <div class="attr-row" data-attr="endurance">
+                            <span class="attr-name">Endurance</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.endurance() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="endurance"
+                                       th:value="${attr != null ? attr.endurance() : 0}" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="attr-group-rating"
+                         th:text="${attr != null ? 'Fort. ' + attr.getFortitude() : '—'}">—</div>
+                </div>
+
+                <!-- Insight group: Understanding + Calmness -->
+                <div class="attr-group" data-group="mental">
+                    <div class="attr-group-icon"><i class="fas fa-scale-balanced"></i></div>
+                    <div class="attr-group-attrs">
+
+                        <div class="attr-row" data-attr="understanding">
+                            <span class="attr-name">Understanding</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.understanding() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="understanding"
+                                       th:value="${attr != null ? attr.understanding() : 0}" />
+                            </div>
+                        </div>
+
+                        <div class="attr-row" data-attr="calmness">
+                            <span class="attr-name">Calmness</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.calmness() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="calmness"
+                                       th:value="${attr != null ? attr.calmness() : 0}" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="attr-group-rating"
+                         th:text="${attr != null ? 'Ins. ' + attr.getInsight() : '—'}">—</div>
+                </div>
+
+                <!-- Temperance group: Intuition + Presence + Conviction -->
+                <div class="attr-group" data-group="social">
+                    <div class="attr-group-icon"><i class="fas fa-lock"></i></div>
+                    <div class="attr-group-attrs">
+
+                        <div class="attr-row" data-attr="intuition">
+                            <span class="attr-name">Intuition</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.intuition() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="intuition"
+                                       th:value="${attr != null ? attr.intuition() : 0}" />
+                            </div>
+                        </div>
+
+                        <div class="attr-row" data-attr="presence">
+                            <span class="attr-name">Presence</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.presence() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="presence"
+                                       th:value="${attr != null ? attr.presence() : 0}" />
+                            </div>
+                        </div>
+
+                        <div class="attr-row" data-attr="conviction">
+                            <span class="attr-name">Conviction</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.conviction() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="conviction"
+                                       th:value="${attr != null ? attr.conviction() : 0}" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="attr-group-rating"
+                         th:text="${attr != null ? 'Temp. ' + attr.getTemperance() : '—'}">—</div>
+                </div>
+
+                <!-- Justice group: Reflex + Focus -->
+                <div class="attr-group" data-group="justice">
+                    <div class="attr-group-icon"><i class="fas fa-star"></i></div>
+                    <div class="attr-group-attrs">
+
+                        <div class="attr-row" data-attr="reflex">
+                            <span class="attr-name">Reflex</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.reflex() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="reflex"
+                                       th:value="${attr != null ? attr.reflex() : 0}" />
+                            </div>
+                        </div>
+
+                        <div class="attr-row" data-attr="focus">
+                            <span class="attr-name">Focus</span>
+                            <div class="attr-dots">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="attr-dot"
+                                      th:classappend="${attr != null and i <= attr.focus() ? ' filled' : ''}"></span>
+                                <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
+                                       data-attr="focus"
+                                       th:value="${attr != null ? attr.focus() : 0}" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="attr-group-rating"
+                         th:text="${attr != null ? 'Just. ' + attr.getJustice() : '—'}">—</div>
+                </div>
+
+            </div><!-- /stats-groups -->
+        </div><!-- /stats-panel -->
+
+
+        <!-- ══════════════════════════════════════════════════
+             ROW 2, COL 3-5 — Skills and Talents
+             ══════════════════════════════════════════════════ -->
+        <div class="notched skills-panel">
+            <div class="headertext">Skills and Talents</div>
+
+            <div class="skills-columns">
+
+                <!--
+                    skills is List<Map<String,Object>> with keys:
+                      skill (tft_skill_name), points (0-5), specialty (String|null)
+                    We split them visually into three columns of roughly 7 rows each.
+                    Thymeleaf doesn't have a native chunk/partition helper, so we
+                    use a simple modulo trick on the iteration status index.
+                -->
+
+                <!-- Column A (index % 3 == 0) -->
+                <div class="skill-group-col">
+                    <th:block th:each="sk, stat : ${skills}"
+                              th:if="${stat.index % 3 == 0}">
+                        <div class="skill-row" th:data-skill="${sk['skill']}">
+                            <span class="skill-name" th:text="${sk['skill']}">—</span>
+                            <div class="skill-specialty">
+                                <span class="skill-spec-text display-val"
+                                      th:text="${sk['specialty'] != null ? sk['specialty'] : ''}"></span>
+                                <input class="edit-inp skill-spec-input" type="text"
+                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
+                                       placeholder="Specialty" />
+                            </div>
+                            <div class="skill-dots" th:data-value="${sk['points']}">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="skill-dot"
+                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
+                            </div>
+                            <!-- Edit: point stepper -->
+                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
+                                   th:data-skill="${sk['skill']}"
+                                   th:value="${sk['points']}" style="width:28px;" />
+                        </div>
+                    </th:block>
+                </div>
+
+                <!-- Column B (index % 3 == 1) -->
+                <div class="skill-group-col">
+                    <th:block th:each="sk, stat : ${skills}"
+                              th:if="${stat.index % 3 == 1}">
+                        <div class="skill-row" th:data-skill="${sk['skill']}">
+                            <span class="skill-name" th:text="${sk['skill']}">—</span>
+                            <div class="skill-specialty">
+                                <span class="skill-spec-text display-val"
+                                      th:text="${sk['specialty'] != null ? sk['specialty'] : ''}"></span>
+                                <input class="edit-inp skill-spec-input" type="text"
+                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
+                                       placeholder="Specialty" />
+                            </div>
+                            <div class="skill-dots" th:data-value="${sk['points']}">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="skill-dot"
+                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
+                            </div>
+                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
+                                   th:data-skill="${sk['skill']}"
+                                   th:value="${sk['points']}" style="width:28px;" />
+                        </div>
+                    </th:block>
+                </div>
+
+                <!-- Column C (index % 3 == 2) -->
+                <div class="skill-group-col">
+                    <th:block th:each="sk, stat : ${skills}"
+                              th:if="${stat.index % 3 == 2}">
+                        <div class="skill-row" th:data-skill="${sk['skill']}">
+                            <span class="skill-name" th:text="${sk['skill']}">—</span>
+                            <div class="skill-specialty">
+                                <span class="skill-spec-text display-val"
+                                      th:text="${sk['specialty'] != null ? sk['specialty'] : ''}"></span>
+                                <input class="edit-inp skill-spec-input" type="text"
+                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
+                                       placeholder="Specialty" />
+                            </div>
+                            <div class="skill-dots" th:data-value="${sk['points']}">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      class="skill-dot"
+                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
+                            </div>
+                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
+                                   th:data-skill="${sk['skill']}"
+                                   th:value="${sk['points']}" style="width:28px;" />
+                        </div>
+                    </th:block>
+                </div>
+
+            </div><!-- /skills-columns -->
+        </div><!-- /skills-panel -->
+
+    </div><!-- /gridcontainer -->
+
+</div><!-- /lobcorp -->
+
+</body>
+</html>

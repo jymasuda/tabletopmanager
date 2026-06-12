@@ -39,17 +39,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const system = card.dataset.category;
 
         try {
-            const res = await fetch(`/personagem/${id}`);
-            
-             if (!res.ok) {
-            console.error('Erro ao carregar ficha:', res.status);
-            return; // <-- não renderiza nada se der erro/redirect
-        }
-            
+            switch(system) {
+                case 'DND5E':
+                    url = `/personagem/${id}/dnd`;
+                    break;
+                case 'TFT':
+                    url = `/personagem/${id}/tft`;
+                    break;
+                default:
+                    console.error("Sistema inválido");
+                    break;
+            }
+
+            const res = await fetch(url);
+
+            if (!res.ok) {
+                console.error('Erro ao carregar ficha:', res.status);
+                return;
+            }
+
             const html = await res.text();
             contentPane.innerHTML = `<div class="character-detail"><div class="detail-content">${html}</div></div>`;
 
             if (system === 'DND5E') initDndSheet();
+            if (system === 'TFT') initTftSheet();
         } catch (err) {
             console.error('Erro ao carregar ficha:', err);
         }
@@ -60,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('article');
         card.className = 'character-card';
         card.dataset.category = category;
-        card.dataset.id = id; 
+        card.dataset.id = id;
         let subtitle = '';
         if (category === 'DND5E') {
             subtitle = 'Sem classe';
@@ -74,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="name-row">
                     <h2>${name}</h2>
                     <button class="card-action" type="button" aria-label="Opções"><span class="material-symbols-outlined">more_vert</span></button>
+                    <div class="card-menu hidden">
+                        <button class="card-menu-item delete-character" type="button">Excluir</button>
+                    </div>
                 </div>
                 <p class="subtitle">${subtitle}</p>
             </div>
@@ -153,6 +169,28 @@ document.addEventListener('DOMContentLoaded', () => {
         await renderCharacterDetail(card);
     }
 
+    function closeAllMenus() {
+        sidebarMiddle.querySelectorAll('.card-menu:not(.hidden)').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+
+    function toggleCardMenu(card) {
+        const menu = card.querySelector('.card-menu');
+        if (!menu) return;
+        const isOpen = !menu.classList.contains('hidden');
+        closeAllMenus();
+        menu.classList.toggle('hidden', isOpen);
+    }
+
+    function handleDeleteCharacter(card) {
+        const id = card.dataset.id;
+        const name = card.querySelector('h2')?.textContent || 'personagem';
+        console.log('Mock delete for personagem:', { id, name });
+        alert(`Excluir personagem "${name}" não está implementado ainda.`);
+        closeAllMenus();
+    }
+
     async function logout() {
         await fetch('/logout', { method: 'POST' });
         window.location.href = '/';
@@ -170,6 +208,35 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('click', () => {
             selectCharacter(card);
         });
+    });
+
+    // Event delegation for card option menus
+    sidebarMiddle.addEventListener('click', event => {
+        const actionButton = event.target.closest('.card-action');
+        if (actionButton) {
+            event.stopPropagation();
+            const card = actionButton.closest('.character-card');
+            if (card) {
+                toggleCardMenu(card);
+            }
+            return;
+        }
+
+        const deleteButton = event.target.closest('.delete-character');
+        if (deleteButton) {
+            event.stopPropagation();
+            const card = deleteButton.closest('.character-card');
+            if (card) {
+                handleDeleteCharacter(card);
+            }
+            return;
+        }
+    });
+
+    document.addEventListener('click', event => {
+        if (!event.target.closest('.character-card')) {
+            closeAllMenus();
+        }
     });
 
     // Event listeners para navegação inferior
@@ -192,37 +259,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-if (saveNewCharacterButton) {
-    saveNewCharacterButton.addEventListener('click', async () => {
-        const name = newCharacterNameInput?.value.trim();
-        const category = newCharacterSystemSelect?.value || 'DND5E';
+    if (saveNewCharacterButton) {
+        saveNewCharacterButton.addEventListener('click', async () => {
+            const name = newCharacterNameInput?.value.trim();
+            const category = newCharacterSystemSelect?.value || 'DND5E';
 
-        if (!name) {
-            newCharacterNameInput?.focus();
-            return;
-        }
-
-        try {
-            const response = await fetch('/personagem/novo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ nome: name, sistema: category })
-            });
-
-           if (response.ok) {
-                const data = await response.json();
-                hideAddCharacterForm();
-                const newCard = createCharacterCard(name, category, data.id); 
-                updateCategoryTabs();
-                await selectCharacter(newCard);
-            } else {
-                // exibit erro dps
+            if (!name) {
+                newCharacterNameInput?.focus();
+                return;
             }
-        } catch (err) {
-            console.error('Erro ao criar personagem:', err);
-        }
-    });
-}
+
+            try {
+                const response = await fetch('/personagem/novo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ nome: name, sistema: category })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    hideAddCharacterForm();
+                    const newCard = createCharacterCard(name, category, data.id);
+                    updateCategoryTabs();
+                    await selectCharacter(newCard);
+                } else {
+                    // exibit erro dps
+                }
+            } catch (err) {
+                console.error('Erro ao criar personagem:', err);
+            }
+        });
+    }
     if (cancelNewCharacterButton) {
         cancelNewCharacterButton.addEventListener('click', () => {
             hideAddCharacterForm();
@@ -240,5 +307,5 @@ if (saveNewCharacterButton) {
     // Inicializar categorias visíveis
     updateCategoryTabs();
 
-    
+
 });

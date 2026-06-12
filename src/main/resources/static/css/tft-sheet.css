@@ -1,0 +1,774 @@
+/* =========================================================
+   TFT SHEET — adapted from lobcorpStylesheet.css
+   All rules scoped under .lobcorp to avoid conflict with
+   the existing DnD sheet styles.
+   ========================================================= */
+
+/* ── CSS Variables ──────────────────────────────────────── */
+.lobcorp {
+  --lc-bg:               #000000;
+  --lc-border:           #777459;
+  --lc-text:             #a3a075;
+  --lc-header-glow:      #ff9442;
+  --lc-header:           #ffffa0;
+  --lc-panel-bg:         #0c0c08;
+  --lc-panel-inner:      #1e1e14;
+  --lc-hr:               #5f5d44;
+  --lc-dot-empty:        #3a3826;
+  --lc-dot-filled:       #a3a075;
+  --lc-sin-color:        #da4c33;   /* overridden per sin type via JS */
+  --lc-radius:           0px;       /* notched style uses clip, not radius */
+}
+
+/* ── Sin accent colors ──────────────────────────────────── */
+.lobcorp .WRATH    { color: #da4c33; }
+.lobcorp .LUST     { color: #f0a33f; }
+.lobcorp .SLOTH    { color: #fcd700; }
+.lobcorp .GLUTTONY { color: #b3d42f; }
+.lobcorp .GLOOM    { color: #56b4c9; }
+.lobcorp .PRIDE    { color: #2887cf; }
+.lobcorp .ENVY     { color: #9c69b2; }
+
+/* Sin color applied to pip track border, applied in JS */
+.lobcorp .sin-pip { border-color: var(--lc-sin-color); }
+.lobcorp .sin-pip.active {
+  background-color: var(--lc-sin-color);
+  box-shadow: 0 0 4px var(--lc-sin-color);
+}
+
+/* ── Resource type colors ───────────────────────────────── */
+.lobcorp .health .resource-counter-step { background-color: #2a1010; border: 1px solid #ff4d4d; }
+.lobcorp .health .resource-counter-step.empty { opacity: 0.25; }
+.lobcorp .sanity .resource-counter-step { background-color: #101828; border: 1px solid #39a6df; }
+.lobcorp .sanity .resource-counter-step.empty { opacity: 0.25; }
+.lobcorp .resource-counter-step.pale { opacity: 0.25; }
+
+/* ── Damage type badge colors ───────────────────────────── */
+.lobcorp .dmg-type-RED   { color: #da4c33; border-color: #da4c33; }
+.lobcorp .dmg-type-WHITE { color: #e0e0e0; border-color: #e0e0e0; }
+.lobcorp .dmg-type-BLACK { color: #888;    border-color: #888; }
+.lobcorp .dmg-type-PALE  { color: #56b4c9; border-color: #56b4c9; }
+
+/* =========================================================
+   BASE
+   ========================================================= */
+.lobcorp {
+  font-family: "GillSansMT", "Gill Sans MT", Arial, sans-serif;
+  color: var(--lc-text);
+  font-size: 14px;
+  background-color: var(--lc-bg);
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Edit-mode show/hide — mirrors dnd-sheet.css pattern */
+.lobcorp .edit-inp   { display: none !important; }
+.lobcorp .display-val { display: inline; }
+
+.lobcorp[data-editing="true"] .edit-inp    { display: inline-block !important; }
+.lobcorp[data-editing="true"] .display-val { display: none !important; }
+
+/* Inline-flex variants need their own rule */
+.lobcorp[data-editing="true"] .tft-res-edit,
+.lobcorp[data-editing="true"] .tft-feat-add-form,
+.lobcorp[data-editing="true"] .combat-add-btn {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Edit toggle — reuses dnd-sheet classes */
+.lobcorp .sheet-edit-toggle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 20;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--lc-border);
+  border-radius: 8px;
+  background: rgba(119, 116, 89, 0.12);
+  color: var(--lc-text);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.lobcorp .sheet-edit-toggle:hover { background: rgba(119, 116, 89, 0.28); }
+.lobcorp[data-editing="true"] .sheet-edit-toggle {
+  background: rgba(211, 96, 92, 0.18);
+  color: #d3605c;
+  border-color: rgba(211, 96, 92, 0.45);
+}
+.lobcorp .sheet-edit-toggle .material-symbols-outlined { font-size: 0.9rem; }
+
+/* =========================================================
+   NOTCHED PANEL BORDER
+   ========================================================= */
+.lobcorp .notched {
+  background-image:
+    linear-gradient(var(--lc-border), var(--lc-border)),
+    linear-gradient(var(--lc-border), var(--lc-border)),
+    linear-gradient(var(--lc-border), var(--lc-border)),
+    linear-gradient(var(--lc-border), var(--lc-border)),
+    linear-gradient(
+      to bottom right,
+      transparent                 calc(50% - 1px),
+      var(--lc-border)            calc(50% - 1px),
+      var(--lc-border)            calc(50% + 1px),
+      var(--lc-bg)                calc(50% + 1px)
+    ),
+    linear-gradient(var(--lc-bg), var(--lc-bg)),
+    linear-gradient(var(--lc-bg), var(--lc-bg));
+  background-size:
+    2px 100%, 2px 100%, 100% 2px, 100% 2px,
+    22px 22px, 100% 100%, 100% 100%;
+  background-position:
+    0% 22px, 100% 0px, 22px 0%, 0px 100%,
+    0% 0%, 0px 0%, 100% 0px;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* =========================================================
+   GRID LAYOUT
+   ========================================================= */
+.lobcorp .gridcontainer {
+  display: grid;
+  grid-template-columns: 260px 1fr 1fr 1fr 220px;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  padding: 8px 8px 8px 44px; /* left pad for the edit toggle */
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.lobcorp .agent        { grid-column: 1;     grid-row: 1; overflow-y: auto; }
+.lobcorp .combat-panel { grid-column: 2 / 5; grid-row: 1; overflow-y: auto; }
+.lobcorp .right-panel  { grid-column: 5;     grid-row: 1; overflow-y: auto; }
+.lobcorp .stats-panel  { grid-column: 1 / 3; grid-row: 2; }
+.lobcorp .skills-panel { grid-column: 3 / 6; grid-row: 2; }
+
+/* =========================================================
+   HEADER TEXT
+   ========================================================= */
+.lobcorp .headertext {
+  color: var(--lc-header);
+  text-shadow: 0 0 4px var(--lc-header-glow), 0 0 8px var(--lc-header-glow);
+  padding: 4px 10px 0 0;
+  font-size: 17px;
+  text-align: right;
+  font-family: "Norwester", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================
+   AGENT PANEL
+   ========================================================= */
+.lobcorp .agent { padding-bottom: 8px; }
+
+.lobcorp .profile {
+  background-color: var(--lc-panel-inner);
+  margin: 8px;
+}
+.lobcorp .inner-profile { padding: 8px 8px 4px; }
+
+.lobcorp .profile-img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  object-position: top;
+  border: none;
+  display: block;
+}
+
+.lobcorp .name-field { margin: 6px 0 2px; text-align: center; }
+.lobcorp .charname {
+  font-size: 15px;
+  color: var(--lc-header);
+  text-align: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--lc-border);
+  color: var(--lc-header);
+  font-family: "Norwester", Arial, sans-serif;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
+.lobcorp hr { margin: 4px 0; border: none; border-top: 1px solid var(--lc-hr); }
+
+.lobcorp .blurbsintext {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+.lobcorp .sin-color-label { font-weight: bold; font-size: 13px; }
+
+.lobcorp .tft-sin-select {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 12px;
+  width: 100%;
+}
+
+/* =========================================================
+   POINT CONTAINERS (HP / SP / Sin)
+   ========================================================= */
+.lobcorp .point-container {
+  border: 1px solid var(--lc-border);
+  margin: 10px 10px 4px;
+  text-align: center;
+}
+.lobcorp .point-container > div:first-child {
+  position: relative;
+}
+.lobcorp .point-container label {
+  position: relative;
+  padding: 0 6px;
+  top: -10px;
+  font-size: 11px;
+  background-color: var(--lc-bg);
+  display: inline-block;
+}
+.lobcorp .resource-control { cursor: pointer; opacity: 0.6; }
+.lobcorp .resource-control:hover { opacity: 1; }
+
+/* Pip tracks */
+.lobcorp .hp-pips,
+.lobcorp .sp-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 0 10px 6px;
+  justify-content: center;
+}
+.lobcorp .pale-pips { opacity: 0.35; }
+
+.lobcorp .resource-counter-step {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  position: relative;
+  top: -6px;
+}
+
+/* Edit mode resource inputs */
+.lobcorp .tft-res-edit {
+  padding: 4px 10px 8px;
+  gap: 8px;
+  font-size: 11px;
+}
+.lobcorp .tft-res-edit label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.lobcorp .tft-res-edit input {
+  width: 44px;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  text-align: center;
+  padding: 2px;
+}
+
+/* Sin pips */
+.lobcorp .sin-tracker { padding: 0 10px 4px; }
+.lobcorp .sin-pip-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+.lobcorp .sin-pip {
+  width: 18px;
+  height: 18px;
+  background-color: #1a1a12;
+  border: 1px solid var(--lc-sin-color);
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.12s;
+  position: relative;
+  top: -6px;
+}
+.lobcorp .sin-pip:hover {
+  background-color: color-mix(in srgb, var(--lc-sin-color) 35%, transparent);
+}
+
+/* =========================================================
+   COMBAT PANEL
+   ========================================================= */
+.lobcorp .combat-panel {
+  padding: 0 12px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lobcorp .combat-skills-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex: 1;
+  padding: 4px 0;
+  overflow-x: auto;
+}
+
+.lobcorp .combat-skill {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-left: 1px solid var(--lc-border);
+  padding-left: 10px;
+}
+.lobcorp .combat-skill:first-child { border-left: none; padding-left: 0; }
+
+.lobcorp .combat-skill-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.lobcorp .skill-index {
+  font-size: 10px;
+  color: var(--lc-text);
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.lobcorp .skill-title {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 17px;
+  color: var(--lc-header);
+  text-shadow: 0 0 3px var(--lc-header-glow);
+}
+.lobcorp .atk-name-inp {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--lc-border);
+  color: var(--lc-header);
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+}
+
+/* Damage badges */
+.lobcorp .atk-damage-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.lobcorp .atk-badge {
+  font-size: 10px;
+  border: 1px solid var(--lc-border);
+  padding: 1px 6px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--lc-text);
+}
+.lobcorp .atk-threat {
+  font-size: 10px;
+  color: var(--lc-text);
+  opacity: 0.7;
+  margin-left: auto;
+}
+
+.lobcorp .combat-skill-summary {
+  font-size: 11px;
+  color: var(--lc-text);
+  opacity: 0.8;
+  border-left: 2px solid var(--lc-border);
+  padding-left: 5px;
+  line-height: 1.4;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.lobcorp .combat-skill-controls {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  font-size: 12px;
+}
+
+.lobcorp .combat-skills-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  font-size: 12px;
+}
+
+.lobcorp .combat-add-btn {
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: color 0.15s;
+}
+.lobcorp .combat-add-btn:hover { color: var(--lc-header); }
+
+/* Add-attack modal-row (edit mode) */
+.lobcorp .tft-atk-add-form {
+  background: var(--lc-panel-inner);
+  border: 1px solid var(--lc-border);
+  padding: 8px;
+  margin-top: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+.lobcorp[data-editing="true"] .tft-atk-add-form.open { display: flex; }
+
+.lobcorp .tft-atk-add-form label {
+  font-size: 10px;
+  color: var(--lc-text);
+  opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lobcorp .tft-atk-add-form input,
+.lobcorp .tft-atk-add-form select,
+.lobcorp .tft-atk-add-form textarea {
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 2px 4px;
+}
+.lobcorp .tft-atk-add-form textarea { resize: vertical; min-height: 40px; }
+.lobcorp .tft-atk-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.lobcorp .tft-atk-row > label { flex: 1; min-width: 90px; }
+
+/* =========================================================
+   RIGHT PANEL
+   ========================================================= */
+.lobcorp .right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px 8px 8px;
+}
+
+/* Resistance section */
+.lobcorp .resistance-section {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--lc-border);
+  margin-bottom: 4px;
+}
+
+.lobcorp .silhouette-img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  object-position: top;
+  filter: grayscale(60%) brightness(0.65);
+  border: 1px solid var(--lc-border);
+  flex-shrink: 0;
+}
+
+.lobcorp .resistance-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.lobcorp .resist-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+.lobcorp .resist-label {
+  min-width: 36px;
+  opacity: 0.75;
+}
+.lobcorp .resist-row .display-val {
+  font-weight: bold;
+  color: var(--lc-header);
+  min-width: 18px;
+  text-align: right;
+}
+.lobcorp .tft-resist-inp {
+  width: 38px;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  text-align: center;
+  padding: 1px 2px;
+}
+
+/* Feature (rp-entry) cards */
+.lobcorp .rp-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.lobcorp .rp-entry {
+  padding: 5px 7px;
+  font-size: 11px;
+}
+.lobcorp .rp-entry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--lc-border);
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+  gap: 4px;
+}
+.lobcorp .rp-type {
+  font-size: 10px;
+  opacity: 0.6;
+  font-family: "Norwester", Arial, sans-serif;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.lobcorp .rp-name {
+  flex: 1;
+  text-align: right;
+  color: var(--lc-header);
+  font-size: 11px;
+}
+.lobcorp .rp-name-inp {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--lc-border);
+  color: var(--lc-header);
+  font-size: 11px;
+  text-align: right;
+  width: 100%;
+}
+.lobcorp .rp-desc {
+  font-size: 10px;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+.lobcorp .rp-desc-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 10px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 40px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   STATS PANEL (Attributes)
+   ========================================================= */
+.lobcorp .stats-panel { padding: 0 10px 10px; }
+
+.lobcorp .stats-groups {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.lobcorp .attr-group {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lobcorp .attr-group-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.lobcorp .attr-group[data-group="physical"] .attr-group-icon { color: #da4c33; }
+.lobcorp .attr-group[data-group="mental"]   .attr-group-icon { color: #56b4c9; }
+.lobcorp .attr-group[data-group="social"]   .attr-group-icon { color: #9c69b2; }
+.lobcorp .attr-group[data-group="justice"]  .attr-group-icon { color: #fcd700; }
+
+.lobcorp .attr-group-attrs { width: 100%; }
+
+.lobcorp .attr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  margin: 2px 0;
+  font-size: 12px;
+}
+.lobcorp .attr-name { flex: 1; white-space: nowrap; font-size: 11px; }
+
+.lobcorp .attr-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.lobcorp .attr-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--lc-border);
+  background-color: var(--lc-dot-empty);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+.lobcorp .attr-dot.filled {
+  background-color: var(--lc-dot-filled);
+  border-color: var(--lc-dot-filled);
+  box-shadow: 0 0 2px var(--lc-dot-filled);
+}
+.lobcorp .tft-attr-inp {
+  width: 32px;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  text-align: center;
+  padding: 1px 2px;
+}
+
+.lobcorp .attr-group-rating {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--lc-header);
+  text-shadow: 0 0 3px var(--lc-header-glow);
+  margin-top: 5px;
+}
+
+/* =========================================================
+   SKILLS PANEL
+   ========================================================= */
+.lobcorp .skills-panel { padding: 0 10px 10px; }
+
+.lobcorp .skills-columns {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}
+.lobcorp .skill-group-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* .lobcorp .skill-row already exists in lobcorp source — scoped so no DnD conflict */
+.lobcorp .skill-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(95, 93, 68, 0.28);
+}
+
+.lobcorp .skill-name {
+  flex: 0 0 78px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+}
+
+.lobcorp .skill-specialty { flex: 1; min-width: 0; }
+.lobcorp .skill-spec-text {
+  font-size: 10px;
+  color: var(--lc-header);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.lobcorp .skill-spec-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--lc-border);
+  color: var(--lc-header);
+  font-size: 10px;
+  font-family: inherit;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+.lobcorp .skill-spec-input::placeholder { color: rgba(163, 160, 117, 0.28); }
+
+.lobcorp .skill-dots {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.lobcorp .skill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--lc-border);
+  background-color: var(--lc-dot-empty);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+.lobcorp .skill-dot.filled {
+  background-color: var(--lc-dot-filled);
+  border-color: var(--lc-dot-filled);
+}
+.lobcorp .tft-skill-pts {
+  width: 26px;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 10px;
+  text-align: center;
+  padding: 1px 2px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 1100px) {
+  .lobcorp .gridcontainer {
+    grid-template-columns: 220px 1fr 1fr 200px;
+    grid-template-rows: auto auto auto;
+  }
+  .lobcorp .combat-panel { grid-column: 2 / 4; }
+  .lobcorp .right-panel  { grid-column: 4; }
+  .lobcorp .stats-panel  { grid-column: 1 / 3; grid-row: 2; }
+  .lobcorp .skills-panel { grid-column: 3 / 5; grid-row: 2; }
+}
+
+@media (max-width: 860px) {
+  .lobcorp .gridcontainer {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    overflow-y: auto;
+    height: auto;
+  }
+  .lobcorp .agent        { grid-column: 1 / -1; }
+  .lobcorp .combat-panel { grid-column: 1 / -1; }
+  .lobcorp .right-panel  { grid-column: 1 / -1; }
+  .lobcorp .stats-panel  { grid-column: 1 / -1; }
+  .lobcorp .skills-panel { grid-column: 1 / -1; }
+}

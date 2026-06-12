@@ -24,10 +24,15 @@ DROP TYPE IF EXISTS tft_feature_source CASCADE;
 DROP TYPE IF EXISTS tft_skill_name CASCADE;
 DROP TYPE IF EXISTS dnd5e_feature_fonte CASCADE;
 DROP TYPE IF EXISTS dnd5e_nome_pericia CASCADE;
+DROP TYPE IF EXISTS dnd5e_nome_classe CASCADE;
 DROP TYPE IF EXISTS lista_sistema CASCADE;
 
 CREATE TYPE lista_sistema AS ENUM (
    'DND5E', 'TFT'
+);
+
+CREATE TYPE dnd5e_nome_classe AS ENUM (
+    'LADINO', 'PALADINO', 'GUERREIRO', 'MAGO', 'CLÉRIGO', 'BARDO', 'FEITICEIRO', 'DRUIDA', 'BRUXO', 'MONGE', 'BARBARO', 'ARQUEIRO'
 );
 
 CREATE TYPE dnd5e_nome_pericia AS ENUM (
@@ -40,7 +45,17 @@ CREATE TYPE dnd5e_nome_pericia AS ENUM (
 CREATE TYPE dnd5e_feature_fonte AS ENUM ('RACE', 'CLASS', 'BACKGROUND', 'FEAT', 'OTHER');
 
 CREATE TYPE tft_feature_source AS ENUM (
-    'CORE_PASSIVE', 'ARMOR_PASSIVE', 'PASSIVE', 'FLAW', 'EGO GIFT', 'REPUTATION FLAW', 'REPUTATION PASSIVE', 'ALLY PASSIVE', 'ALLY FLAW', 'EGO RESONANCE', 'RESONANCE'
+    'CORE_PASSIVE',
+    'ARMOR_PASSIVE',
+    'PASSIVE',
+    'FLAW',
+    'EGO_GIFT',
+    'REPUTATION_FLAW',
+    'REPUTATION_PASSIVE',
+    'ALLY_PASSIVE',
+    'ALLY_FLAW',
+    'EGO_RESONANCE',
+    'RESONANCE'
 );
 
 CREATE TYPE tft_dmg_form AS ENUM ('SLASH', 'PIERCE', 'BLUNT');
@@ -57,17 +72,29 @@ CREATE TYPE tft_attribute_name AS ENUM (
 );
 
 CREATE TYPE tft_skill_name AS ENUM (
-    'ATHLETICS', 'ANIMAL KEN', 'AWARENESS', 
-    'BRAWL', 'BACKSTREETS SOCIETY', 'CITY SECRETS', 
-    'CRAFT', 'INSIGHT', 'HIGH SOCIETY',
-    'DRIVE', 'INTIMIDATION', 'INVESTIGATION',
-    'FIREARMS', 'LEADERSHIP', 'MEDICINE',
-    'LARCENY', 'PERFORMANCE', 'TECHNOLOGY',
-    'MEELE', 'PERSUASION', 'STEALTH',
+    'ATHLETICS',
+    'ANIMAL_KEN',
+    'AWARENESS',
+    'BRAWL',
+    'BACKSTREETS_SOCIETY',
+    'CITY_SECRETS',
+    'CRAFT',
+    'INSIGHT',
+    'HIGH_SOCIETY',
+    'DRIVE',
+    'INTIMIDATION',
+    'INVESTIGATION',
+    'FIREARMS',
+    'LEADERSHIP',
+    'MEDICINE',
+    'LARCENY',
+    'PERFORMANCE',
+    'TECHNOLOGY',
+    'MEELE',
+    'PERSUASION',
+    'STEALTH',
     'SUBTERFUGE'
-
 );
-
 CREATE TABLE IF NOT EXISTS usuario (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50),
@@ -111,7 +138,7 @@ CREATE TABLE IF NOT EXISTS dnd5e_sheets (
 CREATE TABLE IF NOT EXISTS dnd5e_classe (
   id SERIAL PRIMARY KEY,
   id_personagem INT REFERENCES dnd5e_sheets(id_personagem) ON DELETE CASCADE,
-  classe VARCHAR(60) NOT NULL,
+  classe dnd5e_nome_classe NOT NULL,
   level INT NOT NULL CHECK (level BETWEEN 1 AND 20),
   primaria BOOLEAN DEFAULT FALSE 
 );
@@ -217,16 +244,17 @@ CREATE TABLE IF NOT EXISTS tft_sheets (
 );
 
 CREATE TABLE IF NOT EXISTS tft_skill (
-  id SERIAL PRIMARY KEY,
-  id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
-  skill tft_skill_name NOT NULL,
-  points INT DEFAULT 0 CHECK (points BETWEEN 0 AND 5)
+    id           SERIAL PRIMARY KEY,
+    id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
+    skill         tft_skill_name NOT NULL,
+    points        INT DEFAULT 0 CHECK (points BETWEEN 0 AND 5),
+    CONSTRAINT uq_tft_skill_personagem_skill UNIQUE (id_personagem, skill)
 );
 
 CREATE TABLE IF NOT EXISTS tft_skill_specialty (
-    id SERIAL PRIMARY KEY,
+    id       SERIAL PRIMARY KEY,
     id_skill INT REFERENCES tft_skill(id) ON DELETE CASCADE,
-    nome VARCHAR(100) NOT NULL
+    nome     VARCHAR(100) NOT NULL
 );
 
 

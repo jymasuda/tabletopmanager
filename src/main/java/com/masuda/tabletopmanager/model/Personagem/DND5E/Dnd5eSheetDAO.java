@@ -161,6 +161,30 @@ public class Dnd5eSheetDAO {
         );
     }
 
+    public void atualizarCLasse(int idPersonagem, List<Map<String, Object>> classes) {
+        jdbc.update("DELETE FROM dnd5e_classe WHERE id_personagem = ?", idPersonagem);
+
+        if (classes == null || classes.isEmpty()) {
+            return;
+        }
+
+        String sql = """
+            INSERT INTO dnd5e_classe (id_personagem, classe, level, primaria)
+            VALUES (?, ?::dnd5e_nome_classe, ?, ?)
+        """;
+
+        for (Map<String, Object> c : classes) {
+            String nome = (String) c.get("classe");
+            int level = (int) c.get("level");
+            boolean primaria = Boolean.TRUE.equals(c.get("primaria"));
+
+            if (nome == null || nome.isBlank() || level <= 0) {
+                continue;
+            }
+
+            jdbc.update(sql, idPersonagem, nome, level, primaria);
+        }
+    }
     public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
         jdbc.update("DELETE FROM dnd5e_pericia WHERE id_personagem = ?", idPersonagem);
 

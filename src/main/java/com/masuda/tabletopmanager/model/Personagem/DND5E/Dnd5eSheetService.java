@@ -39,6 +39,9 @@ public class Dnd5eSheetService {
         return dDAO.inserirFichaDnd5e(idUsuario, nome);
     }
 
+    public void atualizarCLasse(int idPersonagem, List<Map<String, Object>> classes) {
+        dDAO.atualizarCLasse(idPersonagem, classes);
+    }
     public void atualizarIdentidade(int idPersonagem, String raca, String antecedente, int experiencia) {
         dDAO.atualizarIdentidade(idPersonagem, raca, antecedente, experiencia);
     }

@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="sheet-subline">
-                    <th:block th:if="${classes != null and !classes.empty}" class="display-val">
+                    <th:block th:if="${classes != null and !classes.empty}">
                         <th:block th:each="cls, stat : ${classes}">
                             <span class="display-val"
                                 th:text="${cls.classe.name() + ' ' + cls.level.levelClasse}"></span>
@@ -28,18 +28,15 @@
                     </th:block>
                     <span class="display-val" th:if="${classes == null or classes.empty}">Sem classe</span>
 
-                    <th:block th:with="primaria=${classePrimaria}">
-                        <select class="edit-inp subline-class-select">
-                            <option value="">— Classe —</option>
-                            <option
-                                th:each="cn : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.Classe.Dnd5eClasseNome).values()}"
-                                th:value="${cn.name()}" th:text="${cn.name()}"
-                                th:selected="${primaria != null and primaria.classe == cn}">
-                            </option>
-                        </select>
-                        <input class="edit-inp subline-level" type="number"
-                            th:value="${primaria != null ? primaria.level.levelClasse : 1}" min="1" max="20">
-                    </th:block>
+
+                    <div class="edit-inp classes-editor" style="display:none; flex-direction:column; gap:6px;">
+                        <div class="classes-rows"></div>
+                        <button type="button" class="classes-add-btn" style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                border-radius:8px;color:var(--sh-gold);padding:4px 8px;
+                                cursor:pointer;font-size:0.75rem;align-self:flex-start;">
+                            + Multiclasse
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -224,7 +221,7 @@
                             <th:block th:if="${classes != null and !classes.empty}">
                                 <th:block th:each="cls, stat : ${classes}">
                                     <span
-                                        th:text="${cls.level.levelClasse + 'd' + T(com.masuda.tabletopmanager.controller.DndSheetHelper).hitDieForClass(cls.classe.name())}"></span>
+                                        th:text="${cls.level.levelClasse + 'd' + T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).hitDieForClass(cls.classe.name())}"></span>
                                     <span th:if="${!stat.last}"> + </span>
                                 </th:block>
                             </th:block>
@@ -247,13 +244,13 @@
                 <div class="panel-box">
                     <h3 class="panel-title">⚔ Perícias</h3>
                     <div class="skill-list">
-                        <th:block th:each="row : ${T(com.masuda.tabletopmanager.controller.DndSheetHelper).SKILL_LIST}"
+                        <th:block th:each="row : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SKILL_LIST}"
                             th:with="prof=${profMap != null and profMap[row[0]] != null ? profMap[row[0]] : 'none'}">
                             <div class="skill-row" th:data-skill="${row[0]}" th:data-attr="${row[1]}"
                                 th:data-prof="${prof}" th:classappend="${prof != 'none' ? prof : ''}">
                                 <span class="prof-dot" th:classappend="${prof != 'none' ? ' ' + prof : ''}"></span>
                                 <span class="skill-attr"
-                                    th:text="${T(com.masuda.tabletopmanager.controller.DndSheetHelper).attrLabel(row[1])}">—</span>
+                                    th:text="${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).attrLabel(row[1])}">—</span>
                                 <span class="skill-name" th:text="${row[0]}">—</span>
                                 <span class="skill-mod">—</span>
                                 <span class="skill-passive">—</span>
@@ -303,15 +300,13 @@
                 <div class="panel-box">
                     <h3 class="panel-title">🛡 Testes de Resistência</h3>
                     <div class="saves-grid">
-                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.controller.DndSheetHelper).SAVE_LIST}"
+                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SAVE_LIST}"
                             th:with="isProf=${sv[0] == 'forca' ? saveFor :
                                         sv[0] == 'destreza' ? saveDes :
                                         sv[0] == 'constituicao' ? saveCon :
                                         sv[0] == 'inteligencia' ? saveInt :
                                         sv[0] == 'sabedoria' ? saveSab : saveCar}">
-                            <div class="save-row"
-                                th:data-attr="${sv[0]}"
-                                th:data-prof="${isProf != null and isProf}"
+                            <div class="save-row" th:data-attr="${sv[0]}" th:data-prof="${isProf != null and isProf}"
                                 th:classappend="${isProf != null and isProf ? 'proficient' : ''}">
                                 <span class="prof-dot"
                                     th:classappend="${isProf != null and isProf ? ' proficient' : ''}"></span>
