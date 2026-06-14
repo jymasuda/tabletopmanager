@@ -1,7 +1,3 @@
-// ═══════════════════════════════════════════════════
-//  sheet.js — Lógica da ficha DND5E
-// ═══════════════════════════════════════════════════
-
 function initDndSheet() {
     const sheet = document.querySelector('.sheet');
     const toggle = document.getElementById('sheetEditToggle');
@@ -10,18 +6,17 @@ function initDndSheet() {
     const personagemId = sheet.dataset.personagemId;
 
     let classesLocais = [];
-    sheet.querySelectorAll('.subline-class-select').forEach((sel, i) => {
-        const levelInp = sheet.querySelectorAll('.subline-level')[i];
-        if (sel.value) {
-            classesLocais.push({
-                classe: sel.value,
-                level: parseInt(levelInp?.value) || 1,
-                primaria: i === 0,
-            });
+    sheet.querySelectorAll('.sheet-subline .display-val').forEach((span, i) => {
+        const text = span.textContent.trim();
+        if (!text || text === '·' || text === 'Sem classe') return;
+        const parts = text.split(' ');
+        const level = parseInt(parts[parts.length - 1]);
+        const classe = parts.slice(0, -1).join(' ');
+        if (classe && !isNaN(level)) {
+            classesLocais.push({ classe, level, primaria: classesLocais.length === 0 });
         }
     });
 
-    // ── Mapeamento perícia → atributo ──────────────
     const SKILL_ATTR = {
         'Atletismo': 'forca',
         'Acrobacia': 'destreza',
@@ -43,7 +38,6 @@ function initDndSheet() {
         'Persuasão': 'carisma',
     };
 
-    // ── Bônus de proficiência por nível ───────────
     function calcProfBonus(nivel) {
         if (nivel <= 4) return 2;
         if (nivel <= 8) return 3;
@@ -72,7 +66,6 @@ function initDndSheet() {
         return classesLocais.reduce((sum, c) => sum + (c.level || 0), 0) || 1;
     }
 
-    // ── Dirty tracking ────────────────────────────
     const dirty = {
         atributos: false,
         combate: false,
@@ -86,9 +79,6 @@ function initDndSheet() {
     function markDirty(section) { dirty[section] = true; }
     function resetDirty() { Object.keys(dirty).forEach(k => dirty[k] = false); }
 
-    // ══════════════════════════════════════════════
-    //  RECÁLCULO EM TEMPO REAL
-    // ══════════════════════════════════════════════
 
     function recalcAll() {
         const scores = getScores();
@@ -145,10 +135,6 @@ function initDndSheet() {
         });
     }
 
-    // ══════════════════════════════════════════════
-    //  LISTENERS DE INPUT
-    // ══════════════════════════════════════════════
-
     sheet.querySelectorAll('.ab-score-inp').forEach(inp => {
         inp.addEventListener('input', () => { markDirty('atributos'); recalcAll(); });
     });
@@ -171,29 +157,35 @@ function initDndSheet() {
         classesRows.innerHTML = '';
         classesLocais.forEach((c, i) => {
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex;align-items:center;gap:6px;';
+            row.style.cssText = 'display:flex; align-items:center; gap:6px; margin-bottom:4px;';
+            const outrasClasses = classesLocais
+                .filter((_, idx) => idx !== i)
+                .map(other => other.classe)
+                .filter(Boolean);
+
             row.innerHTML = `
             <select class="edit-inp subline-class-select" style="flex:1;">
                 <option value="">— Classe —</option>
-                ${classOptions(c.classe)}
+                ${classOptions(c.classe, outrasClasses)}
             </select>
             <input class="edit-inp subline-level" type="number"
                 value="${c.level}" min="1" max="20" style="width:48px;">
             ${classesLocais.length > 1
                     ? `<button type="button" class="class-remove-btn"
                        style="background:none;border:none;color:rgba(240,232,224,0.4);
-                              cursor:pointer;font-size:1rem;padding:0;">×</button>`
+                              cursor:pointer;font-size:1rem;padding:0;">Remover</button>`
                     : ''}
         `;
 
             row.querySelector('.subline-class-select').addEventListener('change', e => {
                 classesLocais[i].classe = e.target.value;
                 markDirty('classes');
+                renderClassRows();
             });
             row.querySelector('.subline-level').addEventListener('input', e => {
                 classesLocais[i].level = parseInt(e.target.value) || 1;
                 markDirty('classes');
-                recalcAll(); // atualiza bônus de proficiência
+                recalcAll();
             });
             row.querySelector('.class-remove-btn')?.addEventListener('click', () => {
                 classesLocais.splice(i, 1);
@@ -207,15 +199,16 @@ function initDndSheet() {
         });
     }
 
-    // Gera os <option> com o valor selecionado
-    function classOptions(selected) {
+    function classOptions(selected, excluded = []) {
         const nomes = [
             'BARBARO', 'BARDO', 'CLÉRIGO', 'LADINO', 'DRUIDA', 'FEITICEIRO',
             'PATRULHEIRO', 'GUERREIRO', 'MONGE', 'PALADINO', 'BRUXO', 'MAGO'
         ];
-        return nomes.map(n =>
-            `<option value="${n}" ${n === selected ? 'selected' : ''}>${n}</option>`
-        ).join('');
+        return nomes
+            .filter(n => !excluded.includes(n))
+            .map(n =>
+                `<option value="${n}" ${n === selected ? 'selected' : ''}>${n}</option>`
+            ).join('');
     }
 
     classesAddBtn?.addEventListener('click', () => {
@@ -250,11 +243,6 @@ function initDndSheet() {
         sel.addEventListener('change', () => markDirty('identidade'));
     });
 
-    // ══════════════════════════════════════════════
-    //  HELPER: ciclo de pip none → proficient → expertise → none
-    //  Compartilhado entre perícias e ferramentas
-    // ══════════════════════════════════════════════
-
     function attachProfCycle(row, dirtySection) {
         const dot = row.querySelector('.prof-dot');
         if (!dot) return;
@@ -278,13 +266,11 @@ function initDndSheet() {
         });
     }
 
-    // ── Pips de perícias ──────────────────────────
     sheet.querySelectorAll('.skill-row:not(.tool-entry)').forEach(row => {
         attachProfCycle(row, 'pericias');
     });
 
-    // ── Pips de saves ─────────────────────────────
-    // Saves usam toggle binário (não têm "expertise"), então mantêm lógica própria
+
     sheet.querySelectorAll('.save-row').forEach(row => {
         const dot = row.querySelector('.prof-dot');
         if (!dot) return;
@@ -300,9 +286,6 @@ function initDndSheet() {
         });
     });
 
-    // ══════════════════════════════════════════════
-    //  PILLS (sentidos, resistências, etc.)
-    // ══════════════════════════════════════════════
 
     function setupPillList(listId) {
         const list = document.getElementById(listId);
@@ -348,12 +331,7 @@ function initDndSheet() {
 
     ['sensesList', 'resistancesList', 'immunitiesList', 'armorList', 'weaponsList', 'languagesList'].forEach(setupPillList);
 
-    // ══════════════════════════════════════════════
-    //  FERRAMENTAS
-    //  Comportamento idêntico às perícias:
-    //  pip clicável none → proficient → expertise → none
-    //  Diferença: nome é customizado (não é enum)
-    // ══════════════════════════════════════════════
+    
 
     const toolList = document.getElementById('toolList');
     const toolAddRow = sheet.querySelector('.tool-add-row');
@@ -393,7 +371,6 @@ function initDndSheet() {
                 style="background:none;border:none;color:rgba(240,232,224,0.4);cursor:pointer;font-size:0.9rem;padding:0;">×</button>
         `;
 
-        // Reutiliza o mesmo ciclo de pip das perícias
         attachProfCycle(row, 'pericias');
 
         row.querySelector('.tool-remove').addEventListener('click', () => {
@@ -411,17 +388,12 @@ function initDndSheet() {
         toolList?.appendChild(row);
     }
 
-    // ── Botões de descanso e level up ─────────────
     sheet.querySelector('.rest-btn[title="Descanso Curto"]')
         ?.addEventListener('click', () => post(`/personagem/${personagemId}/dnd/descansocurto`, {}));
     sheet.querySelector('.rest-btn[title="Descanso Longo"]')
         ?.addEventListener('click', () => post(`/personagem/${personagemId}/dnd/descansolongo`, {}));
     sheet.querySelector('.rest-btn[title="Subir de Nível"]')
         ?.addEventListener('click', () => post(`/personagem/${personagemId}/dnd/levelup`, {}));
-
-    // ══════════════════════════════════════════════
-    //  TOGGLE MODO DE EDIÇÃO
-    // ══════════════════════════════════════════════
 
     function isEditing() { return sheet.dataset.editing === 'true'; }
 
@@ -430,9 +402,10 @@ function initDndSheet() {
             el.style.display = show ? 'flex' : 'none';
         });
         if (toolAddRow) toolAddRow.style.display = show ? 'flex' : 'none';
-
-        // classes
-        if (classesEditor) classesEditor.style.display = show ? 'flex' : 'none';
+        if (classesEditor) {
+            classesEditor.style.display = show ? 'flex' : 'none';
+            classesEditor.style.flexDirection = 'column';
+        }
         if (show) renderClassRows();
     }
 
@@ -464,7 +437,7 @@ function initDndSheet() {
         if (levelVal && levelInp) levelVal.textContent = levelInp.value;
 
         const sublineDisplays = sheet.querySelectorAll('.sheet-subline .display-val');
-        sublineDisplays.forEach(el => el.remove()); // limpa spans antigos
+        sublineDisplays.forEach(el => el.remove());
 
         const subline = sheet.querySelector('.sheet-subline');
         classesLocais.filter(c => c.classe).forEach((c, i) => {
@@ -509,9 +482,6 @@ function initDndSheet() {
         });
     }
 
-    // ══════════════════════════════════════════════
-    //  SAVE GRANULARIZADO
-    // ══════════════════════════════════════════════
 
     async function saveChanges() {
         const saves = [];
@@ -521,7 +491,7 @@ function initDndSheet() {
         if (dirty.pericias) saves.push(savePericias());
         if (dirty.saves) saves.push(saveSaves());
         if (dirty.identidade) saves.push(saveIdentidade());
-        if (dirty.classes) saves.push(saveClasses());  // <-- adicionar
+        if (dirty.classes) saves.push(saveClasses()); 
         await Promise.all(saves);
     }
 
@@ -545,12 +515,6 @@ function initDndSheet() {
         if (payload.length === 0) return;
 
         await post(`/personagem/${personagemId}/dnd/classes`, { classes: payload });
-
-        const displaySpans = sheet.querySelectorAll('.sheet-subline .display-val');
-        displaySpans.forEach(el => el.textContent = '');
-        if (displaySpans.length > 0) {
-            displaySpans[0].textContent = `${classe} ${level}`;
-        }
     }
 
     async function saveCombate() {
@@ -570,7 +534,6 @@ function initDndSheet() {
     }
 
     async function savePericias() {
-        // Perícias com nome fixo (enum no banco)
         const pericias = [];
         sheet.querySelectorAll('.skill-row:not(.tool-entry)').forEach(row => {
             const skill = row.dataset.skill;
@@ -584,7 +547,6 @@ function initDndSheet() {
             }
         });
 
-        // Ferramentas com nome livre e mesmo estado de proficiência
         const ferramentas = [];
         sheet.querySelectorAll('.tool-entry').forEach(row => {
             const nome = row.querySelector('.skill-name')?.textContent?.trim();
@@ -629,7 +591,6 @@ function initDndSheet() {
         });
     }
 
-    // ── Helper POST ───────────────────────────────
     async function post(url, body) {
         try {
             const res = await fetch(url, {
@@ -643,7 +604,6 @@ function initDndSheet() {
         }
     }
 
-    // ── Inicialização ─────────────────────────────
     recalcAll();
     showEditOnlyElements(false);
 }

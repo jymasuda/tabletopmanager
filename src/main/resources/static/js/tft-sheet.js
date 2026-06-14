@@ -1,6 +1,3 @@
-// ═══════════════════════════════════════════════════════════
-//  tft-sheet.js  —  Logic for the TFT character sheet
-// ═══════════════════════════════════════════════════════════
 
 const SIN_META = {
     PRIDE: { max: 45, color: '#2887cf' },
@@ -12,7 +9,6 @@ const SIN_META = {
     SLOTH: { max: 45, color: '#fcd700' },
 };
 
-// Map resistance numeric value → display label
 const RESIST_LABELS = {
     1: 'Fatal',
     2: 'Weak',
@@ -29,7 +25,6 @@ function initTftSheet() {
 
     const personagemId = sheet.dataset.personagemId;
 
-    // ── Dirty tracking ────────────────────────────────────
     const dirty = {
         identidade: false,
         recursos: false,
@@ -41,10 +36,6 @@ function initTftSheet() {
     function markDirty(k) { dirty[k] = true; }
     function resetDirty() { Object.keys(dirty).forEach(k => dirty[k] = false); }
     function isEditing() { return sheet.dataset.editing === 'true'; }
-
-    // ══════════════════════════════════════════════════════
-    //  SIN COLOR + PIP RENDERING
-    // ══════════════════════════════════════════════════════
 
     function applySinStyle(sinName) {
         const meta = SIN_META[sinName] || SIN_META['PRIDE'];
@@ -63,7 +54,7 @@ function initTftSheet() {
         return sheet.dataset.sin || 'PRIDE';
     }
 
-    // Sin pip clicks
+
     document.getElementById('sinPipTrack')?.querySelectorAll('.sin-pip').forEach(pip => {
         pip.addEventListener('click', () => {
             const idx = parseInt(pip.dataset.index);
@@ -97,24 +88,9 @@ function initTftSheet() {
         }
     });
 
-    // ══════════════════════════════════════════════════════
-    //  RESOURCE BOX SYSTEM (HP / SP)
-    // ══════════════════════════════════════════════════════
 
-    // State object for each resource: { max, curr, pale }
-    // max and pale are always even (each box = 2 HP)
-    // curr tracks actual HP points (0 to max)
     const resState = { hp: { max: 0, curr: 0, pale: 0 }, sp: { max: 0, curr: 0, pale: 0 } };
 
-    // Derive box states array from (max, curr, pale)
-    // Returns array of 'empty'|'slash'|'x'|'pale', length = max/2
-    // Box state model (linear fill, left to right):
-    //   activeBoxes = (max - pale) / 2 ; activeMax = activeBoxes * 2
-    //   d = damage taken = activeMax - curr  (0 <= d <= activeMax)
-    //   Phase 1 (d <= activeBoxes): first d boxes (left→right) are 'slash', rest 'empty'
-    //   Phase 2 (d > activeBoxes): all boxes 'slash' as base, plus first (d - activeBoxes)
-    //                               boxes (left→right) upgrade to 'x'
-    //   Rightmost `pale` boxes (pale/2 of them) are always 'pale', non-interactive.
     function buildBoxStates(max, curr, pale) {
         const totalBoxes = Math.max(1, Math.floor(max / 2));
         const paleBoxes = Math.floor(pale / 2);
@@ -138,7 +114,6 @@ function initTftSheet() {
         return states;
     }
 
-    // Render boxes into a track element
     function renderBoxes(trackEl, resource) {
         const { max, curr, pale } = resState[resource];
         const states = buildBoxStates(max, curr, pale);
@@ -156,20 +131,16 @@ function initTftSheet() {
             if (state !== 'pale') {
                 box.addEventListener('click', () => onBoxClick(resource, i));
             }
-            // contextmenu (right-click) must work on pale boxes too, so they can be restored
             box.addEventListener('contextmenu', e => { e.preventDefault(); onBoxRightClick(resource, i); });
 
             trackEl.appendChild(box);
         });
     }
 
-    // Determine which box index is the "damage target" (leftmost clickable for damage)
-    // Returns { type: 'damage'|'heal', index } or null
     function getActiveTargets(resource) {
         const { max, curr, pale } = resState[resource];
         const activeMax = max - pale;
         const halfActive = activeMax / 2;
-        // injured = all boxes are '/', meaning curr <= halfActive
         const injured = curr <= halfActive;
         const states = buildBoxStates(max, curr, pale);
 
@@ -177,18 +148,15 @@ function initTftSheet() {
         let healIdx = null;
 
         if (!injured) {
-            // Pre-injury: leftmost 'empty' active box takes damage (empty → slash)
             for (let i = 0; i < states.length; i++) {
                 if (states[i] === 'empty') { damageIdx = i; break; }
             }
         } else {
-            // Injured: leftmost 'slash' active box takes damage (slash → x)
             for (let i = 0; i < states.length; i++) {
                 if (states[i] === 'slash') { damageIdx = i; break; }
             }
         }
 
-        // Healing: rightmost 'x' first, then rightmost '/'
         for (let i = states.length - 1; i >= 0; i--) {
             if (states[i] === 'pale') continue;
             if (states[i] === 'x') { healIdx = i; break; }
@@ -209,7 +177,6 @@ function initTftSheet() {
         const states = buildBoxStates(s.max, s.curr, s.pale);
         const clickedState = states[clickedIdx];
 
-        // If clicked box is the damage target → take damage (-1 HP)
         if (clickedIdx === damageIdx) {
             s.curr = Math.max(0, s.curr - 1);
             markDirty('recursos');
@@ -217,18 +184,17 @@ function initTftSheet() {
             return;
         }
 
-        // If clicked box is the heal target → heal
         if (clickedIdx === healIdx) {
             if (clickedState === 'x') {
-                s.curr = Math.min(s.max - s.pale, s.curr + 1);  // x → /
+                s.curr = Math.min(s.max - s.pale, s.curr + 1);  
             } else if (clickedState === 'slash') {
-                s.curr = Math.min(s.max - s.pale, s.curr + 1);  // / → empty
+                s.curr = Math.min(s.max - s.pale, s.curr + 1); 
             }
             markDirty('recursos');
             rerenderBoxes(resource);
             return;
         }
-        // Clicking non-active box does nothing
+
     }
 
     function onBoxRightClick(resource, clickedIdx) {
@@ -237,24 +203,20 @@ function initTftSheet() {
         const states = buildBoxStates(s.max, s.curr, s.pale);
         const clickedState = states[clickedIdx];
 
-        // Right-click on pale box → remove pale (leftmost pale becomes active again)
         if (clickedState === 'pale') {
             if (s.pale < 2) return;
             const newActiveMax = (s.max - (s.pale - 2));
             s.pale -= 2;
-            // Restored box comes back as 'empty' (full) — add 2 HP, capped at new max
             s.curr = Math.min(newActiveMax, s.curr + 2);
             markDirty('recursos');
             rerenderBoxes(resource);
             return;
         }
 
-        // Right-click on active box → make rightmost active box pale
-        const maxPaleBoxes = Math.floor(s.max / 2) - 1; // min 1 active box
+
+        const maxPaleBoxes = Math.floor(s.max / 2) - 1; 
         if (Math.floor(s.pale / 2) >= maxPaleBoxes) return;
 
-        // Rightmost active box is always the correct pale target
-        // (priority empty > slash > x is automatically satisfied by box ordering)
         let targetIdx = -1;
         for (let i = states.length - 1; i >= 0; i--) {
             if (states[i] !== 'pale') { targetIdx = i; break; }
@@ -264,42 +226,35 @@ function initTftSheet() {
         const targetState = states[targetIdx];
         s.pale += 2;
 
-        // Remove the HP that was "remaining" in the box being paled
-        // empty = 2 HP remaining, slash = 1, x = 0
         if (targetState === 'empty') {
             s.curr = Math.max(0, s.curr - 2);
         } else if (targetState === 'slash') {
             s.curr = Math.max(0, s.curr - 1);
         }
-        // x: curr unchanged (0 remaining to lose)
 
         markDirty('recursos');
         rerenderBoxes(resource);
     }
 
-    // Add/remove max boxes (edit mode +/- buttons)
     function onMaxChange(resource, action) {
         const s = resState[resource];
         if (action === 'plus') {
-            if (s.max / 2 >= 20) return;  // max 20 boxes
+            if (s.max / 2 >= 20) return;  
             s.max += 2;
-            s.curr += 2;  // new box starts full
+            s.curr += 2;  
         } else {
-            if ((s.max - s.pale) / 2 <= 1) return;  // min 1 active box
-            // Remove rightmost non-pale box
+            if ((s.max - s.pale) / 2 <= 1) return; 
             const states = buildBoxStates(s.max, s.curr, s.pale);
-            // Find rightmost active box state
             let removeState = 'empty';
             for (let i = states.length - 1; i >= 0; i--) {
                 if (states[i] !== 'pale') { removeState = states[i]; break; }
             }
-            // Adjust curr based on what was in that box
             if (removeState === 'empty') {
-                s.curr = Math.max(0, s.curr - 2); // removing full box costs 2 HP
+                s.curr = Math.max(0, s.curr - 2); 
             } else if (removeState === 'slash') {
-                s.curr = Math.max(0, s.curr - 1); // half-filled costs 1 HP
+                s.curr = Math.max(0, s.curr - 1); 
             }
-            // x box: curr stays (damage already taken)
+           
             s.max -= 2;
             if (s.curr > s.max - s.pale) s.curr = s.max - s.pale;
         }
@@ -311,11 +266,11 @@ function initTftSheet() {
         const trackSel = resource === 'hp' ? '.hp-boxes' : '.sp-boxes';
         const track = sheet.querySelector(trackSel);
         if (track) renderBoxes(track, resource);
-        // Auto-save on every HP/SP change (deferred to avoid forward reference)
+        
         setTimeout(() => saveRecursos(), 0);
     }
 
-    // Init from data attributes on the track element
+   
     function initResBoxes(resource) {
         const trackSel = resource === 'hp' ? '.hp-boxes' : '.sp-boxes';
         const track = sheet.querySelector(trackSel);
@@ -328,34 +283,25 @@ function initTftSheet() {
         renderBoxes(track, resource);
     }
 
-    // +/- button listeners
     sheet.querySelectorAll('.resource-control').forEach(btn => {
         btn.addEventListener('click', () => {
             onMaxChange(btn.dataset.resource, btn.dataset.resourceAction);
         });
     });
 
-    // ══════════════════════════════════════════════════════
-    //  RESISTANCE DROPDOWNS
-    // ══════════════════════════════════════════════════════
 
-    // Init select values from data-value attribute
     sheet.querySelectorAll('.tft-resist-sel').forEach(sel => {
         const val = sel.dataset.value;
         if (val) sel.value = val;
 
         sel.addEventListener('change', () => {
             markDirty('resistances');
-            // Update display label immediately
             const row = sel.closest('.ft-row');
             const label = row?.querySelector('.ft-res-label');
             if (label) label.textContent = RESIST_LABELS[sel.value] || 'Normal';
         });
     });
 
-    // ══════════════════════════════════════════════════════
-    //  ATTRIBUTE DOTS
-    // ══════════════════════════════════════════════════════
 
     sheet.querySelectorAll('.attr-dot').forEach(dot => {
         dot.addEventListener('click', () => {
@@ -405,9 +351,6 @@ function initTftSheet() {
         });
     }
 
-    // ══════════════════════════════════════════════════════
-    //  SKILL DOTS
-    // ══════════════════════════════════════════════════════
 
     sheet.querySelectorAll('.skill-row').forEach(row => {
         const dots = Array.from(row.querySelectorAll('.skill-dot'));
@@ -432,8 +375,7 @@ function initTftSheet() {
         });
     });
 
-    // ── Specialty edit toggle ─────────────────────────────
-    // The ✎ button appears in edit mode, clicking it shows/hides the input
+
 
     sheet.querySelectorAll('.skill-spec-toggle').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -464,15 +406,12 @@ function initTftSheet() {
         inp.addEventListener('input', () => markDirty('skills'));
     });
 
-    // ══════════════════════════════════════════════════════
-    //  FEATURE ENTRIES
-    // ══════════════════════════════════════════════════════
 
-    // Collapse toggle
+
     function bindCollapseButtons(context) {
         context.querySelectorAll('.rp-entry-header').forEach(header => {
             header.addEventListener('click', e => {
-                // Don't collapse when clicking input/button inside header
+
                 if (e.target.closest('input, button.tft-feat-delete')) return;
                 const entry = header.closest('.rp-entry');
                 if (!entry) return;
@@ -483,7 +422,7 @@ function initTftSheet() {
     }
     bindCollapseButtons(sheet);
 
-    // Delete buttons
+
     function bindFeatureDeleteButtons(context) {
         context.querySelectorAll('.tft-feat-delete').forEach(btn => {
             btn.addEventListener('click', async e => {
@@ -510,13 +449,11 @@ function initTftSheet() {
         inp.addEventListener('input', () => markDirty('features'));
     });
 
-    // Add entry — toggle form visibility
     const rpAddTrigger = sheet.querySelector('.rp-add-trigger');
     const rpAddSection = sheet.querySelector('.rp-add-section');
     rpAddTrigger?.addEventListener('click', () => {
         const visible = rpAddSection?.style.display !== 'none' && rpAddSection?.style.display !== '';
         if (rpAddSection) rpAddSection.style.display = visible ? 'none' : 'flex';
-        // Close the other overlay if it's open
         if (!visible && atkAddForm) atkAddForm.style.display = 'none';
     });
 
@@ -572,11 +509,6 @@ function initTftSheet() {
         bindFeatureDeleteButtons(card);
     }
 
-    // ══════════════════════════════════════════════════════
-    //  ATTACK CARDS
-    // ══════════════════════════════════════════════════════
-
-    // Add skill card click — opens form
     const addSkillCard = document.getElementById('tftAddSkillCard');
     const atkAddForm = document.getElementById('tftAtkAddForm');
 
@@ -585,12 +517,10 @@ function initTftSheet() {
         if (atkAddForm) {
             const isVisible = atkAddForm.style.display !== 'none' && atkAddForm.style.display !== '';
             atkAddForm.style.display = isVisible ? 'none' : 'flex';
-            // Close the other overlay if it's open
             if (!isVisible && rpAddSection) rpAddSection.style.display = 'none';
         }
     });
 
-    // Dicepool mode toggle: show/hide attr vs skill2 field
     const atkModeSelect = document.getElementById('atkModeSelect');
     function updateAtkModeFields() {
         const mode = atkModeSelect?.value;
@@ -604,12 +534,10 @@ function initTftSheet() {
     atkModeSelect?.addEventListener('change', updateAtkModeFields);
     updateAtkModeFields();
 
-    // Cancel add form
     sheet.querySelector('.tft-atk-cancel')?.addEventListener('click', () => {
         if (atkAddForm) atkAddForm.style.display = 'none';
     });
 
-    // Submit new attack
     sheet.querySelector('.tft-atk-submit')?.addEventListener('click', async () => {
         const form = atkAddForm;
         if (!form) return;
@@ -632,12 +560,10 @@ function initTftSheet() {
         if (res?.id) {
             appendAttackCard(res.id, body);
             form.style.display = 'none';
-            // Reset form fields
             form.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(i => i.value = '');
         }
     });
 
-    // Delete attack buttons
     function bindAttackDeleteButtons(context) {
         context.querySelectorAll('.tft-atk-delete').forEach(btn => {
             btn.addEventListener('click', async () => {
@@ -650,7 +576,6 @@ function initTftSheet() {
     }
     bindAttackDeleteButtons(sheet);
 
-    // Attack type select live update
     sheet.querySelectorAll('.atk-type-select').forEach(sel => {
         sel.addEventListener('change', () => {
             const card = sel.closest('.combat-skill');
@@ -660,7 +585,7 @@ function initTftSheet() {
                     : sel.value === 'CORROSION' ? 'Corrosion Skill'
                         : 'Attack';
             }
-            markDirty('features'); // reuse features dirty flag for attack type; handled in save
+            markDirty('features'); 
         });
     });
 
@@ -713,7 +638,7 @@ function initTftSheet() {
             ${atk.attack_description ? `<div class="combat-skill-desc">${atk.attack_description}</div>` : ''}
         `;
 
-        // Insert before the add-skill placeholder
+
         if (addCard) {
             grid.insertBefore(card, addCard);
         } else {
@@ -731,9 +656,6 @@ function initTftSheet() {
         });
     }
 
-    // ══════════════════════════════════════════════════════
-    //  EDIT TOGGLE
-    // ══════════════════════════════════════════════════════
 
     toggle.addEventListener('click', async () => {
         const editing = isEditing();
@@ -743,20 +665,17 @@ function initTftSheet() {
             sheet.dataset.editing = 'false';
             toggle.querySelector('.edit-icon').textContent = 'edit';
             resetDirty();
-            // Close any open specialty inputs
             sheet.querySelectorAll('.skill-spec-input.open').forEach(inp => {
                 inp.classList.remove('open');
                 inp.style.display = 'none';
                 const text = inp.closest('.skill-specialty-wrap')?.querySelector('.skill-spec-text');
                 if (text) text.style.display = '';
             });
-            // Hide add form if open
             if (atkAddForm) atkAddForm.style.display = 'none';
             if (rpAddSection) rpAddSection.style.display = 'none';
         } else {
             sheet.dataset.editing = 'true';
             toggle.querySelector('.edit-icon').textContent = 'edit_off';
-            // Initialize resistance select values from display labels
             sheet.querySelectorAll('.tft-resist-sel').forEach(sel => {
                 if (sel.dataset.value) sel.value = sel.dataset.value;
             });
@@ -764,12 +683,10 @@ function initTftSheet() {
     });
 
     function updateDisplayValues() {
-        // Name
         const nameVal = sheet.querySelector('.tft-name-inp')?.value;
         const nameDisp = sheet.querySelector('.charname.display-val');
         if (nameDisp && nameVal) nameDisp.textContent = nameVal;
 
-        // Sin
         const sinSel = sheet.querySelector('.tft-sin-select');
         const sinLbl = sheet.querySelector('.sin-color-label');
         if (sinSel && sinLbl) {
@@ -777,7 +694,6 @@ function initTftSheet() {
             sinLbl.className = 'sin-color-label display-val ' + sinSel.value;
         }
 
-        // Resistance labels
         sheet.querySelectorAll('.tft-resist-sel').forEach(sel => {
             const row = sel.closest('.ft-row');
             const label = row?.querySelector('.ft-res-label');
@@ -785,7 +701,6 @@ function initTftSheet() {
             sel.dataset.value = sel.value;
         });
 
-        // Feature names + descriptions
         sheet.querySelectorAll('.rp-entry').forEach(entry => {
             const nameInp = entry.querySelector('.rp-name-inp');
             const nameDisp = entry.querySelector('.rp-name');
@@ -796,7 +711,6 @@ function initTftSheet() {
             if (descInp && descDisp) descDisp.textContent = descInp.value;
         });
 
-        // Attack names and type labels
         sheet.querySelectorAll('.combat-skill').forEach(card => {
             const nameInp = card.querySelector('.atk-name-inp');
             const nameDisp = card.querySelector('.skill-title.display-val');
@@ -811,17 +725,12 @@ function initTftSheet() {
             }
         });
 
-        // Skill specialties
         sheet.querySelectorAll('.skill-row').forEach(row => {
             const inp = row.querySelector('.skill-spec-input');
             const text = row.querySelector('.skill-spec-text');
             if (inp && text) text.textContent = inp.value;
         });
     }
-
-    // ══════════════════════════════════════════════════════
-    //  GRANULARIZED SAVE
-    // ══════════════════════════════════════════════════════
 
     async function saveChanges() {
         const saves = [];
@@ -891,7 +800,6 @@ function initTftSheet() {
         await post(`/personagem/${personagemId}/tft/features`, { features });
     }
 
-    // ── Helper POST ───────────────────────────────────────
     async function post(url, body) {
         try {
             const res = await fetch(url, {
@@ -907,7 +815,6 @@ function initTftSheet() {
         }
     }
 
-    // ── Init ─────────────────────────────────────────────
     applySinStyle(getSinFromSheet());
     initResBoxes('hp');
     initResBoxes('sp');
@@ -919,14 +826,12 @@ function initTftSheet() {
             p.classList.toggle('active', parseInt(p.dataset.index) <= savedSinPoints);
         });
     }
-    
-    // Apply Roman numerals to ratings from server-rendered data-rating
+
     sheet.querySelectorAll('.attr-group-rating').forEach(el => {
         const n = parseInt(el.dataset.rating);
         if (!isNaN(n)) el.textContent = toRoman(n);
     });
 
-    // Init resistance select values
     sheet.querySelectorAll('.tft-resist-sel').forEach(sel => {
         if (sel.dataset.value) sel.value = sel.dataset.value;
     });

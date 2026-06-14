@@ -8,7 +8,6 @@
             <span class="material-symbols-outlined edit-icon">edit</span>
         </button>
 
-        <!-- ══ HEADER ══════════════════════════════════════ -->
         <header class="sheet-header">
 
             <div class="sheet-identity">
@@ -29,8 +28,9 @@
                     <span class="display-val" th:if="${classes == null or classes.empty}">Sem classe</span>
 
 
-                    <div class="edit-inp classes-editor" style="display:none; flex-direction:column; gap:6px;">
-                        <div class="classes-rows"></div>
+                    <div class="edit-inp classes-editor"
+                        style="display:none; flex-direction:column; gap:6px; overflow:visible; max-width: none;">
+                        <div class="classes-rows" style="display:flex; flex-direction:column; gap:6px;"></div>
                         <button type="button" class="classes-add-btn" style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
                                 border-radius:8px;color:var(--sh-gold);padding:4px 8px;
                                 cursor:pointer;font-size:0.75rem;align-self:flex-start;">
@@ -78,10 +78,9 @@
             </th:block>
         </header>
 
-        <!-- ══ ATRIBUTOS ═══════════════════════════════════ -->
         <div class="ability-row">
 
-            <!--/* FOR */-->
+
             <div class="ability-badge" data-attr="forca">
                 <span class="ab-name">FOR</span>
                 <span class="ab-mod display-val"
@@ -91,7 +90,7 @@
                     data-attr="forca">
             </div>
 
-            <!--/* DES */-->
+
             <div class="ability-badge" data-attr="destreza">
                 <span class="ab-name">DES</span>
                 <span class="ab-mod display-val"
@@ -101,7 +100,6 @@
                     data-attr="destreza">
             </div>
 
-            <!--/* CON */-->
             <div class="ability-badge" data-attr="constituicao">
                 <span class="ab-name">CON</span>
                 <span class="ab-mod display-val"
@@ -111,7 +109,6 @@
                     data-attr="constituicao">
             </div>
 
-            <!--/* INT */-->
             <div class="ability-badge" data-attr="inteligencia">
                 <span class="ab-name">INT</span>
                 <span class="ab-mod display-val"
@@ -121,7 +118,6 @@
                     data-attr="inteligencia">
             </div>
 
-            <!--/* SAB */-->
             <div class="ability-badge" data-attr="sabedoria">
                 <span class="ab-name">SAB</span>
                 <span class="ab-mod display-val"
@@ -131,7 +127,6 @@
                     data-attr="sabedoria">
             </div>
 
-            <!--/* CAR */-->
             <div class="ability-badge" data-attr="carisma">
                 <span class="ab-name">CAR</span>
                 <span class="ab-mod display-val"
@@ -143,10 +138,8 @@
 
         </div>
 
-        <!-- ══ SHEET BODY ══════════════════════════════════ -->
         <div class="sheet-body">
 
-            <!-- ─ COLUNA ESQUERDA ─────────────────────────── -->
             <aside class="col-left">
 
                 <div class="portrait-wrap">
@@ -238,13 +231,13 @@
 
             </aside>
 
-            <!-- ─ COLUNA DO MEIO: Perícias ────────────────── -->
             <section class="col-mid">
 
                 <div class="panel-box">
                     <h3 class="panel-title">⚔ Perícias</h3>
                     <div class="skill-list">
-                        <th:block th:each="row : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SKILL_LIST}"
+                        <th:block
+                            th:each="row : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SKILL_LIST}"
                             th:with="prof=${profMap != null and profMap[row[0]] != null ? profMap[row[0]] : 'none'}">
                             <div class="skill-row" th:data-skill="${row[0]}" th:data-attr="${row[1]}"
                                 th:data-prof="${prof}" th:classappend="${prof != 'none' ? prof : ''}">
@@ -293,14 +286,13 @@
                 </div>
 
             </section>
-
-            <!-- ─ COLUNA DIREITA ─────────────────────────── -->
             <section class="col-right">
 
                 <div class="panel-box">
                     <h3 class="panel-title">🛡 Testes de Resistência</h3>
                     <div class="saves-grid">
-                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SAVE_LIST}"
+                        <th:block
+                            th:each="sv : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SAVE_LIST}"
                             th:with="isProf=${sv[0] == 'forca' ? saveFor :
                                         sv[0] == 'destreza' ? saveDes :
                                         sv[0] == 'constituicao' ? saveCon :
@@ -317,7 +309,6 @@
                     </div>
                 </div>
 
-                <!-- Raça / Antecedente -->
                 <div class="trait-chips">
                     <div class="trait-chip">
                         <div class="trait-icon-wrap">🍃</div>
@@ -351,8 +342,6 @@
                     </div>
                 </div>
 
-                <!--/* ── Pill sections (sentidos, resistências, imunidades, armaduras, armas, idiomas) ── */-->
-
 
                 <th:block th:each="sec : ${ {
                 {'👁','Sentidos','sensesList'},
@@ -364,7 +353,6 @@
             } }">
                 </th:block>
 
-                <!--/* Sentidos */-->
                 <div class="traits-section">
                     <h4 class="traits-title">👁 Sentidos</h4>
                     <div class="pill-group" id="sensesList">
@@ -386,7 +374,7 @@
                     </div>
                 </div>
 
-                <!--/* Resistências */-->
+
                 <div class="traits-section">
                     <h4 class="traits-title">🔥 Resistências</h4>
                     <div class="pill-group" id="resistancesList">
@@ -408,7 +396,7 @@
                     </div>
                 </div>
 
-                <!--/* Imunidades */-->
+
                 <div class="traits-section">
                     <h4 class="traits-title">🛡 Imunidades</h4>
                     <div class="pill-group" id="immunitiesList">
@@ -430,7 +418,6 @@
                     </div>
                 </div>
 
-                <!--/* Armaduras */-->
                 <div class="traits-section">
                     <h4 class="traits-title">🪖 Armadura</h4>
                     <div class="pill-group" id="armorList">
@@ -452,7 +439,6 @@
                     </div>
                 </div>
 
-                <!--/* Armas */-->
                 <div class="traits-section">
                     <h4 class="traits-title">⚔ Armas</h4>
                     <div class="pill-group" id="weaponsList">
@@ -474,7 +460,6 @@
                     </div>
                 </div>
 
-                <!--/* Idiomas */-->
                 <div class="traits-section">
                     <h4 class="traits-title">🗣 Idiomas</h4>
                     <div class="pill-group" id="languagesList">
@@ -498,7 +483,6 @@
 
             </section>
 
-            <!-- ─ TABS LATERAIS ──────────────────────────── -->
             <nav class="sheet-tabs" aria-label="Seções da ficha">
                 <button class="sheet-tab active" type="button" title="Visão Geral">
                     <span class="material-symbols-outlined">person</span>
@@ -517,9 +501,9 @@
                 </button>
             </nav>
 
-        </div><!-- /sheet-body -->
+        </div>
 
-    </div><!-- /sheet -->
+    </div>
 
 </body>
 
