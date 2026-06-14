@@ -18,8 +18,8 @@ public record TftSP(int currentSP, int maxSP, int paleSP) {
 
     public static TftSP converterRegistros(Map<String, Object> registros) {
         return new TftSP(
-                (int) registros.get("max_sp"),
                 (int) registros.get("current_sp"),
+                (int) registros.get("max_sp"),
                 (int) registros.get("pale_sp")
         );
     }

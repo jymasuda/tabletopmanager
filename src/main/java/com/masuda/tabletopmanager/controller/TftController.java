@@ -22,21 +22,21 @@ import com.masuda.tabletopmanager.model.Personagem.TFT.TftSheetService;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * All TFT sheet endpoints.
- * Wire this class into Spring by dropping it alongside MainController —
- * it's annotated @Controller so it's picked up automatically by @SpringBootApplication.
+ * All TFT sheet endpoints. Wire this class into Spring by dropping it alongside
+ * MainController — it's annotated @Controller so it's picked up automatically
+ * by @SpringBootApplication.
  *
- * GET  /personagem/{id}/tft                  → renders fragment tft-sheet :: sheet
- * POST /personagem/{id}/tft/identidade        → name + sin
- * POST /personagem/{id}/tft/recursos          → HP / SP / sin points
- * POST /personagem/{id}/tft/atributos         → 9 attributes
- * POST /personagem/{id}/tft/skills            → all skills + specialties
- * POST /personagem/{id}/tft/resistencias      → 7 resistance values
- * POST /personagem/{id}/tft/features          → bulk update existing feature text
- * POST /personagem/{id}/tft/feature/novo      → create feature  → returns {id}
- * POST /personagem/{id}/tft/feature/{fid}/deletar → delete feature
- * POST /personagem/{id}/tft/ataque/novo       → create attack   → returns {id}
- * POST /personagem/{id}/tft/ataque/{aid}/deletar  → delete attack
+ * GET /personagem/{id}/tft → renders fragment tft-sheet :: sheet POST
+ * /personagem/{id}/tft/identidade → name + sin POST
+ * /personagem/{id}/tft/recursos → HP / SP / sin points POST
+ * /personagem/{id}/tft/atributos → 9 attributes POST
+ * /personagem/{id}/tft/skills → all skills + specialties POST
+ * /personagem/{id}/tft/resistencias → 7 resistance values POST
+ * /personagem/{id}/tft/features → bulk update existing feature text POST
+ * /personagem/{id}/tft/feature/novo → create feature → returns {id} POST
+ * /personagem/{id}/tft/feature/{fid}/deletar → delete feature POST
+ * /personagem/{id}/tft/ataque/novo → create attack → returns {id} POST
+ * /personagem/{id}/tft/ataque/{aid}/deletar → delete attack
  */
 @Controller
 public class TftController {
@@ -54,27 +54,28 @@ public class TftController {
 
     @GetMapping("/personagem/{id}/tft")
     public String visualizarFichaTft(@PathVariable int id,
-                                     HttpSession session,
-                                     Model model) {
-        if (userId(session) == null) return "redirect:/";
+            HttpSession session,
+            Model model) {
+        if (userId(session) == null) {
+            return "redirect:/";
+        }
 
         TftSheetService ts = svc();
         TftSheet ficha = ts.obterFichaTft(id);
 
-        if (ficha.getuId().idUsuario() != userId(session)) return "redirect:/dashboard";
+        if (ficha.getuId().idUsuario() != userId(session)) {
+            return "redirect:/dashboard";
+        }
 
-        model.addAttribute("ficha",      ficha);
-        model.addAttribute("hp",         ficha.getHp());
-        model.addAttribute("sp",         ficha.getSp());
+        model.addAttribute("ficha", ficha);
+        model.addAttribute("hp", ficha.getHp());
+        model.addAttribute("sp", ficha.getSp());
+        model.addAttribute("sinPoints", ficha.getSinPoints());
         model.addAttribute("attributes", ficha.getAttributes());
-        model.addAttribute("combat",     ficha.getCombatAttributes());
-        model.addAttribute("skills",     ts.obterSkills(id));
-        model.addAttribute("features",   ts.obterFeatures(id));
-        model.addAttribute("attacks",    ts.obterAtaques(id));
+        model.addAttribute("combat", ficha.getCombatAttributes());
 
         return "fragments/tft-sheet :: sheet";
     }
-
 
     @PostMapping("/personagem/{id}/tft/identidade")
     @ResponseBody
@@ -83,8 +84,9 @@ public class TftController {
             @RequestBody Map<String, String> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         svc().atualizarIdentidade(id, body.get("nome"), body.get("sin"));
         return ResponseEntity.ok(Map.of("message", "Identidade atualizada."));
@@ -97,13 +99,14 @@ public class TftController {
             @RequestBody Map<String, Integer> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         svc().atualizarRecursos(id,
-            orZero(body, "hpAtual"), orZero(body, "hpMax"), orZero(body, "hpPale"),
-            orZero(body, "spAtual"), orZero(body, "spMax"), orZero(body, "spPale"),
-            orZero(body, "sinPoints"));
+                orZero(body, "hpAtual"), orZero(body, "hpMax"), orZero(body, "hpPale"),
+                orZero(body, "spAtual"), orZero(body, "spMax"), orZero(body, "spPale"),
+                orZero(body, "sinPoints"));
 
         return ResponseEntity.ok(Map.of("message", "Recursos atualizados."));
     }
@@ -115,19 +118,20 @@ public class TftController {
             @RequestBody Map<String, Integer> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         TftAttributes attrs = new TftAttributes(
-            orZero(body, "physique"),
-            orZero(body, "endurance"),
-            orZero(body, "understanding"),
-            orZero(body, "calmness"),
-            orZero(body, "intuition"),
-            orZero(body, "presence"),
-            orZero(body, "conviction"),
-            orZero(body, "reflex"),
-            orZero(body, "focus"));
+                orZero(body, "physique"),
+                orZero(body, "endurance"),
+                orZero(body, "understanding"),
+                orZero(body, "calmness"),
+                orZero(body, "intuition"),
+                orZero(body, "presence"),
+                orZero(body, "conviction"),
+                orZero(body, "reflex"),
+                orZero(body, "focus"));
 
         svc().atualizarAtributos(id, attrs);
         return ResponseEntity.ok(Map.of("message", "Atributos atualizados."));
@@ -140,12 +144,15 @@ public class TftController {
             @RequestBody Map<String, Object> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> skills = (List<Map<String, Object>>) body.get("skills");
-        if (skills != null) svc().atualizarSkills(id, skills);
+        if (skills != null) {
+            svc().atualizarSkills(id, skills);
+        }
 
         return ResponseEntity.ok(Map.of("message", "Skills atualizadas."));
     }
@@ -157,22 +164,22 @@ public class TftController {
             @RequestBody Map<String, Integer> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         TftCombat combat = new TftCombat(
-            orZero(body, "blunt"),
-            orZero(body, "piercing"),
-            orZero(body, "slashing"),
-            orZero(body, "red"),
-            orZero(body, "white"),
-            orZero(body, "black"),
-            orZero(body, "pale"));
+                orZero(body, "blunt"),
+                orZero(body, "piercing"),
+                orZero(body, "slashing"),
+                orZero(body, "red"),
+                orZero(body, "white"),
+                orZero(body, "black"),
+                orZero(body, "pale"));
 
         svc().atualizarResistencias(id, combat);
         return ResponseEntity.ok(Map.of("message", "Resistências atualizadas."));
     }
-
 
     @PostMapping("/personagem/{id}/tft/features")
     @ResponseBody
@@ -181,12 +188,15 @@ public class TftController {
             @RequestBody Map<String, Object> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> features = (List<Map<String, Object>>) body.get("features");
-        if (features != null) svc().atualizarFeatures(id, features);
+        if (features != null) {
+            svc().atualizarFeatures(id, features);
+        }
 
         return ResponseEntity.ok(Map.of("message", "Features atualizadas."));
     }
@@ -198,13 +208,14 @@ public class TftController {
             @RequestBody Map<String, String> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         Integer newId = svc().inserirFeature(id,
-            body.get("source"),
-            body.get("nome"),
-            body.get("descricao"));
+                body.get("source"),
+                body.get("nome"),
+                body.get("descricao"));
 
         return ResponseEntity.ok(Map.of("id", newId, "message", "Feature criada."));
     }
@@ -216,8 +227,9 @@ public class TftController {
             @PathVariable int fid,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         svc().deletarFeature(fid, id);
         return ResponseEntity.ok(Map.of("message", "Feature removida."));
@@ -230,8 +242,9 @@ public class TftController {
             @RequestBody Map<String, Object> body,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         Integer newId = svc().inserirAtaque(id, body);
         return ResponseEntity.ok(Map.of("id", newId, "message", "Ataque criado."));
@@ -244,8 +257,9 @@ public class TftController {
             @PathVariable int aid,
             HttpSession session) {
 
-        if (userId(session) == null)
+        if (userId(session) == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Não autenticado."));
+        }
 
         svc().deletarAtaque(aid, id);
         return ResponseEntity.ok(Map.of("message", "Ataque removido."));
