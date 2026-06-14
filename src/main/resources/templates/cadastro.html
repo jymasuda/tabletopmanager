@@ -8,20 +8,20 @@
             <div class="overlay"></div>
             <main class="auth-card">
                 <h1>Cadastro</h1>
-                <form id="registerForm" action="javascript:void(0)" method="post" th:object="${user}">
+                <form id="registerForm" action="javascript:void(0)" method="post">
                     <div class="input-group">
                         <label for="registerName">Nome</label>
-                        <input type="text" id="registerName" placeholder="Nome de usuário" th:field="*{nome}">
+                        <input type="text" id="registerName" placeholder="Nome de usuário"">
                         <span class="field-error" id="registerNameError"></span>
                     </div>
                     <div class="input-group">
                         <label for="registerEmail">E-mail</label>
-                        <input type="text" id="registerEmail" placeholder="seu@email.com" th:field="*{email}">
+                        <input type="text" id="registerEmail" placeholder="seu@email.com">
                         <span class="field-error" id="registerEmailError"></span>
                     </div>
                     <div class="input-group">
                         <label for="registerPassword">Senha</label>
-                        <input type="password" id="registerPassword" placeholder="Senha" th:field="*{senha}">
+                        <input type="password" id="registerPassword" placeholder="Senha">
                         <span class="field-error" id="registerPasswordError"></span>
                     </div>
                     <div class="input-group">
