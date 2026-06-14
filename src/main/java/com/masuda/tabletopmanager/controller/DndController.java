@@ -33,7 +33,7 @@ public class DndController {
         ApplicationContext context;
 
 
-    @GetMapping("/personagem/{id}/dnd/")
+    @GetMapping("/personagem/{id}/dnd")
         public String visualizarPersonagem(@PathVariable int id, HttpSession session, Model model) {
             Integer usuarioId = (Integer) session.getAttribute("usuarioId");
             if (usuarioId == null) {

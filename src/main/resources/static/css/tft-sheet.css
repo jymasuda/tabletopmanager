@@ -1,7 +1,6 @@
 /* =========================================================
-   TFT SHEET — adapted from lobcorpStylesheet.css
-   All rules scoped under .lobcorp to avoid conflict with
-   the existing DnD sheet styles.
+   TFT SHEET — tft-sheet.css
+   All rules scoped under .lobcorp
    ========================================================= */
 
 /* ── CSS Variables ──────────────────────────────────────── */
@@ -16,8 +15,8 @@
   --lc-hr:               #5f5d44;
   --lc-dot-empty:        #3a3826;
   --lc-dot-filled:       #a3a075;
-  --lc-sin-color:        #da4c33;   /* overridden per sin type via JS */
-  --lc-radius:           0px;       /* notched style uses clip, not radius */
+  --lc-sin-color:        #da4c33;
+  --lc-radius:           0px;
 }
 
 /* ── Sin accent colors ──────────────────────────────────── */
@@ -29,25 +28,32 @@
 .lobcorp .PRIDE    { color: #2887cf; }
 .lobcorp .ENVY     { color: #9c69b2; }
 
-/* Sin color applied to pip track border, applied in JS */
+.lobcorp .FORTITUDE  { color: #da4c33; }
+.lobcorp .PRUDENCE   { color: #56b4c9; }
+.lobcorp .TEMPERANCE { color: #9c69b2; }
+.lobcorp .JUSTICE    { color: #fcd700; }
+
+/* ── Damage type colors ─────────────────────────────────── */
+.lobcorp .dmg-dot-RED   { color: #da4c33; }
+.lobcorp .dmg-dot-WHITE { color: #e8e8e8; }
+.lobcorp .dmg-dot-BLACK { color: #888;    }
+.lobcorp .dmg-dot-PALE  { color: #56b4c9; }
+.lobcorp .ft-type-name.RED   { color: #da4c33; }
+.lobcorp .ft-type-name.WHITE { color: #e8e8e8; }
+.lobcorp .ft-type-name.BLACK { color: #888;    }
+.lobcorp .ft-type-name.PALE  { color: #56b4c9; }
+
+.lobcorp .dmg-type-RED   { color: #da4c33; border-color: #da4c33; }
+.lobcorp .dmg-type-WHITE { color: #e0e0e0; border-color: #e0e0e0; }
+.lobcorp .dmg-type-BLACK { color: #888;    border-color: #888; }
+.lobcorp .dmg-type-PALE  { color: #56b4c9; border-color: #56b4c9; }
+
+/* ── Sin pip ────────────────────────────────────────────── */
 .lobcorp .sin-pip { border-color: var(--lc-sin-color); }
 .lobcorp .sin-pip.active {
   background-color: var(--lc-sin-color);
   box-shadow: 0 0 4px var(--lc-sin-color);
 }
-
-/* ── Resource type colors ───────────────────────────────── */
-.lobcorp .health .resource-counter-step { background-color: #2a1010; border: 1px solid #ff4d4d; }
-.lobcorp .health .resource-counter-step.empty { opacity: 0.25; }
-.lobcorp .sanity .resource-counter-step { background-color: #101828; border: 1px solid #39a6df; }
-.lobcorp .sanity .resource-counter-step.empty { opacity: 0.25; }
-.lobcorp .resource-counter-step.pale { opacity: 0.25; }
-
-/* ── Damage type badge colors ───────────────────────────── */
-.lobcorp .dmg-type-RED   { color: #da4c33; border-color: #da4c33; }
-.lobcorp .dmg-type-WHITE { color: #e0e0e0; border-color: #e0e0e0; }
-.lobcorp .dmg-type-BLACK { color: #888;    border-color: #888; }
-.lobcorp .dmg-type-PALE  { color: #56b4c9; border-color: #56b4c9; }
 
 /* =========================================================
    BASE
@@ -62,23 +68,47 @@
   overflow: hidden;
 }
 
-/* Edit-mode show/hide — mirrors dnd-sheet.css pattern */
+/* Edit-mode show/hide */
 .lobcorp .edit-inp   { display: none !important; }
 .lobcorp .display-val { display: inline; }
+
+/* dnd-sheet.css defines a global, unscoped `.edit-inp { max-width: 80px }`
+   which (since both stylesheets load on the same page) also applies to
+   every .edit-inp element in here, squishing inputs/selects/overlays to
+   80px. Neutralize it; elements that need a specific width set their own
+   width/max-width below (which, being more specific, still apply). */
+.lobcorp .edit-inp   { max-width: none; }
 
 .lobcorp[data-editing="true"] .edit-inp    { display: inline-block !important; }
 .lobcorp[data-editing="true"] .display-val { display: none !important; }
 
-/* Inline-flex variants need their own rule */
-.lobcorp[data-editing="true"] .tft-res-edit,
-.lobcorp[data-editing="true"] .tft-feat-add-form,
-.lobcorp[data-editing="true"] .combat-add-btn {
-  display: flex !important;
+/* Flex overrides for edit-mode containers */
+.lobcorp[data-editing="true"] .rp-add-section,
+.lobcorp[data-editing="true"] .tft-feat-add-form {
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
 }
+.lobcorp[data-editing="true"] .rp-add-trigger { display: block !important; }
+.lobcorp[data-editing="true"] .skill-spec-toggle { display: inline-flex !important; }
+.lobcorp[data-editing="true"] .skill-spec-input.open { display: block !important; }
+.lobcorp[data-editing="true"] .atk-type-select { display: inline-block !important; }
+.lobcorp[data-editing="true"] .skill-action-icons { display: flex !important; }
 
-/* Edit toggle — reuses dnd-sheet classes */
+/* Icon button base */
+.lobcorp .icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--lc-text);
+  opacity: 0.6;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 1;
+  transition: opacity 0.15s, color 0.15s;
+}
+.lobcorp .icon-btn:hover { opacity: 1; color: var(--lc-header); }
+
+/* Edit toggle */
 .lobcorp .sheet-edit-toggle {
   position: absolute;
   top: 6px;
@@ -137,17 +167,17 @@
    ========================================================= */
 .lobcorp .gridcontainer {
   display: grid;
-  grid-template-columns: 260px 1fr 1fr 1fr 220px;
+  grid-template-columns: 240px 1fr 1fr 1fr 210px;
   grid-template-rows: 1fr auto;
   gap: 8px;
-  padding: 8px 8px 8px 44px; /* left pad for the edit toggle */
+  padding: 8px 8px 8px 44px;
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .lobcorp .agent        { grid-column: 1;     grid-row: 1; overflow-y: auto; }
-.lobcorp .combat-panel { grid-column: 2 / 5; grid-row: 1; overflow-y: auto; }
+.lobcorp .combat-panel { grid-column: 2 / 5; grid-row: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .lobcorp .right-panel  { grid-column: 5;     grid-row: 1; overflow-y: auto; }
 .lobcorp .stats-panel  { grid-column: 1 / 3; grid-row: 2; }
 .lobcorp .skills-panel { grid-column: 3 / 6; grid-row: 2; }
@@ -168,24 +198,30 @@
 /* =========================================================
    AGENT PANEL
    ========================================================= */
-.lobcorp .agent { padding-bottom: 8px; }
+.lobcorp .agent {
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
 
 .lobcorp .profile {
   background-color: var(--lc-panel-inner);
   margin: 8px;
 }
-.lobcorp .inner-profile { padding: 8px 8px 4px; }
+.lobcorp .inner-profile { padding: 8px 8px 6px; }
 
 .lobcorp .profile-img {
   width: 100%;
   max-height: 160px;
   object-fit: cover;
   object-position: top;
-  border: none;
   display: block;
 }
 
-.lobcorp .name-field { margin: 6px 0 2px; text-align: center; }
+.lobcorp .name-field {
+  margin: 6px 0 2px;
+  text-align: center;
+}
 .lobcorp .charname {
   font-size: 15px;
   color: var(--lc-header);
@@ -194,23 +230,34 @@
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--lc-border);
-  color: var(--lc-header);
   font-family: "Norwester", Arial, sans-serif;
   padding: 2px 4px;
   box-sizing: border-box;
 }
+.lobcorp .charname.edit-inp {
+  display: none !important;
+}
+.lobcorp[data-editing="true"] .charname.edit-inp {
+  display: block !important;
+}
 
-.lobcorp hr { margin: 4px 0; border: none; border-top: 1px solid var(--lc-hr); }
+.lobcorp hr { margin: 6px 0; border: none; border-top: 1px solid var(--lc-hr); }
 
-.lobcorp .blurbsintext {
+/* Name + Sin row */
+.lobcorp .name-sin-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 6px;
-  font-size: 12px;
-  padding: 2px 0;
+  padding: 3px 4px 5px;
 }
-.lobcorp .sin-color-label { font-weight: bold; font-size: 13px; }
-
+.lobcorp .sin-color-label {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px currentColor;
+}
 .lobcorp .tft-sin-select {
   background: transparent;
   border: none;
@@ -221,62 +268,133 @@
 }
 
 /* =========================================================
-   POINT CONTAINERS (HP / SP / Sin)
+   RESOURCE CONTAINERS (HP / SP / Sin)
    ========================================================= */
 .lobcorp .point-container {
   border: 1px solid var(--lc-border);
-  margin: 10px 10px 4px;
-  text-align: center;
+  margin: 8px 10px 4px;
 }
-.lobcorp .point-container > div:first-child {
-  position: relative;
-}
-.lobcorp .point-container label {
-  position: relative;
-  padding: 0 6px;
-  top: -10px;
-  font-size: 11px;
-  background-color: var(--lc-bg);
-  display: inline-block;
-}
-.lobcorp .resource-control { cursor: pointer; opacity: 0.6; }
-.lobcorp .resource-control:hover { opacity: 1; }
 
-/* Pip tracks */
-.lobcorp .hp-pips,
-.lobcorp .sp-pips {
+.lobcorp .resource-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+}
+
+.lobcorp .resource-title {
+  position: relative;
+  top: -9px;
+  background-color: var(--lc-bg);
+  padding: 0 6px;
+  font-size: 11px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* +/- max controls — only in edit mode */
+.lobcorp .resource-control {
+  position: relative;
+  top: -9px;
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 13px;
+  font-weight: bold;
+  background: none;
+  border: none;
+  color: var(--lc-text);
+  padding: 0 4px;
+  line-height: 1;
+  font-family: inherit;
+}
+.lobcorp .resource-control:hover { opacity: 1; color: var(--lc-header); }
+
+/* Box track */
+.lobcorp .res-box-track {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
-  padding: 0 10px 6px;
+  padding: 4px 10px 8px;
   justify-content: center;
+  min-height: 28px;
 }
-.lobcorp .pale-pips { opacity: 0.35; }
 
-.lobcorp .resource-counter-step {
-  width: 18px;
-  height: 18px;
-  display: inline-block;
+/* Individual box */
+.lobcorp .res-box {
+  width: 20px;
+  height: 20px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
   position: relative;
-  top: -6px;
+  transition: background 0.1s;
+  font-family: monospace;
+  line-height: 1;
 }
+
+/* HP box states */
+.lobcorp .hp-boxes .res-box[data-state="empty"] {
+  border-color: #7a2a2a;
+  background: #1a0808;
+  color: transparent;
+}
+.lobcorp .hp-boxes .res-box[data-state="slash"] {
+  border-color: #cc4444;
+  background: #2a0f0f;
+  color: #e06060;
+}
+.lobcorp .hp-boxes .res-box[data-state="x"] {
+  border-color: #ff4444;
+  background: #3a1010;
+  color: #ff6060;
+}
+.lobcorp .hp-boxes .res-box[data-state="pale"] {
+  border-color: #3a2a2a;
+  background: #100808;
+  color: transparent;
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* SP box states */
+.lobcorp .sp-boxes .res-box[data-state="empty"] {
+  border-color: #1a3a5a;
+  background: #080f1a;
+  color: transparent;
+}
+.lobcorp .sp-boxes .res-box[data-state="slash"] {
+  border-color: #2a6aaa;
+  background: #0f1e30;
+  color: #5090d0;
+}
+.lobcorp .sp-boxes .res-box[data-state="x"] {
+  border-color: #39a6df;
+  background: #102030;
+  color: #60c0f0;
+}
+.lobcorp .sp-boxes .res-box[data-state="pale"] {
+  border-color: #1a2a3a;
+  background: #080c10;
+  color: transparent;
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Hover hints — only on active boxes */
+.lobcorp .hp-boxes .res-box[data-state="empty"]:hover  { background: #2a1010; }
+.lobcorp .hp-boxes .res-box[data-state="slash"]:hover  { background: #3a1414; }
+.lobcorp .hp-boxes .res-box[data-state="x"]:hover      { background: #4a1a1a; }
+.lobcorp .sp-boxes .res-box[data-state="empty"]:hover  { background: #0f1e30; }
+.lobcorp .sp-boxes .res-box[data-state="slash"]:hover  { background: #142840; }
+.lobcorp .sp-boxes .res-box[data-state="x"]:hover      { background: #1a3050; }
 
 /* Edit mode resource inputs */
-.lobcorp .tft-res-edit {
-  padding: 4px 10px 8px;
-  gap: 8px;
-  font-size: 11px;
-}
-.lobcorp .tft-res-edit label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.lobcorp .tft-res-edit input {
-  width: 44px;
-  background: transparent;
-  border: 1px solid var(--lc-border);
-  color: var(--lc-text);
-  font-size: 11px;
-  text-align: center;
-  padding: 2px;
-}
 
 /* Sin pips */
 .lobcorp .sin-tracker { padding: 0 10px 4px; }
@@ -307,22 +425,21 @@
    ========================================================= */
 .lobcorp .combat-panel {
   padding: 0 12px 10px;
-  display: flex;
-  flex-direction: column;
 }
 
 .lobcorp .combat-skills-grid {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 12px;
   flex: 1;
-  padding: 4px 0;
+  padding: 6px 0;
   overflow-x: auto;
+  align-items: flex-start;
 }
 
+/* Individual skill card */
 .lobcorp .combat-skill {
-  flex: 1;
-  min-width: 140px;
+  flex: 0 0 160px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -331,113 +448,182 @@
 }
 .lobcorp .combat-skill:first-child { border-left: none; padding-left: 0; }
 
+/* Skill image */
+.lobcorp .skill-img-wrap {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border: 1px solid var(--lc-border);
+  background: #0a0a06;
+  flex-shrink: 0;
+}
+.lobcorp .skill-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Skill type row */
+.lobcorp .combat-skill-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lobcorp .skill-type-label {
+  font-size: 10px;
+  color: var(--lc-text);
+  opacity: 0.7;
+  background: rgba(119,116,89,0.15);
+  border: 1px solid var(--lc-border);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+.lobcorp .atk-type-select {
+  background: var(--lc-panel-inner);
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 10px;
+  padding: 1px 3px;
+  width: 100%;
+}
+
+/* Skill name + actions row */
 .lobcorp .combat-skill-header {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 .lobcorp .skill-index {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--lc-text);
-  opacity: 0.65;
+  opacity: 0.55;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+.lobcorp .skill-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
 .lobcorp .skill-title {
   font-family: "Norwester", Arial, sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   color: var(--lc-header);
   text-shadow: 0 0 3px var(--lc-header-glow);
+  flex: 1;
+  line-height: 1.15;
 }
 .lobcorp .atk-name-inp {
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--lc-border);
   color: var(--lc-header);
-  font-size: 14px;
+  font-size: 13px;
   font-family: inherit;
-  width: 100%;
+  flex: 1;
 }
-
-/* Damage badges */
-.lobcorp .atk-damage-row {
-  display: flex;
-  gap: 5px;
+.lobcorp .skill-action-icons {
+  display: none;
+  gap: 4px;
   align-items: center;
-  flex-wrap: wrap;
-}
-.lobcorp .atk-badge {
-  font-size: 10px;
-  border: 1px solid var(--lc-border);
-  padding: 1px 6px;
-  border-radius: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--lc-text);
-}
-.lobcorp .atk-threat {
-  font-size: 10px;
-  color: var(--lc-text);
-  opacity: 0.7;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.lobcorp .combat-skill-summary {
-  font-size: 11px;
+/* Damage summary */
+.lobcorp .atk-damage-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+  min-height: 18px;
+}
+.lobcorp .dmg-token {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--lc-text);
+}
+.lobcorp .dmg-form { color: var(--lc-text); }
+.lobcorp .dmg-meta { color: var(--lc-text); opacity: 0.7; font-weight: normal; }
+
+/* Description */
+.lobcorp .combat-skill-desc {
+  font-size: 10px;
   color: var(--lc-text);
   opacity: 0.8;
   border-left: 2px solid var(--lc-border);
   padding-left: 5px;
-  line-height: 1.4;
-  max-height: 120px;
+  line-height: 1.45;
+  max-height: 130px;
   overflow-y: auto;
-}
-
-.lobcorp .combat-skill-controls {
-  display: flex;
-  gap: 6px;
-  margin-top: auto;
-  font-size: 12px;
-}
-
-.lobcorp .combat-skills-empty {
   flex: 1;
+}
+
+/* Add skill placeholder — always visible, interactive only in edit mode */
+.lobcorp .combat-skill-add {
+  border-left: 1px solid var(--lc-border);
+  padding-left: 10px;
+  flex: 0 0 72px;
+  min-height: 80px;
+  cursor: default;
+  transition: background 0.15s;
+  opacity: 0.35;
+}
+.lobcorp[data-editing="true"] .combat-skill-add {
+  cursor: pointer;
+  opacity: 0.65;
+}
+.lobcorp[data-editing="true"] .combat-skill-add:hover {
+  background: rgba(119,116,89,0.12);
+  opacity: 1;
+}
+.lobcorp .add-skill-inner {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0.4;
-  font-size: 12px;
+  gap: 4px;
 }
-
-.lobcorp .combat-add-btn {
-  align-self: flex-end;
-  background: transparent;
-  border: 1px solid var(--lc-border);
+.lobcorp .add-skill-plus {
+  font-size: 26px;
+  line-height: 1;
   color: var(--lc-text);
-  font-size: 11px;
-  padding: 2px 8px;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: color 0.15s;
 }
-.lobcorp .combat-add-btn:hover { color: var(--lc-header); }
+.lobcorp .add-skill-label {
+  font-size: 9px;
+  color: var(--lc-text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
-/* Add-attack modal-row (edit mode) */
+/* Add attack form — centered overlay positioned relative to .lobcorp
+   (the sheet container), so it's never squished regardless of the
+   narrow combat-panel flex layout. Uses % instead of vw/vh since
+   .lobcorp is position:relative and establishes its own box. */
 .lobcorp .tft-atk-add-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(94%, 440px);
+  max-width: 440px;
+  max-height: 88%;
+  overflow-y: auto;
   background: var(--lc-panel-inner);
   border: 1px solid var(--lc-border);
-  padding: 8px;
-  margin-top: 6px;
-  display: none;
+  padding: 14px;
+  margin-top: 0;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  z-index: 100;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.6), 0 0 24px rgba(0,0,0,0.8);
+  box-sizing: border-box;
 }
-.lobcorp[data-editing="true"] .tft-atk-add-form.open { display: flex; }
-
 .lobcorp .tft-atk-add-form label {
   font-size: 10px;
   color: var(--lc-text);
-  opacity: 0.8;
+  opacity: 0.85;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -452,73 +638,123 @@
   font-family: inherit;
   padding: 2px 4px;
 }
-.lobcorp .tft-atk-add-form textarea { resize: vertical; min-height: 40px; }
-.lobcorp .tft-atk-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.lobcorp .tft-atk-row > label { flex: 1; min-width: 90px; }
-
-/* =========================================================
-   RIGHT PANEL
-   ========================================================= */
-.lobcorp .right-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 4px 8px 8px;
-}
-
-/* Resistance section */
-.lobcorp .resistance-section {
+.lobcorp .tft-atk-add-form textarea { resize: vertical; min-height: 44px; }
+.lobcorp .tft-atk-row {
   display: flex;
   gap: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--lc-border);
-  margin-bottom: 4px;
+  flex-wrap: wrap;
 }
-
-.lobcorp .silhouette-img {
-  width: 60px;
-  height: 80px;
-  object-fit: cover;
-  object-position: top;
-  filter: grayscale(60%) brightness(0.65);
-  border: 1px solid var(--lc-border);
-  flex-shrink: 0;
-}
-
-.lobcorp .resistance-list {
-  flex: 1;
+.lobcorp .tft-atk-row > label { flex: 1; min-width: 90px; }
+.lobcorp .tft-atk-form-actions {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
-
-.lobcorp .resist-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-}
-.lobcorp .resist-label {
-  min-width: 36px;
-  opacity: 0.75;
-}
-.lobcorp .resist-row .display-val {
-  font-weight: bold;
-  color: var(--lc-header);
-  min-width: 18px;
-  text-align: right;
-}
-.lobcorp .tft-resist-inp {
-  width: 38px;
+.lobcorp .tft-atk-submit,
+.lobcorp .tft-atk-cancel {
   background: transparent;
   border: 1px solid var(--lc-border);
   color: var(--lc-text);
   font-size: 11px;
-  text-align: center;
-  padding: 1px 2px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.lobcorp .tft-atk-submit:hover { color: var(--lc-header); border-color: var(--lc-header); }
+.lobcorp .tft-atk-cancel:hover { color: #d3605c; border-color: #d3605c; }
+
+/* =========================================================
+   RIGHT PANEL — Form/Type + Features
+   ========================================================= */
+.lobcorp .right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 8px 8px;
 }
 
-/* Feature (rp-entry) cards */
+/* Form/Type resistance section */
+.lobcorp .form-type-section {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--lc-border);
+  margin-bottom: 4px;
+}
+
+.lobcorp .form-type-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+.lobcorp .ft-col-label {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 13px;
+  color: var(--lc-header);
+  text-shadow: 0 0 4px var(--lc-header-glow);
+  flex: 1;
+  text-align: center;
+}
+.lobcorp .ft-lock-btn {
+  background: none;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  padding: 2px 5px;
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.lobcorp .ft-lock-btn:hover { opacity: 1; }
+
+.lobcorp .form-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+
+.lobcorp .ft-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lobcorp .ft-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+.lobcorp .ft-dmg-icon {
+  width: 14px;
+  text-align: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.lobcorp .ft-dmg-name {
+  flex: 1;
+  font-size: 10px;
+  opacity: 0.8;
+}
+.lobcorp .ft-res-label {
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--lc-header);
+  min-width: 44px;
+  text-align: right;
+}
+.lobcorp .tft-resist-sel {
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 10px;
+  padding: 1px 2px;
+  width: 66px;
+}
+
+/* Feature entries */
 .lobcorp .rp-entries {
   display: flex;
   flex-direction: column;
@@ -527,31 +763,47 @@
   overflow-y: auto;
 }
 
+.lobcorp .rp-empty-msg {
+  font-size: 11px;
+  opacity: 0.4;
+  padding: 4px 0;
+}
+
 .lobcorp .rp-entry {
-  padding: 5px 7px;
+  padding: 4px 13px;
   font-size: 11px;
 }
 .lobcorp .rp-entry-header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
   border-bottom: 1px solid var(--lc-border);
-  padding-bottom: 2px;
+  padding-bottom: 3px;
   margin-bottom: 3px;
-  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.lobcorp .rp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--lc-border);
+  background: var(--lc-dot-empty);
+  flex-shrink: 0;
 }
 .lobcorp .rp-type {
-  font-size: 10px;
-  opacity: 0.6;
+  font-size: 9px;
+  opacity: 0.55;
   font-family: "Norwester", Arial, sans-serif;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 .lobcorp .rp-name {
   flex: 1;
-  text-align: right;
   color: var(--lc-header);
   font-size: 11px;
+  text-align: right;
 }
 .lobcorp .rp-name-inp {
   flex: 1;
@@ -563,14 +815,32 @@
   text-align: right;
   width: 100%;
 }
+.lobcorp .rp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.lobcorp .rp-collapse-btn {
+  font-size: 9px;
+  transition: transform 0.2s;
+}
+.lobcorp .rp-entry[data-collapsed="true"] .rp-collapse-btn {
+  transform: rotate(-90deg);
+}
+.lobcorp .rp-entry[data-collapsed="true"] .rp-body {
+  display: none;
+}
+.lobcorp .rp-body { }
 .lobcorp .rp-desc {
   font-size: 10px;
-  line-height: 1.4;
+  line-height: 1.45;
   opacity: 0.85;
+  padding: 2px 0;
 }
 .lobcorp .rp-desc-textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--lc-border);
   color: var(--lc-text);
   font-size: 10px;
@@ -581,47 +851,177 @@
   box-sizing: border-box;
 }
 
+/* Add entry section — centered overlay positioned relative to .lobcorp
+   (the sheet container), so it's never squished by the narrow
+   right-panel flex layout. Uses % instead of vw/vh. */
+.lobcorp .rp-add-section {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(94%, 360px);
+  max-width: 360px;
+  max-height: 88%;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0;
+  background: var(--lc-panel-inner);
+  border: 1px solid var(--lc-border);
+  padding: 14px;
+  z-index: 100;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.6), 0 0 24px rgba(0,0,0,0.8);
+  box-sizing: border-box;
+}
+.lobcorp .tft-feat-add-form {
+  flex-direction: column;
+  gap: 6px;
+}
+.lobcorp .tft-feat-add-form select,
+.lobcorp .tft-feat-add-form input,
+.lobcorp .tft-feat-add-form textarea {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+.lobcorp .tft-feat-add-form textarea { resize: vertical; min-height: 60px; }
+
+.lobcorp .tft-feat-form-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.lobcorp .tft-feat-add-btn {
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  flex: 1;
+  text-align: center;
+  transition: color 0.15s;
+}
+.lobcorp .tft-feat-add-btn:hover { color: var(--lc-header); border-color: var(--lc-header); }
+
+.lobcorp .tft-feat-cancel {
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.lobcorp .tft-feat-cancel:hover { color: #d3605c; border-color: #d3605c; }
+
+.lobcorp .rp-add-trigger {
+  background: transparent;
+  border: 1px solid var(--lc-border);
+  color: var(--lc-text);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;
+  transition: color 0.15s;
+}
+.lobcorp .rp-add-trigger:hover { color: var(--lc-header); }
+
 /* =========================================================
    STATS PANEL (Attributes)
    ========================================================= */
 .lobcorp .stats-panel { padding: 0 10px 10px; }
 
 .lobcorp .stats-groups {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 0;
+  padding-top: 6px;
 }
 
 .lobcorp .attr-group {
-  flex: 1;
-  min-width: 120px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
+  border-right: 1px solid rgba(119,116,89,0.3);
+  border-bottom: 1px solid rgba(119,116,89,0.3);
 }
+/* Remove right border on even columns, bottom border on last row */
+.lobcorp .attr-group:nth-child(2n)   { border-right: none; }
+.lobcorp .attr-group:nth-last-child(-n+2) { border-bottom: none; }
+.lobcorp .attr-group:last-child { border-right: none; }
 
+/* Group label: icon left, name stacked above rating */
+.lobcorp .attr-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
 .lobcorp .attr-group-icon {
-  font-size: 22px;
-  margin-bottom: 4px;
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .lobcorp .attr-group[data-group="physical"] .attr-group-icon { color: #da4c33; }
 .lobcorp .attr-group[data-group="mental"]   .attr-group-icon { color: #56b4c9; }
 .lobcorp .attr-group[data-group="social"]   .attr-group-icon { color: #9c69b2; }
 .lobcorp .attr-group[data-group="justice"]  .attr-group-icon { color: #fcd700; }
 
-.lobcorp .attr-group-attrs { width: 100%; }
+.lobcorp .attr-group-name {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 4px currentColor;
+  flex: 1;
+}
+
+.lobcorp .attr-group-rating {
+  font-family: "Norwester", Arial, sans-serif;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--lc-header);
+  text-shadow: 0 0 6px var(--lc-header-glow), 0 0 14px var(--lc-header-glow);
+  letter-spacing: 0.02em;
+}
+
+.lobcorp .attr-group-attrs { width: 100%; flex: 1; }
 
 .lobcorp .attr-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 5px;
   margin: 2px 0;
-  font-size: 12px;
+  font-size: 11px;
 }
-.lobcorp .attr-name { flex: 1; white-space: nowrap; font-size: 11px; }
+
+/* X marker — always visible */
+.lobcorp .attr-x {
+  color: var(--lc-border);
+  font-size: 11px;
+  flex-shrink: 0;
+  line-height: 1;
+  display: inline !important;
+  opacity: 0.8;
+}
+
+.lobcorp .attr-name {
+  flex: 1;
+  white-space: nowrap;
+  font-size: 11px;
+}
 
 .lobcorp .attr-dots {
   display: flex;
@@ -653,14 +1053,6 @@
   padding: 1px 2px;
 }
 
-.lobcorp .attr-group-rating {
-  font-family: "Norwester", Arial, sans-serif;
-  font-size: 14px;
-  color: var(--lc-header);
-  text-shadow: 0 0 3px var(--lc-header-glow);
-  margin-top: 5px;
-}
-
 /* =========================================================
    SKILLS PANEL
    ========================================================= */
@@ -676,7 +1068,6 @@
   min-width: 0;
 }
 
-/* .lobcorp .skill-row already exists in lobcorp source — scoped so no DnD conflict */
 .lobcorp .skill-row {
   display: flex;
   align-items: center;
@@ -686,6 +1077,16 @@
   border-bottom: 1px solid rgba(95, 93, 68, 0.28);
 }
 
+/* Edit specialty toggle button */
+.lobcorp .skill-spec-toggle {
+  font-size: 11px;
+  color: var(--lc-text);
+  opacity: 0.5;
+  flex-shrink: 0;
+  padding: 0;
+}
+.lobcorp .skill-spec-toggle:hover { opacity: 1; }
+
 .lobcorp .skill-name {
   flex: 0 0 78px;
   white-space: nowrap;
@@ -694,7 +1095,12 @@
   font-size: 10px;
 }
 
-.lobcorp .skill-specialty { flex: 1; min-width: 0; }
+/* Specialty wrap: text or input */
+.lobcorp .skill-specialty-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
 .lobcorp .skill-spec-text {
   font-size: 10px;
   color: var(--lc-header);
@@ -750,7 +1156,7 @@
    ========================================================= */
 @media (max-width: 1100px) {
   .lobcorp .gridcontainer {
-    grid-template-columns: 220px 1fr 1fr 200px;
+    grid-template-columns: 200px 1fr 1fr 190px;
     grid-template-rows: auto auto auto;
   }
   .lobcorp .combat-panel { grid-column: 2 / 4; }
@@ -771,4 +1177,8 @@
   .lobcorp .right-panel  { grid-column: 1 / -1; }
   .lobcorp .stats-panel  { grid-column: 1 / -1; }
   .lobcorp .skills-panel { grid-column: 1 / -1; }
+  .lobcorp .stats-groups { grid-template-columns: 1fr 1fr; }
+  .lobcorp .attr-group   { border-right: 1px solid rgba(119,116,89,0.3); border-bottom: 1px solid rgba(119,116,89,0.3); }
+  .lobcorp .attr-group:nth-child(2n)        { border-right: none; }
+  .lobcorp .attr-group:nth-last-child(-n+2) { border-bottom: none; }
 }

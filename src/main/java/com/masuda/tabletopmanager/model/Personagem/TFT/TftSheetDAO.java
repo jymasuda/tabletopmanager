@@ -24,8 +24,6 @@ public class TftSheetDAO {
         jdbc = new JdbcTemplate(dataSource);
     }
 
-    // ── Create ────────────────────────────────────────────
-
     public Integer inserirFichaTft(int idUsuario, String nome) {
         String sql = """
             INSERT INTO personagem (id_usuario, nome, sistema, avatar_url)
@@ -49,8 +47,8 @@ public class TftSheetDAO {
                 10, 10, 0,
                 1, 1, 1, 1,
                 1, 1, 1, 1, 1,
-                0, 0, 0,
-                0, 0, 0, 0)
+                3, 3, 3,
+                3, 3, 3, 3)
             """, id);
 
         for (TftSkillName skill : TftSkillName.values()) {
@@ -62,7 +60,6 @@ public class TftSheetDAO {
 
         return id;
     }
-
 
     public TftSheet obterFichaTft(int idPersonagem) {
         String sql = """
@@ -106,7 +103,7 @@ public class TftSheetDAO {
 
     public List<Map<String, Object>> obterAtaques(int idPersonagem) {
         String sql = """
-            SELECT id, nome, damage_type, damage_form,
+            SELECT id, nome, skill_type, damage_type, damage_form,
                    dicepool_mode, attribute, skill_primary, skill_secondary,
                    threat, attack_weight, attack_description
             FROM tft_attack
@@ -115,8 +112,6 @@ public class TftSheetDAO {
             """;
         return jdbc.queryForList(sql, idPersonagem);
     }
-
-    // ── Update: Identity ──────────────────────────────────
 
     public void atualizarIdentidade(int idPersonagem, String nome, String sin) {
         jdbc.update("""
@@ -130,11 +125,10 @@ public class TftSheetDAO {
         }
     }
 
-
     public void atualizarRecursos(int idPersonagem,
-                                  int hpAtual, int hpMax, int hpPale,
-                                  int spAtual, int spMax, int spPale,
-                                  int sinPoints) {
+            int hpAtual, int hpMax, int hpPale,
+            int spAtual, int spMax, int spPale,
+            int sinPoints) {
         jdbc.update("""
             UPDATE tft_sheets SET
                 current_hp = ?, max_hp = ?, pale_hp = ?,
@@ -142,8 +136,8 @@ public class TftSheetDAO {
                 sin_points = ?
             WHERE id_personagem = ?
             """, hpAtual, hpMax, hpPale,
-                 spAtual, spMax, spPale,
-                 sinPoints, idPersonagem);
+                spAtual, spMax, spPale,
+                sinPoints, idPersonagem);
     }
 
     public void atualizarAtributos(int idPersonagem, TftAttributes attrs) {
@@ -155,17 +149,17 @@ public class TftSheetDAO {
                 reflex = ?, focus = ?
             WHERE id_personagem = ?
             """,
-            attrs.physique(), attrs.endurance(),
-            attrs.understanding(), attrs.calmness(),
-            attrs.intuition(), attrs.presence(), attrs.conviction(),
-            attrs.reflex(), attrs.focus(),
-            idPersonagem);
+                attrs.physique(), attrs.endurance(),
+                attrs.understanding(), attrs.calmness(),
+                attrs.intuition(), attrs.presence(), attrs.conviction(),
+                attrs.reflex(), attrs.focus(),
+                idPersonagem);
     }
 
     public void atualizarSkills(int idPersonagem, List<Map<String, Object>> skills) {
         for (Map<String, Object> sk : skills) {
             String skillName = (String) sk.get("skill");
-            int points       = sk.get("points") != null ? ((Number) sk.get("points")).intValue() : 0;
+            int points = sk.get("points") != null ? ((Number) sk.get("points")).intValue() : 0;
             String specialty = (String) sk.get("specialty");
 
             jdbc.update("""
@@ -206,17 +200,17 @@ public class TftSheetDAO {
                 pale_resistance     = ?
             WHERE id_personagem = ?
             """,
-            combat.bluntResistance(), combat.piercingResistance(), combat.slashingResistance(),
-            combat.redResistance(), combat.whiteResistance(), combat.blackResistance(),
-            combat.paleResistance(),
-            idPersonagem);
+                combat.bluntResistance(), combat.piercingResistance(), combat.slashingResistance(),
+                combat.redResistance(), combat.whiteResistance(), combat.blackResistance(),
+                combat.paleResistance(),
+                idPersonagem);
     }
 
     public void atualizarFeatures(int idPersonagem, List<Map<String, Object>> features) {
         for (Map<String, Object> feat : features) {
-            int    id    = ((Number) feat.get("id")).intValue();
-            String nome  = (String) feat.get("nome");
-            String desc  = (String) feat.get("descricao");
+            int id = ((Number) feat.get("id")).intValue();
+            String nome = (String) feat.get("nome");
+            String desc = (String) feat.get("descricao");
             jdbc.update("""
                 UPDATE tft_feature SET nome = ?, descricao = ?
                 WHERE id = ? AND id_personagem = ?
@@ -240,26 +234,29 @@ public class TftSheetDAO {
         return jdbc.queryForObject("""
             INSERT INTO tft_attack (
                 id_personagem, nome,
+                skill_type,
                 damage_type, damage_form,
                 dicepool_mode, attribute, skill_primary, skill_secondary,
                 threat, attack_weight, attack_description)
             VALUES (?, ?,
+                ?::tft_skill_type,
                 ?::tft_dmg_type, ?::tft_dmg_form,
                 ?::tft_dicepool_mode, ?::tft_attribute_name, ?::tft_skill_name, ?::tft_skill_name,
                 ?, ?, ?)
             RETURNING id
             """, Integer.class,
-            idPersonagem,
-            body.get("nome"),
-            body.get("damage_type"),
-            body.get("damage_form"),
-            body.get("dicepool_mode"),
-            body.get("attribute"),
-            body.get("skill_primary"),
-            body.get("skill_secondary"),
-            body.get("threat"),
-            body.get("attack_weight"),
-            body.get("attack_description"));
+                idPersonagem,
+                body.get("nome"),
+                body.getOrDefault("skill_type", "ATTACK"),
+                body.get("damage_type"),
+                body.get("damage_form"),
+                body.get("dicepool_mode"),
+                body.get("attribute"),
+                body.get("skill_primary"),
+                body.get("skill_secondary"),
+                body.get("threat"),
+                body.get("attack_weight"),
+                body.get("attack_description"));
     }
 
     public void deletarAtaque(int id, int idPersonagem) {

@@ -20,6 +20,7 @@ DROP TYPE IF EXISTS tft_dicepool_mode CASCADE;
 DROP TYPE IF EXISTS tft_damage_type CASCADE;
 DROP TYPE IF EXISTS tft_dmg_type CASCADE;
 DROP TYPE IF EXISTS tft_dmg_form CASCADE;
+DROP TYPE IF EXISTS tft_skill_type CASCADE;
 DROP TYPE IF EXISTS tft_feature_source CASCADE;
 DROP TYPE IF EXISTS tft_skill_name CASCADE;
 DROP TYPE IF EXISTS dnd5e_feature_fonte CASCADE;
@@ -60,7 +61,7 @@ CREATE TYPE tft_feature_source AS ENUM (
 
 CREATE TYPE tft_dmg_form AS ENUM ('SLASH', 'PIERCE', 'BLUNT');
 CREATE TYPE tft_dmg_type AS ENUM ('RED', 'WHITE', 'BLACK', 'PALE');
-
+CREATE TYPE tft_skill_type AS ENUM ('ATTACK', 'DEFENSE', 'CORROSION');
 CREATE TYPE tft_dicepool_mode AS ENUM (
     'ATTRIBUTE_AND_SKILL',
     'SKILL_AND_SKILL'
@@ -239,8 +240,8 @@ CREATE TABLE IF NOT EXISTS tft_sheets (
   understanding INT, calmness INT, 
   intuition INT, presence INT, conviction INT,
   reflex INT, focus INT,
-  blunt_resistance INT, piercing_resistance INT, slashing_resistance INT,
-  red_resistance INT, white_resistance INT, black_resistance INT, pale_resistance INT
+  blunt_resistance INT DEFAULT 3, piercing_resistance INT DEFAULT 3, slashing_resistance INT DEFAULT 3,
+  red_resistance INT DEFAULT 3, white_resistance INT DEFAULT 3, black_resistance INT DEFAULT 3, pale_resistance INT DEFAULT 3
 );
 
 CREATE TABLE IF NOT EXISTS tft_skill (
@@ -282,6 +283,7 @@ CREATE TABLE IF NOT EXISTS tft_attack (
     id SERIAL PRIMARY KEY,
     id_personagem INT REFERENCES tft_sheets(id_personagem) ON DELETE CASCADE,
     nome VARCHAR(100) NOT NULL,
+    skill_type tft_skill_type NOT NULL DEFAULT 'ATTACK',
     damage_type tft_dmg_type,
     damage_form tft_dmg_form,
     CHECK (damage_type IS NOT NULL OR damage_form IS NOT NULL),

@@ -44,19 +44,13 @@ public class TftController {
     @Autowired
     ApplicationContext context;
 
-    // ── Helper: resolve service ───────────────────────────
     private TftSheetService svc() {
         return context.getBean(TftSheetService.class);
     }
 
-    // ── Helper: session guard ─────────────────────────────
     private Integer userId(HttpSession session) {
         return (Integer) session.getAttribute("usuarioId");
     }
-
-    // ═══════════════════════════════════════════════════════
-    //  READ — renders the Thymeleaf fragment
-    // ═══════════════════════════════════════════════════════
 
     @GetMapping("/personagem/{id}/tft")
     public String visualizarFichaTft(@PathVariable int id,
@@ -67,7 +61,6 @@ public class TftController {
         TftSheetService ts = svc();
         TftSheet ficha = ts.obterFichaTft(id);
 
-        // Ownership check
         if (ficha.getuId().idUsuario() != userId(session)) return "redirect:/dashboard";
 
         model.addAttribute("ficha",      ficha);
@@ -82,9 +75,6 @@ public class TftController {
         return "fragments/tft-sheet :: sheet";
     }
 
-    // ═══════════════════════════════════════════════════════
-    //  WRITE — one endpoint per dirty section
-    // ═══════════════════════════════════════════════════════
 
     @PostMapping("/personagem/{id}/tft/identidade")
     @ResponseBody
@@ -183,7 +173,6 @@ public class TftController {
         return ResponseEntity.ok(Map.of("message", "Resistências atualizadas."));
     }
 
-    // ── Features ──────────────────────────────────────────
 
     @PostMapping("/personagem/{id}/tft/features")
     @ResponseBody
@@ -234,8 +223,6 @@ public class TftController {
         return ResponseEntity.ok(Map.of("message", "Feature removida."));
     }
 
-    // ── Attacks ───────────────────────────────────────────
-
     @PostMapping("/personagem/{id}/tft/ataque/novo")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> inserirAtaque(
@@ -263,8 +250,6 @@ public class TftController {
         svc().deletarAtaque(aid, id);
         return ResponseEntity.ok(Map.of("message", "Ataque removido."));
     }
-
-    // ── Utility ───────────────────────────────────────────
 
     private static int orZero(Map<String, Integer> map, String key) {
         return map.getOrDefault(key, 0);
