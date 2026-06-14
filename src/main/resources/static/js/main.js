@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
     const menuFab = document.querySelector('.menu-fab');
 
-    // Estado da aplicação
     let selectedCharacter = null;
     let currentCategory = 'Todos';
     let sidebarHidden = false;
@@ -139,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Atualizar botão ativo
         tabButtons.forEach(btn => {
             btn.classList.toggle('selected', btn.textContent === category);
         });
@@ -183,11 +181,39 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.classList.toggle('hidden', isOpen);
     }
 
-    function handleDeleteCharacter(card) {
+    async function handleDeleteCharacter(card) {
         const id = card.dataset.id;
         const name = card.querySelector('h2')?.textContent || 'personagem';
-        console.log('Mock delete for personagem:', { id, name });
-        alert(`Excluir personagem "${name}" não está implementado ainda.`);
+
+        if (!confirm(`Excluir "${name}"? Esta ação não pode ser desfeita.`)) {
+            closeAllMenus();
+            return;
+        }
+
+        try {
+            const response = await fetch(`/personagem/${id}/deletar`, { method: 'POST' });
+            if (response.ok) {
+                if (selectedCharacter === card) {
+                    selectedCharacter = null;
+                    contentPane.innerHTML = `
+                        <div class="hero-panel">
+                            <h1>Seus personagens</h1>
+                            <p>Gerencie rapidamente suas fichas de RPG com a navegação lateral.</p>
+                        </div>`;
+                }
+                const idx = characterCards.indexOf(card);
+                if (idx !== -1) characterCards.splice(idx, 1);
+                card.remove();
+                updateCategoryTabs();
+            } else {
+                const data = await response.json().catch(() => ({}));
+                alert(data.error || 'Erro ao excluir personagem.');
+            }
+        } catch (err) {
+            console.error('Erro ao excluir personagem:', err);
+            alert('Erro de conexão. Tente novamente.');
+        }
+
         closeAllMenus();
     }
 
@@ -196,21 +222,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/';
     }
 
-    // Event listeners para tabs de categoria
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             filterCardsByCategory(button.textContent);
         });
     });
 
-    // Event listeners para cards de personagem
     characterCards.forEach(card => {
         card.addEventListener('click', () => {
             selectCharacter(card);
         });
     });
 
-    // Event delegation for card option menus
     sidebarMiddle.addEventListener('click', event => {
         const actionButton = event.target.closest('.card-action');
         if (actionButton) {
@@ -239,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event listeners para navegação inferior
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const label = item.getAttribute('aria-label');
@@ -251,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Event listener para botão de adicionar personagem
     const fabButton = document.querySelector('.fab');
     if (fabButton) {
         fabButton.addEventListener('click', () => {
@@ -304,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicializar categorias visíveis
     updateCategoryTabs();
 
 

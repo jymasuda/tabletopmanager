@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -109,6 +110,39 @@ public class MainController {
         }
 
         return ResponseEntity.ok(Map.of("message", "Personagem criado com sucesso.", "id", String.valueOf(novoId)));
+    }
+
+    @PostMapping("/personagem/{id}/deletar")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> deletarPersonagem(@PathVariable int id, HttpSession session) {
+        Integer usuarioId = (Integer) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Usuário não autenticado."));
+        }
+
+        PersonagemService ps = context.getBean(PersonagemService.class);
+        List<PersonagemResumo> resumos = ps.obterResumosPersonagemUsuario(usuarioId);
+
+        PersonagemResumo alvo = resumos.stream()
+                .filter(r -> r.id().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        if (alvo == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "Acesso negado."));
+        }
+
+        switch (alvo.sistema()) {
+            case "DND5E" ->
+                context.getBean(Dnd5eSheetService.class).deletarFichaDnd5e(id);
+            case "TFT" ->
+                context.getBean(TftSheetService.class).deletarFichaTft(id);
+            default -> {
+                return ResponseEntity.badRequest().body(Map.of("error", "Sistema desconhecido."));
+            }
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Personagem excluído com sucesso."));
     }
 
     @PostMapping("/logout")
