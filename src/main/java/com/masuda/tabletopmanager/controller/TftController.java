@@ -73,6 +73,9 @@ public class TftController {
         model.addAttribute("sinPoints", ficha.getSinPoints());
         model.addAttribute("attributes", ficha.getAttributes());
         model.addAttribute("combat", ficha.getCombatAttributes());
+        model.addAttribute("skills", ts.obterSkills(id));
+        model.addAttribute("features", ts.obterFeatures(id));
+        model.addAttribute("attacks", ts.obterAtaques(id));
 
         return "fragments/tft-sheet :: sheet";
     }

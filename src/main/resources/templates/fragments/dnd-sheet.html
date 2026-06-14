@@ -2,724 +2,525 @@
 
 <body>
 
-<div th:fragment="sheet"
-     class="lobcorp"
-     data-editing="false"
-     th:data-personagem-id="${ficha.id.idPersonagem}"
-     th:data-sin="${ficha.sin != null ? ficha.sin.name() : 'PRIDE'}">
+    <div th:fragment="sheet" class="sheet" data-editing="false" th:data-personagem-id="${ficha.id.idPersonagem}">
 
-    <button class="sheet-edit-toggle" id="tftEditToggle" type="button" aria-label="Modo de edição">
-        <span class="material-symbols-outlined edit-icon">edit</span>
-    </button>
+        <button class="sheet-edit-toggle" id="sheetEditToggle" type="button" aria-label="Modo de edição">
+            <span class="material-symbols-outlined edit-icon">edit</span>
+        </button>
 
-    <div class="gridcontainer">
+        <!-- ══ HEADER ══════════════════════════════════════ -->
+        <header class="sheet-header">
 
-        <!-- ══════════════════════════════════════════════════
-             COLUMN 1 — Agent Basic Information
-             ══════════════════════════════════════════════════ -->
-        <div class="notched agent">
-            <div class="headertext">Agent Basic Information</div>
+            <div class="sheet-identity">
+                <div>
+                    <span class="sheet-name display-val" th:text="${ficha.nome.nomePersonagem}">Nome</span>
+                    <input class="edit-inp sheet-name-inp" type="text" th:value="${ficha.nome.nomePersonagem}"
+                        placeholder="Nome">
+                </div>
 
-            <div class="profile">
-                <div class="inner-profile">
+                <div class="sheet-subline">
+                    <th:block th:if="${classes != null and !classes.empty}">
+                        <th:block th:each="cls, stat : ${classes}">
+                            <span class="display-val"
+                                th:text="${cls.classe.name() + ' ' + cls.level.levelClasse}"></span>
+                            <span class="display-val" th:if="${!stat.last}"> · </span>
+                        </th:block>
+                    </th:block>
+                    <span class="display-val" th:if="${classes == null or classes.empty}">Sem classe</span>
 
-                    <!-- Portrait -->
-                    <img class="profile-img"
-                         th:src="${ficha.avatarURL != null ? ficha.avatarURL : 'https://placehold.net/avatar.svg'}"
-                         th:alt="${ficha.nome.nomePersonagem}" />
 
-                    <!-- Name -->
-                    <div class="name-field">
-                        <span class="charname display-val" th:text="${ficha.nome.nomePersonagem}">Nome</span>
-                        <input class="charname edit-inp tft-name-inp" type="text"
-                               th:value="${ficha.nome.nomePersonagem}" placeholder="Nome do agente" />
-                    </div>
-
-                    <hr />
-
-                    <!-- Name + Sin on same row -->
-                    <div class="name-sin-row">
-                        <span class="display-val sin-color-label"
-                              th:text="${ficha.sin != null ? ficha.sin.name() : '—'}"
-                              th:classappend="${ficha.sin != null ? ficha.sin.name() : ''}">—</span>
-                        <select class="edit-inp tft-sin-select">
-                            <option value="">— Sin —</option>
-                            <option th:each="s : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftSin).values()}"
-                                    th:value="${s.name()}" th:text="${s.name()}"
-                                    th:selected="${ficha.sin == s}"></option>
-                        </select>
+                    <div class="edit-inp classes-editor" style="display:none; flex-direction:column; gap:6px;">
+                        <div class="classes-rows"></div>
+                        <button type="button" class="classes-add-btn" style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                border-radius:8px;color:var(--sh-gold);padding:4px 8px;
+                                cursor:pointer;font-size:0.75rem;align-self:flex-start;">
+                            + Multiclasse
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ── Health Points ─────────────────────────── -->
-            <div class="point-container"
-                 th:with="hpMax=${hp != null ? hp.maxHP() : 10},
-                           hpCurr=${hp != null ? hp.currentHP() : 10},
-                           hpPale=${hp != null ? hp.paleHP() : 0}">
-                <div class="resource-label-row">
-                    <button class="resource-control edit-inp" data-resource="hp" data-resource-action="minus"
-                            style="display:none;">−</button>
-                    <span class="resource-title hp-title">Health Points</span>
-                    <button class="resource-control edit-inp" data-resource="hp" data-resource-action="plus"
-                            style="display:none;">+</button>
-                </div>
-                <!-- Boxes rendered by JS on init -->
-                <div class="res-box-track hp-boxes"
-                     th:data-max="${hpMax}"
-                     th:data-curr="${hpCurr}"
-                     th:data-pale="${hpPale}"
-                     data-resource="hp"></div>
-            </div>
+            <th:block th:with="nivelTotal=${nivelTotal}">
 
-            <!-- ── Sanity Points ──────────────────────────── -->
-            <div class="point-container"
-                 th:with="spMax=${sp != null ? sp.maxSP() : 10},
-                           spCurr=${sp != null ? sp.currentSP() : 10},
-                           spPale=${sp != null ? sp.paleSP() : 0}">
-                <div class="resource-label-row">
-                    <button class="resource-control edit-inp" data-resource="sp" data-resource-action="minus"
-                            style="display:none;">−</button>
-                    <span class="resource-title sp-title">Sanity Points</span>
-                    <button class="resource-control edit-inp" data-resource="sp" data-resource-action="plus"
-                            style="display:none;">+</button>
-                </div>
-                <!-- Boxes rendered by JS on init -->
-                <div class="res-box-track sp-boxes"
-                     th:data-max="${spMax}"
-                     th:data-curr="${spCurr}"
-                     th:data-pale="${spPale}"
-                     data-resource="sp"></div>
-            </div>
-
-            <!-- ── Sin Points ─────────────────────────────── -->
-            <div class="point-container sin-points-container">
-                <div class="resource-label-row">
-                    <span class="resource-title sin-title">Sin Points</span>
-                </div>
-                <div class="sin-tracker">
-                    <div class="sin-pip-track" id="sinPipTrack">
-                        <span th:each="i : ${#numbers.sequence(1, 10)}"
-                              class="sin-pip"
-                              th:data-index="${i}"></span>
+                <div class="sheet-header-right">
+                    <div class="rest-actions">
+                        <button class="rest-btn" type="button" title="Descanso Curto">
+                            <span class="material-symbols-outlined">bedtime</span>
+                            <span class="rest-lbl">Curto</span>
+                        </button>
+                        <button class="rest-btn" type="button" title="Descanso Longo">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            <span class="rest-lbl">Longo</span>
+                        </button>
+                        <button class="rest-btn rest-levelup" type="button" title="Subir de Nível">
+                            <span class="material-symbols-outlined">grade</span>
+                            <span class="rest-lbl">Nível</span>
+                        </button>
                     </div>
-                </div>
-            </div>
 
-        </div><!-- /agent -->
+                    <div class="level-orb">
+                        <span class="display-val" th:text="${nivelTotal}">1</span>
+                        <input class="edit-inp level-inp" type="number" th:value="${nivelTotal}" min="1" max="20">
+                    </div>
 
-
-        <!-- ══════════════════════════════════════════════════
-             COLUMNS 2-4 — Combat Skills
-             ══════════════════════════════════════════════════ -->
-        <div class="notched combat-panel">
-            <div class="headertext">Combat Skills</div>
-
-            <div class="combat-skills-grid" id="tftAttackList">
-
-                <th:block th:if="${attacks != null and !attacks.empty}"
-                          th:each="atk : ${attacks}">
-                    <div class="combat-skill" th:data-attack-id="${atk['id']}">
-
-                        <!-- Skill image placeholder -->
-                        <div class="skill-img-wrap">
-                            <img class="skill-img"
-                                 th:src="${atk['image_url'] != null ? atk['image_url'] : 'https://placehold.net/120x80'}"
-                                 alt="Skill art" />
+                    <div class="xp-block">
+                        <div class="xp-track">
+                            <div class="xp-fill" style="--pct: 0%"></div>
                         </div>
-
-                        <!-- Skill type + label row -->
-                        <div class="combat-skill-meta">
-                            <span class="skill-type-label display-val"
-                                  th:text="${atk['skill_type'] == 'DEFENSE' ? 'Defense' : (atk['skill_type'] == 'CORROSION' ? 'Corrosion Skill' : 'Attack')}">Attack</span>
-                            <select class="edit-inp atk-type-select" data-field="skill_type">
-                                <option value="ATTACK"    th:selected="${atk['skill_type'] == 'ATTACK'    or atk['skill_type'] == null}">Attack</option>
-                                <option value="DEFENSE"   th:selected="${atk['skill_type'] == 'DEFENSE'}">Defense</option>
-                                <option value="CORROSION" th:selected="${atk['skill_type'] == 'CORROSION'}">Corrosion Skill</option>
-                            </select>
+                        <div class="xp-label">
+                            <span class="display-val">0</span>
+                            <input class="edit-inp xp-inp" type="number" value="0">
+                            <span>/ 300</span>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Skill name row with edit/delete icons -->
-                        <div class="combat-skill-header">
-                            <span class="skill-index"
-                                  th:text="${atk['dicepool_mode'] == 'ATTRIBUTE_AND_SKILL'
-                                             ? atk['attribute'] + ' + ' + atk['skill_primary']
-                                             : atk['skill_primary'] + ' + ' + atk['skill_secondary']}">—</span>
-                            <div class="skill-name-row">
-                                <span class="skill-title display-val" th:text="${atk['nome']}">—</span>
-                                <input class="edit-inp atk-name-inp" type="text"
-                                       th:value="${atk['nome']}" placeholder="Nome do ataque" />
-                                <div class="skill-action-icons edit-inp" style="display:none;">
-                                    <button class="tft-atk-delete icon-btn" type="button"
-                                            th:data-attack-id="${atk['id']}" title="Excluir">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+            </th:block>
+        </header>
+
+        <!-- ══ ATRIBUTOS ═══════════════════════════════════ -->
+        <div class="ability-row">
+
+            <!--/* FOR */-->
+            <div class="ability-badge" data-attr="forca">
+                <span class="ab-name">FOR</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atFor >= 10 ? '+' : '') + #numbers.formatInteger((atFor - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atFor}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atFor}" min="1" max="30"
+                    data-attr="forca">
+            </div>
+
+            <!--/* DES */-->
+            <div class="ability-badge" data-attr="destreza">
+                <span class="ab-name">DES</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atDes >= 10 ? '+' : '') + #numbers.formatInteger((atDes - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atDes}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atDes}" min="1" max="30"
+                    data-attr="destreza">
+            </div>
+
+            <!--/* CON */-->
+            <div class="ability-badge" data-attr="constituicao">
+                <span class="ab-name">CON</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atCon >= 10 ? '+' : '') + #numbers.formatInteger((atCon - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atCon}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atCon}" min="1" max="30"
+                    data-attr="constituicao">
+            </div>
+
+            <!--/* INT */-->
+            <div class="ability-badge" data-attr="inteligencia">
+                <span class="ab-name">INT</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atInt >= 10 ? '+' : '') + #numbers.formatInteger((atInt - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atInt}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atInt}" min="1" max="30"
+                    data-attr="inteligencia">
+            </div>
+
+            <!--/* SAB */-->
+            <div class="ability-badge" data-attr="sabedoria">
+                <span class="ab-name">SAB</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atSab >= 10 ? '+' : '') + #numbers.formatInteger((atSab - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atSab}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atSab}" min="1" max="30"
+                    data-attr="sabedoria">
+            </div>
+
+            <!--/* CAR */-->
+            <div class="ability-badge" data-attr="carisma">
+                <span class="ab-name">CAR</span>
+                <span class="ab-mod display-val"
+                    th:text="${(atCar >= 10 ? '+' : '') + #numbers.formatInteger((atCar - 10) / 2, 1)}">+0</span>
+                <span class="ab-score display-val" th:text="${atCar}">10</span>
+                <input class="edit-inp ab-score-inp" type="number" th:value="${atCar}" min="1" max="30"
+                    data-attr="carisma">
+            </div>
+
+        </div>
+
+        <!-- ══ SHEET BODY ══════════════════════════════════ -->
+        <div class="sheet-body">
+
+            <!-- ─ COLUNA ESQUERDA ─────────────────────────── -->
+            <aside class="col-left">
+
+                <div class="portrait-wrap">
+                    <div class="portrait-frame">
+                        <img class="portrait-img"
+                            th:src="${ficha.avatarURL != null ? ficha.avatarURL : 'https://placehold.net/avatar.svg'}"
+                            alt="Retrato do personagem">
+                    </div>
+                </div>
+
+                <div class="exhaustion-track">
+                    <span class="ex-label">Exaustão</span>
+                    <div class="ex-pips">
+                        <span class="ex-pip" th:each="i : ${#numbers.sequence(1,6)}"></span>
+                    </div>
+                </div>
+
+                <div class="combat-stats-row" th:with="desMod=${atDes}">
+                    <div class="stat-chip">
+                        <span class="stat-chip-val"
+                            th:text="${(desMod >= 10 ? '+' : '') + #numbers.formatInteger((desMod - 10) / 2, 1)}">+0</span>
+                        <span class="stat-chip-lbl">Iniciativa</span>
+                    </div>
+                    <div class="ac-badge">
+                        <span class="ac-val display-val" th:text="${ficha.combate?.classeArmadura ?: '—'}">—</span>
+                        <input class="edit-inp ac-inp" type="number" th:value="${ficha.combate?.classeArmadura ?: 10}">
+                        <span class="ac-lbl">CA</span>
+                    </div>
+                    <div class="stat-chip">
+                        <span class="stat-chip-val" id="profBonus">+2</span>
+                        <span class="stat-chip-lbl">Proficiência</span>
+                    </div>
+                </div>
+
+                <div class="speed-row">
+                    <span class="speed-val display-val" th:text="${ficha.combate?.velocidade ?: '—'}">—</span>
+                    <input class="edit-inp speed-inp" type="number" th:value="${ficha.combate?.velocidade ?: 30}">
+                    <span class="speed-lbl">ft. Caminhada</span>
+                </div>
+
+                <div class="resource-block" th:with="
+                    hpAtual=${ficha.vida?.vidaAtual    ?: 0},
+                    hpMax=${ficha.vida?.vidaMax        ?: 0},
+                    hpTemp=${ficha.vida?.vidaTemporaria ?: 0}">
+                    <span class="resource-label">Pontos de Vida</span>
+                    <div class="hp-bar-wrap">
+                        <div class="hp-bar-fill"
+                            th:style="'--pct: ' + (${hpMax > 0 ? hpAtual * 100 / hpMax : 0}) + '%'"></div>
+                        <span class="hp-text">
+                            <span class="display-val" th:text="${hpAtual}">0</span>
+                            <input class="edit-inp hp-curr-inp" type="number" th:value="${hpAtual}">
+                            /
+                            <span class="display-val" th:text="${hpMax}">0</span>
+                            <input class="edit-inp hp-max-inp" type="number" th:value="${hpMax}">
+                        </span>
+                    </div>
+                    <div class="tmp-row">
+                        <span class="tmp-lbl">TMP</span>
+                        <div class="tmp-track">
+                            <div class="tmp-fill"
+                                th:style="'--pct: ' + (${hpMax > 0 ? hpTemp * 100 / hpMax : 0}) + '%'"></div>
+                        </div>
+                        <span class="tmp-val display-val" th:text="${hpTemp > 0 ? hpTemp : '—'}">—</span>
+                        <input class="edit-inp tmp-inp" type="number" th:value="${hpTemp}">
+                    </div>
+                </div>
+
+                <div class="resource-block">
+                    <div class="hd-bar-wrap">
+                        <div class="hd-bar-fill" style="--pct: 100%"></div>
+                        <span class="hd-text">
+                            <th:block th:if="${classes != null and !classes.empty}">
+                                <th:block th:each="cls, stat : ${classes}">
+                                    <span
+                                        th:text="${cls.level.levelClasse + 'd' + T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).hitDieForClass(cls.classe.name())}"></span>
+                                    <span th:if="${!stat.last}"> + </span>
+                                </th:block>
+                            </th:block>
+                            <span th:if="${classes == null or classes.empty}">—</span>
+                        </span>
+                    </div>
+                    <span class="resource-label">Dado de Vida</span>
+                </div>
+
+                <button class="death-saves-row" type="button" title="Testes contra a Morte">
+                    <span class="material-symbols-outlined">skull</span>
+                    <span class="death-saves-lbl">Testes Contra a Morte</span>
+                </button>
+
+            </aside>
+
+            <!-- ─ COLUNA DO MEIO: Perícias ────────────────── -->
+            <section class="col-mid">
+
+                <div class="panel-box">
+                    <h3 class="panel-title">⚔ Perícias</h3>
+                    <div class="skill-list">
+                        <th:block th:each="row : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SKILL_LIST}"
+                            th:with="prof=${profMap != null and profMap[row[0]] != null ? profMap[row[0]] : 'none'}">
+                            <div class="skill-row" th:data-skill="${row[0]}" th:data-attr="${row[1]}"
+                                th:data-prof="${prof}" th:classappend="${prof != 'none' ? prof : ''}">
+                                <span class="prof-dot" th:classappend="${prof != 'none' ? ' ' + prof : ''}"></span>
+                                <span class="skill-attr"
+                                    th:text="${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).attrLabel(row[1])}">—</span>
+                                <span class="skill-name" th:text="${row[0]}">—</span>
+                                <span class="skill-mod">—</span>
+                                <span class="skill-passive">—</span>
                             </div>
-                        </div>
-
-                        <!-- Damage summary -->
-                        <div class="atk-damage-summary">
-                            <span th:if="${atk['damage_form'] != null}"
-                                  th:text="${atk['damage_form']}"
-                                  class="dmg-token dmg-form">—</span>
-                            <span th:if="${atk['damage_type'] != null}"
-                                  th:text="${atk['damage_type']}"
-                                  class="dmg-token"
-                                  th:classappend="${'dmg-type-' + (atk['damage_type'] != null ? atk['damage_type'] : 'none')}">—</span>
-                            <span th:if="${atk['threat'] != null}"
-                                  class="dmg-token dmg-meta"
-                                  th:text="${'THREAT ' + atk['threat']}">—</span>
-                            <span th:if="${atk['attack_weight'] != null}"
-                                  class="dmg-token dmg-meta"
-                                  th:text="${'ATTACK WEIGHT ' + atk['attack_weight']}">—</span>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="combat-skill-desc" th:if="${atk['attack_description'] != null}"
-                             th:text="${atk['attack_description']}"></div>
-
+                        </th:block>
                     </div>
+                </div>
+
+                <div class="panel-box">
+                    <h3 class="panel-title">🔧 Ferramentas</h3>
+                    <div class="skill-list" id="toolList">
+                        <div th:if="${ferramentas == null or ferramentas.empty}" class="tool-empty-msg"
+                            style="padding:10px 12px;font-size:0.78rem;color:rgba(240,232,224,0.35);">
+                            Nenhuma ferramenta
+                        </div>
+                        <th:block th:each="tool : ${ferramentas}"
+                            th:with="prof=${tool['expert'] ? 'expertise' : (tool['proficiente'] ? 'proficient' : 'none')}">
+                            <div class="skill-row tool-entry" th:data-prof="${prof}"
+                                th:classappend="${prof != 'none' ? prof : ''}">
+                                <span class="prof-dot" th:classappend="${prof != 'none' ? ' ' + prof : ''}"></span>
+                                <span class="skill-attr">—</span>
+                                <span class="skill-name" th:text="${tool['nome']}">—</span>
+                                <span class="skill-mod"></span>
+                                <button class="tool-remove" type="button"
+                                    style="background:none;border:none;color:rgba(240,232,224,0.4);cursor:pointer;font-size:0.9rem;padding:0;">×</button>
+                            </div>
+                        </th:block>
+                    </div>
+                    <div class="edit-only tool-add-row"
+                        style="display:none;padding:8px 12px;gap:6px;align-items:center;">
+                        <input type="text" class="tool-add-inp" placeholder="Nome da ferramenta"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:6px 10px;font:inherit;font-size:0.82rem;outline:none;">
+                        <button type="button" class="tool-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:6px 10px;cursor:pointer;font-size:0.8rem;">
+                            + Adicionar
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ─ COLUNA DIREITA ─────────────────────────── -->
+            <section class="col-right">
+
+                <div class="panel-box">
+                    <h3 class="panel-title">🛡 Testes de Resistência</h3>
+                    <div class="saves-grid">
+                        <th:block th:each="sv : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndSheetHelper).SAVE_LIST}"
+                            th:with="isProf=${sv[0] == 'forca' ? saveFor :
+                                        sv[0] == 'destreza' ? saveDes :
+                                        sv[0] == 'constituicao' ? saveCon :
+                                        sv[0] == 'inteligencia' ? saveInt :
+                                        sv[0] == 'sabedoria' ? saveSab : saveCar}">
+                            <div class="save-row" th:data-attr="${sv[0]}" th:data-prof="${isProf != null and isProf}"
+                                th:classappend="${isProf != null and isProf ? 'proficient' : ''}">
+                                <span class="prof-dot"
+                                    th:classappend="${isProf != null and isProf ? ' proficient' : ''}"></span>
+                                <span class="save-attr" th:text="${sv[1]}">—</span>
+                                <span class="save-mod">—</span>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- Raça / Antecedente -->
+                <div class="trait-chips">
+                    <div class="trait-chip">
+                        <div class="trait-icon-wrap">🍃</div>
+                        <div class="trait-chip-info">
+                            <span class="trait-chip-name display-val"
+                                th:text="${ficha.raca != null ? ficha.raca.name() : '—'}">—</span>
+                            <select class="edit-inp trait-select" data-field="raca">
+                                <option value="">—</option>
+                                <option
+                                    th:each="r : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndRaca).values()}"
+                                    th:value="${r.name()}" th:text="${r.name()}" th:selected="${ficha.raca == r}">
+                                </option>
+                            </select>
+                            <span class="trait-chip-sub">Raça</span>
+                        </div>
+                    </div>
+                    <div class="trait-chip">
+                        <div class="trait-icon-wrap">⚜️</div>
+                        <div class="trait-chip-info">
+                            <span class="trait-chip-name display-val"
+                                th:text="${ficha.antecedente != null ? ficha.antecedente.name() : '—'}">—</span>
+                            <select class="edit-inp trait-select" data-field="antecedente">
+                                <option value="">—</option>
+                                <option
+                                    th:each="a : ${T(com.masuda.tabletopmanager.model.Personagem.DND5E.DndAntecedente).values()}"
+                                    th:value="${a.name()}" th:text="${a.name()}"
+                                    th:selected="${ficha.antecedente == a}"></option>
+                            </select>
+                            <span class="trait-chip-sub">Antecedente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!--/* ── Pill sections (sentidos, resistências, imunidades, armaduras, armas, idiomas) ── */-->
+
+
+                <th:block th:each="sec : ${ {
+                {'👁','Sentidos','sensesList'},
+                {'🔥','Resistências','resistancesList'},
+                {'🛡','Imunidades','immunitiesList'},
+                {'🪖','Armadura','armorList'},
+                {'⚔','Armas','weaponsList'},
+                {'🗣','Idiomas','languagesList'}
+            } }">
                 </th:block>
 
-                <!-- Add skill placeholder card -->
-                <div class="combat-skill combat-skill-add" id="tftAddSkillCard">
-                    <div class="add-skill-inner">
-                        <span class="add-skill-plus">+</span>
-                        <span class="add-skill-label">Add Skill</span>
+                <!--/* Sentidos */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">👁 Sentidos</h4>
+                    <div class="pill-group" id="sensesList">
+                        <th:block th:if="${auxilio != null and !auxilio.sentidosList().empty}"
+                            th:each="v : ${auxilio.sentidosList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.sentidosList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhum</span>
+                    </div>
+                    <div class="edit-only trait-add-row" data-list="sensesList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Visão no Escuro 60 ft."
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
                     </div>
                 </div>
 
-            </div><!-- /combat-skills-grid -->
-
-            <!-- Add attack form (edit mode only, shown when add card is clicked) -->
-            <div class="tft-atk-add-form edit-inp" id="tftAtkAddForm" style="display:none;">
-                <div class="tft-atk-row">
-                    <label>Nome
-                        <input type="text" name="atk-nome" placeholder="Nome do ataque" />
-                    </label>
-                    <label>Tipo
-                        <select name="atk-type">
-                            <option value="ATTACK">Attack</option>
-                            <option value="DEFENSE">Defense</option>
-                            <option value="CORROSION">Corrosion Skill</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="tft-atk-row">
-                    <label>Dicepool
-                        <select name="atk-mode" id="atkModeSelect">
-                            <option value="ATTRIBUTE_AND_SKILL">Atributo + Perícia</option>
-                            <option value="SKILL_AND_SKILL">Perícia + Perícia</option>
-                        </select>
-                    </label>
-                    <label class="atk-attr-field">Atributo
-                        <select name="atk-attr">
-                            <option th:each="a : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftAttributeName).values()}"
-                                    th:value="${a.name()}" th:text="${a.name()}"></option>
-                        </select>
-                    </label>
-                </div>
-                <div class="tft-atk-row">
-                    <label>Perícia Primária
-                        <select name="atk-skill1">
-                            <option th:each="s : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftSkillName).values()}"
-                                    th:value="${s.name()}" th:text="${s.name()}"></option>
-                        </select>
-                    </label>
-                    <label class="atk-skill2-field">Perícia Secundária
-                        <select name="atk-skill2">
-                            <option value="">—</option>
-                            <option th:each="s : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftSkillName).values()}"
-                                    th:value="${s.name()}" th:text="${s.name()}"></option>
-                        </select>
-                    </label>
-                </div>
-                <div class="tft-atk-row">
-                    <label>Tipo de Dano
-                        <select name="atk-dmgtype">
-                            <option value="">—</option>
-                            <option value="RED">RED</option>
-                            <option value="WHITE">WHITE</option>
-                            <option value="BLACK">BLACK</option>
-                            <option value="PALE">PALE</option>
-                        </select>
-                    </label>
-                    <label>Forma do Dano
-                        <select name="atk-dmgform">
-                            <option value="">—</option>
-                            <option value="SLASH">SLASH</option>
-                            <option value="PIERCE">PIERCE</option>
-                            <option value="BLUNT">BLUNT</option>
-                        </select>
-                    </label>
-                    <label>Threat
-                        <input type="number" name="atk-threat" min="1" style="width:48px;" />
-                    </label>
-                    <label>Weight
-                        <input type="number" name="atk-weight" min="1" style="width:48px;" />
-                    </label>
-                </div>
-                <label style="display:flex;flex-direction:column;gap:3px;">Descrição
-                    <textarea name="atk-desc" placeholder="Descrição do ataque…"></textarea>
-                </label>
-                <div class="tft-atk-form-actions">
-                    <button type="button" class="tft-atk-submit">Adicionar</button>
-                    <button type="button" class="tft-atk-cancel">Cancelar</button>
-                </div>
-            </div>
-
-        </div><!-- /combat-panel -->
-
-
-        <!-- ══════════════════════════════════════════════════
-             COLUMN 5 — Form/Type + Features
-             ══════════════════════════════════════════════════ -->
-        <div class="notched right-panel">
-
-            <!-- Form / Type resistance section -->
-            <div class="form-type-section" th:with="c=${combat}">
-                <div class="form-type-header">
-                    <span class="ft-col-label">Form</span>
-                    <span class="ft-col-label">Type</span>
-                    <button class="ft-lock-btn" type="button" title="Travar resistências">
-                        <i class="fas fa-lock"></i>
-                    </button>
-                </div>
-
-                <div class="form-type-grid">
-                    <!-- FORM column -->
-                    <div class="ft-col ft-form-col">
-                        <!-- Slash -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon ft-slash-icon">⚔</span>
-                            <span class="ft-dmg-name">Slash</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.slashingResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="slashing"
-                                    th:data-value="${c != null ? c.slashingResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.slashingResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                        <!-- Pierce -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon ft-pierce-icon">🔱</span>
-                            <span class="ft-dmg-name">Pierce</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.piercingResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="piercing"
-                                    th:data-value="${c != null ? c.piercingResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.piercingResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                        <!-- Blunt -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon ft-blunt-icon">🔨</span>
-                            <span class="ft-dmg-name">Blunt</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.bluntResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="blunt"
-                                    th:data-value="${c != null ? c.bluntResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.bluntResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
+                <!--/* Resistências */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">🔥 Resistências</h4>
+                    <div class="pill-group" id="resistancesList">
+                        <th:block th:if="${auxilio != null and !auxilio.resistenciasList().empty}"
+                            th:each="v : ${auxilio.resistenciasList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.resistenciasList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhuma</span>
                     </div>
-
-                    <!-- TYPE column -->
-                    <div class="ft-col ft-type-col">
-                        <!-- RED -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon dmg-dot-RED">●</span>
-                            <span class="ft-dmg-name ft-type-name RED">RED</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.redResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="red"
-                                    th:data-value="${c != null ? c.redResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.redResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                        <!-- WHITE -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon dmg-dot-WHITE">●</span>
-                            <span class="ft-dmg-name ft-type-name WHITE">WHITE</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.whiteResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="white"
-                                    th:data-value="${c != null ? c.whiteResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.whiteResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                        <!-- BLACK -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon dmg-dot-BLACK">●</span>
-                            <span class="ft-dmg-name ft-type-name BLACK">BLACK</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.blackResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="black"
-                                    th:data-value="${c != null ? c.blackResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.blackResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                        <!-- PALE -->
-                        <div class="ft-row">
-                            <span class="ft-dmg-icon dmg-dot-PALE">●</span>
-                            <span class="ft-dmg-name ft-type-name PALE">PALE</span>
-                            <span class="display-val ft-res-label"
-                                  th:text="${c != null ? T(com.masuda.tabletopmanager.model.Personagem.TFT.TftResistanceLevel).fromValue(c.paleResistance()).label() : 'Normal'}">Normal</span>
-                            <select class="edit-inp tft-resist-sel" data-resist="pale"
-                                    th:data-value="${c != null ? c.paleResistance() : 3}">
-                                <option value="1">Fatal</option>
-                                <option value="2">Weak</option>
-                                <option value="3" th:selected="${c == null or c.paleResistance() == 3}">Normal</option>
-                                <option value="4">Resistant</option>
-                                <option value="5">Endured</option>
-                                <option value="6">Immune</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div><!-- /form-type-section -->
-
-            <!-- Feature entries -->
-            <div class="rp-entries" id="tftFeatureList">
-                <th:block th:if="${features != null}"
-                          th:each="feat : ${features}">
-                    <div class="rp-entry notched" th:data-feature-id="${feat['id']}"
-                         th:data-collapsed="false">
-                        <div class="rp-entry-header">
-                            <span class="rp-dot"></span>
-                            <span class="rp-type" th:text="${feat['source']}">—</span>
-                            <span class="rp-name display-val" th:text="${feat['nome']}">—</span>
-                            <input class="edit-inp rp-name-inp" type="text"
-                                   th:value="${feat['nome']}" placeholder="Nome" />
-                            <div class="rp-header-actions">
-                                <button class="rp-collapse-btn icon-btn" type="button" title="Recolher">▼</button>
-                                <button class="edit-inp tft-feat-delete icon-btn" type="button"
-                                        th:data-feature-id="${feat['id']}" title="Excluir">×</button>
-                            </div>
-                        </div>
-                        <div class="rp-body">
-                            <div class="rp-desc display-val" th:text="${feat['descricao']}"></div>
-                            <textarea class="edit-inp rp-desc-textarea"
-                                      th:text="${feat['descricao']}"
-                                      placeholder="Descrição…"></textarea>
-                        </div>
-                    </div>
-                </th:block>
-
-                <div th:if="${features == null or features.empty}"
-                     class="rp-empty-msg">
-                    Nenhuma feature cadastrada.
-                </div>
-            </div>
-
-            <!-- Add entry button -->
-            <div class="edit-inp rp-add-section" style="display:none;">
-                <div class="tft-feat-add-form">
-                    <select class="tft-feat-source-select">
-                        <option th:each="src : ${T(com.masuda.tabletopmanager.model.Personagem.TFT.TftFeatureSource).values()}"
-                                th:value="${src.name()}" th:text="${src.name()}"></option>
-                    </select>
-                    <input type="text" class="tft-feat-name-inp" placeholder="Nome" />
-                    <textarea class="tft-feat-desc-inp" placeholder="Descrição…"></textarea>
-                    <div class="tft-feat-form-actions">
-                        <button type="button" class="tft-feat-add-btn">+ Add Entry</button>
-                        <button type="button" class="tft-feat-cancel">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-            <button class="edit-inp rp-add-trigger" type="button" style="display:none;">+ Add Entry</button>
-
-        </div><!-- /right-panel -->
-
-
-        <!-- ══════════════════════════════════════════════════
-             ROW 2, COL 1-2 — Stats and Traits
-             ══════════════════════════════════════════════════ -->
-        <div class="notched stats-panel"
-             th:with="attr=${attributes}">
-            <div class="headertext">Stats and Traits</div>
-
-            <div class="stats-groups">
-
-                <!-- Fortitude: Physique + Endurance -->
-                <div class="attr-group" data-group="physical">
-                    <div class="attr-group-label">
-                        <span class="attr-group-icon"><i class="fas fa-hand-fist"></i></span>
-                        <span class="attr-group-name FORTITUDE">Fortitude</span>
-                        <span class="attr-group-rating" th:data-rating="${attr != null ? attr.getFortitude() : 1}">II</span>
-                    </div>
-                    <div class="attr-group-attrs">
-                        <div class="attr-row" data-attr="physique">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Physique</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.physique() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="physique"
-                                   th:value="${attr != null ? attr.physique() : 0}" />
-                        </div>
-                        <div class="attr-row" data-attr="endurance">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Endurance</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.endurance() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="endurance"
-                                   th:value="${attr != null ? attr.endurance() : 0}" />
-                        </div>
+                    <div class="edit-only trait-add-row" data-list="resistancesList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Fogo"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
                     </div>
                 </div>
 
-                <!-- Insight: Understanding + Calmness -->
-                <div class="attr-group" data-group="mental">
-                    <div class="attr-group-label">
-                        <span class="attr-group-icon"><i class="fas fa-scale-balanced"></i></span>
-                        <span class="attr-group-name PRUDENCE">Prudence</span>
-                        <span class="attr-group-rating" th:data-rating="${attr != null ? attr.getInsight() : 1}">II</span>
+                <!--/* Imunidades */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">🛡 Imunidades</h4>
+                    <div class="pill-group" id="immunitiesList">
+                        <th:block th:if="${auxilio != null and !auxilio.imunidadesList().empty}"
+                            th:each="v : ${auxilio.imunidadesList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.imunidadesList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhuma</span>
                     </div>
-                    <div class="attr-group-attrs">
-                        <div class="attr-row" data-attr="understanding">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Underst.</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.understanding() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="understanding"
-                                   th:value="${attr != null ? attr.understanding() : 0}" />
-                        </div>
-                        <div class="attr-row" data-attr="calmness">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Calmness</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.calmness() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="calmness"
-                                   th:value="${attr != null ? attr.calmness() : 0}" />
-                        </div>
+                    <div class="edit-only trait-add-row" data-list="immunitiesList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Doença"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
                     </div>
                 </div>
 
-                <!-- Temperance: Intuition + Presence + Conviction -->
-                <div class="attr-group" data-group="social">
-                    <div class="attr-group-label">
-                        <span class="attr-group-icon"><i class="fas fa-lock"></i></span>
-                        <span class="attr-group-name TEMPERANCE">Temperance</span>
-                        <span class="attr-group-rating" th:data-rating="${attr != null ? attr.getTemperance() : 1}">II</span>
+                <!--/* Armaduras */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">🪖 Armadura</h4>
+                    <div class="pill-group" id="armorList">
+                        <th:block th:if="${auxilio != null and !auxilio.armadurasList().empty}"
+                            th:each="v : ${auxilio.armadurasList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.armadurasList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhuma</span>
                     </div>
-                    <div class="attr-group-attrs">
-                        <div class="attr-row" data-attr="intuition">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Intuition</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.intuition() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="intuition"
-                                   th:value="${attr != null ? attr.intuition() : 0}" />
-                        </div>
-                        <div class="attr-row" data-attr="presence">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Presence</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.presence() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="presence"
-                                   th:value="${attr != null ? attr.presence() : 0}" />
-                        </div>
-                        <div class="attr-row" data-attr="conviction">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Conviction</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.conviction() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="conviction"
-                                   th:value="${attr != null ? attr.conviction() : 0}" />
-                        </div>
+                    <div class="edit-only trait-add-row" data-list="armorList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Leve"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
                     </div>
                 </div>
 
-                <!-- Justice: Reflex + Focus -->
-                <div class="attr-group" data-group="justice">
-                    <div class="attr-group-label">
-                        <span class="attr-group-icon"><i class="fas fa-star"></i></span>
-                        <span class="attr-group-name JUSTICE">Justice</span>
-                        <span class="attr-group-rating" th:data-rating="${attr != null ? attr.getJustice() : 1}">II</span>
+                <!--/* Armas */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">⚔ Armas</h4>
+                    <div class="pill-group" id="weaponsList">
+                        <th:block th:if="${auxilio != null and !auxilio.armasList().empty}"
+                            th:each="v : ${auxilio.armasList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.armasList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhuma</span>
                     </div>
-                    <div class="attr-group-attrs">
-                        <div class="attr-row" data-attr="reflex">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Reflex</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.reflex() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="reflex"
-                                   th:value="${attr != null ? attr.reflex() : 0}" />
-                        </div>
-                        <div class="attr-row" data-attr="focus">
-                            <span class="attr-x">×</span>
-                            <span class="attr-name">Focus</span>
-                            <div class="attr-dots">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="attr-dot"
-                                      th:classappend="${attr != null and i <= attr.focus() ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-attr-inp" type="number" min="0" max="5"
-                                   data-attr="focus"
-                                   th:value="${attr != null ? attr.focus() : 0}" />
-                        </div>
+                    <div class="edit-only trait-add-row" data-list="weaponsList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Simples"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
                     </div>
                 </div>
 
-            </div>
-        </div><!-- /stats-panel -->
-
-
-        <!-- ══════════════════════════════════════════════════
-             ROW 2, COL 3-5 — Skills and Talents
-             ══════════════════════════════════════════════════ -->
-        <div class="notched skills-panel">
-            <div class="headertext">Skills and Talents</div>
-
-            <div class="skills-columns">
-
-                <!-- Column A -->
-                <div class="skill-group-col">
-                    <th:block th:each="sk, stat : ${skills}" th:if="${stat.index % 3 == 0}">
-                        <div class="skill-row" th:data-skill="${sk['skill']}">
-                            <button class="edit-inp skill-spec-toggle icon-btn" type="button"
-                                    title="Editar especialidade" style="display:none;">✎</button>
-                            <span class="skill-name" th:text="${sk['skill']}">—</span>
-                            <div class="skill-specialty-wrap">
-                                <span class="skill-spec-text"
-                                      th:text="${sk['specialty'] != null and !sk['specialty'].isEmpty() ? sk['specialty'] : ''}"></span>
-                                <input class="skill-spec-input" type="text"
-                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
-                                       placeholder="Specialty" style="display:none;" />
-                            </div>
-                            <div class="skill-dots" th:data-value="${sk['points']}">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="skill-dot"
-                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
-                                   th:data-skill="${sk['skill']}"
-                                   th:value="${sk['points']}" style="width:28px;" />
-                        </div>
-                    </th:block>
+                <!--/* Idiomas */-->
+                <div class="traits-section">
+                    <h4 class="traits-title">🗣 Idiomas</h4>
+                    <div class="pill-group" id="languagesList">
+                        <th:block th:if="${auxilio != null and !auxilio.idiomasList().empty}"
+                            th:each="v : ${auxilio.idiomasList()}">
+                            <span class="pill pill-removable" th:text="${v}"></span>
+                        </th:block>
+                        <span th:if="${auxilio == null or auxilio.idiomasList().empty}" class="pill-empty"
+                            style="font-size:0.7rem;color:rgba(240,232,224,0.35);">Nenhum</span>
+                    </div>
+                    <div class="edit-only trait-add-row" data-list="languagesList"
+                        style="display:none;margin-top:5px;gap:4px;align-items:center;">
+                        <input type="text" class="trait-add-inp" placeholder="Ex: Comum"
+                            style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--sh-gold-border);
+                                  border-radius:8px;color:var(--sh-text);padding:5px 8px;font:inherit;font-size:0.75rem;outline:none;">
+                        <button type="button" class="trait-add-btn"
+                            style="background:var(--sh-gold-faint);border:1px solid var(--sh-gold-border);
+                                   border-radius:8px;color:var(--sh-gold);padding:5px 8px;cursor:pointer;font-size:0.75rem;">+</button>
+                    </div>
                 </div>
 
-                <!-- Column B -->
-                <div class="skill-group-col">
-                    <th:block th:each="sk, stat : ${skills}" th:if="${stat.index % 3 == 1}">
-                        <div class="skill-row" th:data-skill="${sk['skill']}">
-                            <button class="edit-inp skill-spec-toggle icon-btn" type="button"
-                                    title="Editar especialidade" style="display:none;">✎</button>
-                            <span class="skill-name" th:text="${sk['skill']}">—</span>
-                            <div class="skill-specialty-wrap">
-                                <span class="skill-spec-text"
-                                      th:text="${sk['specialty'] != null and !sk['specialty'].isEmpty() ? sk['specialty'] : ''}"></span>
-                                <input class="skill-spec-input" type="text"
-                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
-                                       placeholder="Specialty" style="display:none;" />
-                            </div>
-                            <div class="skill-dots" th:data-value="${sk['points']}">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="skill-dot"
-                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
-                                   th:data-skill="${sk['skill']}"
-                                   th:value="${sk['points']}" style="width:28px;" />
-                        </div>
-                    </th:block>
-                </div>
+            </section>
 
-                <!-- Column C -->
-                <div class="skill-group-col">
-                    <th:block th:each="sk, stat : ${skills}" th:if="${stat.index % 3 == 2}">
-                        <div class="skill-row" th:data-skill="${sk['skill']}">
-                            <button class="edit-inp skill-spec-toggle icon-btn" type="button"
-                                    title="Editar especialidade" style="display:none;">✎</button>
-                            <span class="skill-name" th:text="${sk['skill']}">—</span>
-                            <div class="skill-specialty-wrap">
-                                <span class="skill-spec-text"
-                                      th:text="${sk['specialty'] != null and !sk['specialty'].isEmpty() ? sk['specialty'] : ''}"></span>
-                                <input class="skill-spec-input" type="text"
-                                       th:value="${sk['specialty'] != null ? sk['specialty'] : ''}"
-                                       placeholder="Specialty" style="display:none;" />
-                            </div>
-                            <div class="skill-dots" th:data-value="${sk['points']}">
-                                <span th:each="i : ${#numbers.sequence(1,5)}"
-                                      class="skill-dot"
-                                      th:classappend="${i <= sk['points'] ? ' filled' : ''}"></span>
-                            </div>
-                            <input class="edit-inp tft-skill-pts" type="number" min="0" max="5"
-                                   th:data-skill="${sk['skill']}"
-                                   th:value="${sk['points']}" style="width:28px;" />
-                        </div>
-                    </th:block>
-                </div>
+            <!-- ─ TABS LATERAIS ──────────────────────────── -->
+            <nav class="sheet-tabs" aria-label="Seções da ficha">
+                <button class="sheet-tab active" type="button" title="Visão Geral">
+                    <span class="material-symbols-outlined">person</span>
+                </button>
+                <button class="sheet-tab" type="button" title="Inventário">
+                    <span class="material-symbols-outlined">backpack</span>
+                </button>
+                <button class="sheet-tab" type="button" title="Características">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                </button>
+                <button class="sheet-tab" type="button" title="Magias">
+                    <span class="material-symbols-outlined">electric_bolt</span>
+                </button>
+                <button class="sheet-tab" type="button" title="Lore">
+                    <span class="material-symbols-outlined">menu_book</span>
+                </button>
+            </nav>
 
-            </div>
-        </div><!-- /skills-panel -->
+        </div><!-- /sheet-body -->
 
-    </div><!-- /gridcontainer -->
-
-</div><!-- /lobcorp -->
+    </div><!-- /sheet -->
 
 </body>
+
 </html>
