@@ -3,6 +3,7 @@ package com.masuda.tabletopmanager.model.Personagem.DND5E;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -162,78 +163,93 @@ public class Dnd5eSheetDAO {
     }
 
     public void atualizarCLasse(int idPersonagem, List<Map<String, Object>> classes) {
-        jdbc.update("DELETE FROM dnd5e_classe WHERE id_personagem = ?", idPersonagem);
+    jdbc.update("DELETE FROM dnd5e_classe WHERE id_personagem = ?", idPersonagem);
 
-        if (classes == null || classes.isEmpty()) {
-            return;
-        }
-
-        String sql = """
-            INSERT INTO dnd5e_classe (id_personagem, classe, level, primaria)
-            VALUES (?, ?::dnd5e_nome_classe, ?, ?)
-        """;
-
-        for (Map<String, Object> c : classes) {
-            String nome = (String) c.get("classe");
-            int level = (int) c.get("level");
-            boolean primaria = Boolean.TRUE.equals(c.get("primaria"));
-
-            if (nome == null || nome.isBlank() || level <= 0) {
-                continue;
-            }
-
-            jdbc.update(sql, idPersonagem, nome, level, primaria);
-        }
+    if (classes == null || classes.isEmpty()) {
+        return;
     }
+
+    String sql = """
+        INSERT INTO dnd5e_classe (id_personagem, classe, level, primaria)
+        VALUES (?, ?::dnd5e_nome_classe, ?, ?)
+    """;
+
+    List<Object[]> lote = new ArrayList<>();
+    for (Map<String, Object> c : classes) {
+        String nome = (String) c.get("classe");
+        int level = (int) c.get("level");
+        boolean primaria = Boolean.TRUE.equals(c.get("primaria"));
+
+        if (nome == null || nome.isBlank() || level <= 0) {
+            continue;
+        }
+
+        lote.add(new Object[]{idPersonagem, nome, level, primaria});
+    }
+
+    if (!lote.isEmpty()) {
+        jdbc.batchUpdate(sql, lote);
+    }
+}
     public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
-        jdbc.update("DELETE FROM dnd5e_pericia WHERE id_personagem = ?", idPersonagem);
+    jdbc.update("DELETE FROM dnd5e_pericia WHERE id_personagem = ?", idPersonagem);
 
-        if (pericias == null || pericias.isEmpty()) {
-            return;
-        }
-
-        String sql = """
-            INSERT INTO dnd5e_pericia (id_personagem, pericia, proficiente, expert)
-            VALUES (?, ?::dnd5e_nome_pericia, ?, ?)
-        """;
-
-        for (Map<String, Object> p : pericias) {
-            String nome = (String) p.get("nome");
-            boolean proficiente = Boolean.TRUE.equals(p.get("proficiente"));
-            boolean expert = Boolean.TRUE.equals(p.get("expert"));
-
-            if (!proficiente && !expert) {
-                continue;
-            }
-
-            jdbc.update(sql, idPersonagem, nome, proficiente, expert);
-        }
+    if (pericias == null || pericias.isEmpty()) {
+        return;
     }
+
+    String sql = """
+        INSERT INTO dnd5e_pericia (id_personagem, pericia, proficiente, expert)
+        VALUES (?, ?::dnd5e_nome_pericia, ?, ?)
+    """;
+
+    List<Object[]> lote = new ArrayList<>();
+    for (Map<String, Object> p : pericias) {
+        String nome = (String) p.get("nome");
+        boolean proficiente = Boolean.TRUE.equals(p.get("proficiente"));
+        boolean expert = Boolean.TRUE.equals(p.get("expert"));
+
+        if (!proficiente && !expert) {
+            continue;
+        }
+
+        lote.add(new Object[]{idPersonagem, nome, proficiente, expert});
+    }
+
+    if (!lote.isEmpty()) {
+        jdbc.batchUpdate(sql, lote);
+    }
+}
 
     public void atualizarFerramentas(int idPersonagem, List<Map<String, Object>> ferramentas) {
-        jdbc.update("DELETE FROM dnd5e_ferramenta WHERE id_personagem = ?", idPersonagem);
+    jdbc.update("DELETE FROM dnd5e_ferramenta WHERE id_personagem = ?", idPersonagem);
 
-        if (ferramentas == null || ferramentas.isEmpty()) {
-            return;
-        }
-
-        String sql = """
-            INSERT INTO dnd5e_ferramenta (id_personagem, nome, proficiente, expert)
-            VALUES (?, ?, ?, ?)
-        """;
-
-        for (Map<String, Object> f : ferramentas) {
-            String nome = (String) f.get("nome");
-            boolean proficiente = Boolean.TRUE.equals(f.get("proficiente"));
-            boolean expert = Boolean.TRUE.equals(f.get("expert"));
-
-            if (nome == null || nome.isBlank()) {
-                continue;
-            }
-
-            jdbc.update(sql, idPersonagem, nome, proficiente, expert);
-        }
+    if (ferramentas == null || ferramentas.isEmpty()) {
+        return;
     }
+
+    String sql = """
+        INSERT INTO dnd5e_ferramenta (id_personagem, nome, proficiente, expert)
+        VALUES (?, ?, ?, ?)
+    """;
+
+    List<Object[]> lote = new ArrayList<>();
+    for (Map<String, Object> f : ferramentas) {
+        String nome = (String) f.get("nome");
+        boolean proficiente = Boolean.TRUE.equals(f.get("proficiente"));
+        boolean expert = Boolean.TRUE.equals(f.get("expert"));
+
+        if (nome == null || nome.isBlank()) {
+            continue;
+        }
+
+        lote.add(new Object[]{idPersonagem, nome, proficiente, expert});
+    }
+
+    if (!lote.isEmpty()) {
+        jdbc.batchUpdate(sql, lote);
+    }
+}
 
     public void atualizarSaves(int idPersonagem, DndSaves saves) {
         String sql = """

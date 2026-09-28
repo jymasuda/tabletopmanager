@@ -184,8 +184,7 @@ public class DndController {
             List<Map<String, Object>> ferramentas = (List<Map<String, Object>>) body.get("ferramentas");
 
             Dnd5eSheetService ds = context.getBean(Dnd5eSheetService.class);
-            ds.atualizarPericias(id, pericias);
-            ds.atualizarFerramentas(id, ferramentas);
+            ds.atualizarPericiasEFerramentas(id, pericias, ferramentas);
 
             return ResponseEntity.ok(Map.of("message", "Perícias atualizadas."));
         }

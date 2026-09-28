@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.masuda.tabletopmanager.model.Personagem.DND5E.Classe.Dnd5eClasse;
 
@@ -39,6 +40,7 @@ public class Dnd5eSheetService {
         return dDAO.inserirFichaDnd5e(idUsuario, nome);
     }
 
+    @Transactional
     public void atualizarCLasse(int idPersonagem, List<Map<String, Object>> classes) {
         dDAO.atualizarCLasse(idPersonagem, classes);
     }
@@ -59,11 +61,19 @@ public class Dnd5eSheetService {
         dDAO.atualizarAtributos(idPersonagem, novosAtributos);
     }
 
+    @Transactional
     public void atualizarPericias(int idPersonagem, List<Map<String, Object>> pericias) {
         dDAO.atualizarPericias(idPersonagem, pericias);
     }
 
+    @Transactional
     public void atualizarFerramentas(int idPersonagem, List<Map<String, Object>> ferramentas) {
+        dDAO.atualizarFerramentas(idPersonagem, ferramentas);
+    }
+
+    @Transactional
+    public void atualizarPericiasEFerramentas(int idPersonagem, List<Map<String, Object>> pericias, List<Map<String, Object>> ferramentas) {
+        dDAO.atualizarPericias(idPersonagem, pericias);
         dDAO.atualizarFerramentas(idPersonagem, ferramentas);
     }
 
